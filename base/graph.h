@@ -24,6 +24,9 @@ typedef graph_traits<BGraph>::edge_descriptor Edge;
 
 typedef vector<Edge> Path;
 
+typedef pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
+typedef vector<pair<std::shared_ptr<Node>, std::shared_ptr<Node>>> VisitRuleList;
+
 class Graph {
 public:
     BGraph                          graph;
@@ -54,8 +57,8 @@ public:
     
     /*  Used in branching when we want to enforce that n2->port is [not] visited just
         after n1->port */
-    void unite_ports(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2, Graph& dest) const;
-    void separate_ports(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2, Graph& dest) const;
+    void unite_ports(VisitRule vr, Graph& dest) const;
+    void separate_ports(VisitRule vr, Graph& dest) const;
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
     void reduce_graph(const float lambda, Graph& dest) const;

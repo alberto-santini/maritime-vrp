@@ -75,7 +75,10 @@ void Graph::prepare_for_labelling() {
     }
 }
 
-void Graph::unite_ports(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2, Graph& dest) const {
+void Graph::unite_ports(VisitRule vr, Graph& dest) const {
+    std::shared_ptr<Node> n1, n2;
+    tie(n1, n2) = vr;
+    
     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
     }
@@ -115,7 +118,10 @@ void Graph::unite_ports(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2, Grap
     }
 }
 
-void Graph::separate_ports(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2, Graph& dest) const {
+void Graph::separate_ports(VisitRule vr, Graph& dest) const {
+    std::shared_ptr<Node> n1, n2;
+    tie(n1, n2) = vr;
+    
     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
     }

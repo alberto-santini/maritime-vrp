@@ -5,6 +5,10 @@
 #ifndef COLUMN_H
 #define COLUMN_H
 
+#include <base/base.h>
+#include <base/problem.h>
+#include <column/solution.h>
+
 class Column {
 public:
     Problem&        prob;
@@ -18,6 +22,9 @@ public:
     Column(const Problem& prob, const Solution sol);
     
     void make_dummy(const float huge_cost);
+    
+    bool is_compatible_with_unite_rule(VisitRule vr) const;
+    bool is_compatible_with_separate_rule(VisitRule vr) const;
 };
 
 #endif

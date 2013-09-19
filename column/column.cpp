@@ -23,6 +23,8 @@ Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
                     prob_coeff[constr_index]++;
                 }
             }
+        } else {
+            throw runtime_error("The hub is not the first port!");
         }
     }
     
@@ -42,4 +44,38 @@ void Column::make_dummy(const float huge_cost) {
     port_coeff = vector<float>(2 * (prob.data.num_ports - 1), 1);
     vc_coeff = vector<float>(prob.data.num_vessel_classes, 0);
     dummy = true;
+}
+
+bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
+    Graph& g = prob.graphs.at(solution.vessel_class);
+    
+    for(Edge e : solution.path) {
+        Node orig = *g.graph[source(e, g.graph)];
+        Node dest = *g.graph[target(e, g.graph)];
+        
+        /*  If orig~vr.first and !dest~vr.second OR
+               !orig~vr.first and dest~vr.second
+            then the path is not compatible! */
+        if(orig.same_row_as(*vr.first) != dest.same_row_as(*vr.second)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
+    Graph& g = prob.graphs.at(solution.vessel_class);
+    
+    for(Edge e : solution.path) {
+        Node orig = *g.graph[source(e, g.graph)];
+        Node dest = *g.graph[target(e, g.graph)];
+        
+        /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
+        if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {
+            return false;
+        }
+    }
+    
+    return true;
 }

@@ -12,11 +12,13 @@
 #include <preprocessing/problem_data.h>
 #include <preprocessing/program_params.h>
 
+typedef std::unorederd_map<std::shared_ptr<VesselClass>, Graph> GraphMap;
+
 class Problem {
 public:
-    ProgramParams                                           params;
-    ProblemData                                             data;
-    std::unorederd_map<std::shared_ptr<VesselClass>, Graph> graphs;
+    ProgramParams    params;
+    ProblemData      data;
+    GraphMap         graphs;
     
     Problem(string params_file = "data/program_params.json", string data_file = "data/problem_data.json");
 };
