@@ -1,0 +1,107 @@
+{
+    "num_ports":            5,
+    "num_times":            84,
+    "num_vessel_classes":   2,
+    "vessel_classes": [
+                       {
+                       "name":             "VC1",
+                       "num_vessels":      2,
+                       "num_speeds":       3,
+                       "capacity":         100,
+                       "base_cost":        1,
+                       "speeds":           [3, 6, 12.5],
+                       "speeds_cost":      [0.01, 0.03, 0.07]
+                       },
+                       {
+                       "name":             "VC1",
+                       "num_vessels":      3,
+                       "num_speeds":       1,
+                       "capacity":         150,
+                       "base_cost":        1.2,
+                       "speeds":           [12.5],
+                       "speeds_cost":      [0.08]
+                       }
+                       ],
+    "ports": [
+              {
+              "name":             "DEBRV",
+              "hub":              true,
+              "pickup_dem":       0,
+              "delivery_dem":     0,
+              "allowed_vc":       [true, true],
+              "calling_fee":      [0, 0],
+              "pickup_trans":     0,
+              "delivery_trans":   0,
+              "pickup_hand":      0,
+              "delivery_hand":    0,
+              "num_tw":           0,
+              "tw_left":          [],
+              "tw_right":         [],
+              "distances":        [0, 100, 150, 200, 100]
+              },
+              {
+              "name":             "DKAAR",
+              "hub":              false,
+              "pickup_dem":       45,
+              "delivery_dem":     15,
+              "allowed_vc":       [true, true],
+              "calling_fee":      [2.5, 3],
+              "pickup_trans":     84,
+              "delivery_trans":   84,
+              "pickup_hand":      1,
+              "delivery_hand":    0,
+              "num_tw":           0,
+              "tw_left":          [],
+              "tw_right":         [],
+              "distances":        [100, 0, 50, 100, 50]
+              },
+              {
+              "name":             "FIRAU",
+              "hub":              false,
+              "pickup_dem":       10,
+              "delivery_dem":     20,
+              "allowed_vc":       [true, true],
+              "calling_fee":      [1.5, 2],
+              "pickup_trans":     84,
+              "delivery_trans":   84,
+              "pickup_hand":      0,
+              "delivery_hand":    0,
+              "num_tw":           0,
+              "tw_left":          [],
+              "tw_right":         [],
+              "distances":        [150, 50, 0, 50, 50]
+              },
+              {
+              "name":             "RULED",
+              "hub":              false,
+              "pickup_dem":       35,
+              "delivery_dem":     45,
+              "allowed_vc":       [true, true],
+              "calling_fee":      [0.4, 0.6],
+              "pickup_trans":     84,
+              "delivery_trans":   84,
+              "pickup_hand":      1,
+              "delivery_hand":    1,
+              "num_tw":           0,
+              "tw_left":          [],
+              "tw_right":         [],
+              "distances":        [200, 100, 50, 0, 150]
+              },
+              {
+              "name":             "DKCPH",
+              "hub":              false,
+              "pickup_dem":       15,
+              "delivery_dem":     65,
+              "allowed_vc":       [true, true],
+              "calling_fee":      [0.8, 1.0],
+              "pickup_trans":     84,
+              "delivery_trans":   84,
+              "pickup_hand":      1,
+              "delivery_hand":    2,
+              "num_tw":           0,
+              "tw_left":          [],
+              "tw_right":         [],
+              "distances":        [100, 50, 50, 150, 0]
+              }
+              ]
+}
