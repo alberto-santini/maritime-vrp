@@ -12,8 +12,12 @@ public:
     float           obj_coeff;
     vector<float>   port_coeff;
     vector<float>   vc_coeff;
+    bool            dummy;
     
+    Column(const Problem& prob) {}
     Column(const Problem& prob, const Solution sol);
+    
+    void make_dummy(const float huge_cost);
 };
 
 #endif

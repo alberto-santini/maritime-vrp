@@ -32,4 +32,14 @@ Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
             vc_coeff[i] = 1;
         }
     }
+    
+    dummy = false;
+}
+
+void Column::make_dummy(const float huge_cost) {
+    solution = Solution();
+    obj_coeff = huge_cost;
+    port_coeff = vector<float>(2 * (prob.data.num_ports - 1), 1);
+    vc_coeff = vector<float>(prob.data.num_vessel_classes, 0);
+    dummy = true;
 }
