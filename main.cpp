@@ -4,15 +4,13 @@
 
 #include <base/base.h>
 #include <base/graph.h>
-#include <preprocessing/graph_generator.h>
-#include <preprocessing/problem_data.h>
+#include <base/problem.h>
 
 int main() {
-    ProblemData data = ProblemData();
-    Graph g;
+    Problem p = Problem();
     
-    GraphGenerator::create_graph(data, data.vessel_classes.front(), g);
-    
-    return 0;
+    for(Graph& g : p.graphs) {
+        cout << g.name << " has " << num_vertices(g.graph) << " vertices and " << num_edges(g.graph) << " edges" << endl;
+    }
 }
 

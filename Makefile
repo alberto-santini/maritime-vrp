@@ -13,6 +13,7 @@ LDLIBS=		-lcplex -lilocplex -lconcert -lm
 
 OBJS=		base/graph.o \
 			base/node.o \
+			base/problem.o \
 			preprocessing/graph_generator.o \
 			preprocessing/problem_data.o \
 			preprocessing/program_params.o \

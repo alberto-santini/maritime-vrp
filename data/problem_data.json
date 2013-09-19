@@ -13,7 +13,7 @@
                        "speeds_cost":      [0.01, 0.03, 0.07]
                        },
                        {
-                       "name":             "VC1",
+                       "name":             "VC2",
                        "num_vessels":      3,
                        "num_speeds":       1,
                        "capacity":         150,
