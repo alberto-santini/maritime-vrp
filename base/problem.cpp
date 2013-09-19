@@ -12,6 +12,6 @@ Problem::Problem(string params_file, string data_file) {
     for(std::shared_ptr<VesselClass> vessel_class : data.vessel_classes) {
         Graph g;
         GraphGenerator::create_graph(data, vessel_class, g);
-        graphs.push_back(g);
+        graphs.emplace(vessel_class, g);
     }
 }
