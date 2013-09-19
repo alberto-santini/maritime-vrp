@@ -7,10 +7,11 @@
 #include <base/problem.h>
 
 int main() {
-    Problem p = Problem();
+    Problem prob = Problem();
     
-    for(Graph& g : p.graphs) {
-        cout << g.name << " has " << num_vertices(g.graph) << " vertices and " << num_edges(g.graph) << " edges" << endl;
+    for(auto& vg : prob.graphs) {
+        cout << vg.second.name << " has " << num_vertices(vg.second.graph) << " vertices and " << num_edges(vg.second.graph) << " edges" << endl;
     }
-}
 
+    return 0;
+}

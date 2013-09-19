@@ -7,7 +7,7 @@
 Problem::Problem(string params_file, string data_file) {
     params = ProgramParams(params_file);
     data = ProblemData(data_file);
-    graphs = vector<Graph>();
+    graphs = GraphMap();
     
     for(std::shared_ptr<VesselClass> vessel_class : data.vessel_classes) {
         Graph g;
