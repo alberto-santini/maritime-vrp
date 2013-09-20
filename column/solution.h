@@ -21,6 +21,8 @@ public:
              const float cost,
              const float reduced_cost,
              std::shared_ptr<VesselClass> vessel_class) : path(path), cost(cost), reduced_cost(reduced_cost), vessel_class(vessel_class) {}
+    
+    bool satisfies_capacity_constraints(const Graph& g);
 };
 
 #endif

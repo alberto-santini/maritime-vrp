@@ -13,7 +13,9 @@ void Graph::print(const bool detailed) const {
         cout << "Vertices:" << endl;
         pair<vit, vit> vp;
         for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-            cout << *graph[*vp.first] << " - Prize: " << graph[*vp.first]->dual_prize << endl;
+            Node n = *graph[*vp.first];
+            float prize = dual_of(n);
+            cout << n << " - Dual prize/price: " << prize << endl;
         }
         cout << "Edges:" << endl;
         pair<eit, eit> ep;
@@ -21,6 +23,13 @@ void Graph::print(const bool detailed) const {
             cout << *graph[source(*ep.first, graph)] << " -> " << *graph[target(*ep.first, graph)];
             cout << " - Cost: " << graph[*ep.first]->cost << endl;
         }
+    }
+}
+
+void Graph::print_path(const Path& p) const {
+    Path::const_reverse_iterator pit;
+    for(pit = p.rbegin(); pit != p.rend(); ++pit) {
+        cout << *graph[source(*pit, graph)] << " -> " << *graph[target(*pit, graph)] << endl;
     }
 }
 
@@ -57,9 +66,9 @@ void Graph::prepare_for_labelling() {
             if(find(checked_ports.begin(), checked_ports.end(), pp) == checked_ports.end()) {
                 checked_ports.push_back(pp);
                 if(graph[v]->pu_type == PickupType::PICKUP) {
-                    pickup_demands.push_back(graph[v]->port->pickup_demand);
+                    pickup_demands.push_back(graph[v]->pu_demand());
                 } else {
-                    delivery_demands.push_back(graph[v]->port->delivery_demand);
+                    delivery_demands.push_back(graph[v]->de_demand());
                 }
             }
         }
@@ -88,7 +97,7 @@ void Graph::unite_ports(VisitRule vr, Graph& dest) const {
     }
     
     string new_name = name + " uniting " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name, dual_price);
+    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
     
     pair<vit, vit> vp;
     for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
@@ -116,6 +125,8 @@ void Graph::unite_ports(VisitRule vr, Graph& dest) const {
             }
         }
     }
+    
+    dest.prepare_for_labelling();
 }
 
 void Graph::separate_ports(VisitRule vr, Graph& dest) const {
@@ -131,7 +142,7 @@ void Graph::separate_ports(VisitRule vr, Graph& dest) const {
     }
     
     string new_name = name + " separating " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name, dual_price);
+    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
 
     pair<vit, vit> vp;
     for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
@@ -149,12 +160,14 @@ void Graph::separate_ports(VisitRule vr, Graph& dest) const {
             }
         }
     }
+    
+    dest.prepare_for_labelling();
 }
 
 void Graph::reduce_graph(const float lambda, Graph& dest) const {
     float cost_limit = lambda * max_dual_prize();
     string new_name = name + " reduced for arc cost < " + to_string(cost_limit);
-    dest = Graph(graph, vessel_class, new_name, dual_price);
+    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
     
     eit ei, ei_end, ei_next;
     tie(ei, ei_end) = edges(dest.graph);
@@ -164,6 +177,8 @@ void Graph::reduce_graph(const float lambda, Graph& dest) const {
             remove_edge(*ei, dest.graph);
         }
     }
+    
+    dest.prepare_for_labelling();
 }
 
 float Graph::max_dual_prize() const {
@@ -171,7 +186,9 @@ float Graph::max_dual_prize() const {
     
     pair<vit, vit> vp;
     for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        max_prize = max(max_prize, graph[*vp.first]->dual_prize);
+        Node n = *graph[*vp.first];
+        max_prize = max(max_prize, port_duals.at(n.port).first);
+        max_prize = max(max_prize, port_duals.at(n.port).second);
     }
     
     return max_prize;
@@ -192,9 +209,61 @@ pair<bool, Vertex> Graph::get_vertex(std::shared_ptr<Port> p, const PickupType p
 float Graph::calculate_cost(const Path& p) const {
     float cost = 0;
     
-    for(Edge e : p) {
+    for(const Edge& e : p) {
         cost += graph[e]->cost;
     }
     
     return cost;
+}
+
+float Graph::dual_of(const Node n) const {
+    if(n.n_type == NodeType::REGULAR_PORT) {
+        if(n.pu_type == PickupType::PICKUP) {
+            return port_duals.at(n.port).first;
+        } else {
+            return port_duals.at(n.port).second;
+        }
+    } else if(n.n_type == NodeType::H2) {
+        return -vc_dual;
+    }
+    
+    return 0;
+}
+
+Path Graph::transfer_path(const Path& path, const Graph& subgraph) const {
+    Path local_path;
+    Path::const_iterator pit;
+    for(pit = path.begin(); pit != path.end(); ++pit) {
+        Edge e = *pit;
+        Node n_orig = *graph[source(e, graph)];
+        Node n_dest = *graph[target(e, graph)];
+        
+        bool o_found;
+        Vertex local_orig;
+        tie(o_found, local_orig) = get_vertex(n_orig.port, n_orig.pu_type, n_orig.time_step);
+        
+        if(!o_found) {
+            throw runtime_error("Can't find the origin of an edge while transferring paths");
+        }
+        
+        bool d_found;
+        Vertex local_dest;
+        tie(d_found, local_dest) = get_vertex(n_dest.port, n_dest.pu_type, n_dest.time_step);
+        
+        if(!d_found) {
+            throw runtime_error("Can't find the destination of an edge while transferring paths");
+        }
+        
+        bool e_found;
+        Edge local_edge;
+        tie(local_edge, e_found) = edge(local_orig, local_dest, graph);
+        
+        if(!e_found) {
+            throw runtime_error("The two vertices are not connected in the graph where you want to transfer the path");
+        }
+        
+        local_path.push_back(local_edge);
+    }
+    
+    return local_path;
 }

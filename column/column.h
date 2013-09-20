@@ -11,15 +11,17 @@
 
 class Column {
 public:
-    Problem&        prob;
+    const Problem&  prob;
     Solution        sol;
     float           obj_coeff;
     vector<float>   port_coeff;
     vector<float>   vc_coeff;
     bool            dummy;
     
-    Column(const Problem& prob) {}
+    Column(const Problem& prob) : prob(prob) {}
     Column(const Problem& prob, const Solution sol);
+    ~Column() {}
+    void operator=(const Column& other);
     
     void make_dummy(const float huge_cost);
     

@@ -246,6 +246,8 @@ void GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<Vesse
             }
         }
     }
+    
+    g.prepare_for_labelling();
 }
 
 int GraphGenerator::final_time(const ProblemData& data, std::shared_ptr<Port> p, const int arrival_time, const PickupType pu) {

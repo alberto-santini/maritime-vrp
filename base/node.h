@@ -18,7 +18,6 @@ public:
     PickupType                      pu_type;
     NodeType                        n_type;
     int                             time_step;
-    float                           dual_prize;
     std::shared_ptr<VesselClass>    vessel_class;
     int                             boost_vertex_id;
     
@@ -28,10 +27,11 @@ public:
          const NodeType n_type,
          const int time_step,
          std::shared_ptr<VesselClass> vessel_class) : port(port), pu_type(pu_type), n_type(n_type), time_step(time_step), vessel_class(vessel_class) {
-        dual_prize = 0;
         boost_vertex_id = 0;
     }
     
+    float pu_demand() const;
+    float de_demand() const;
     bool same_row_as(const Node& other) const;
     bool operator==(const Node& other) const;
 };

@@ -6,8 +6,8 @@ CPPFLAGS=	-I/Users/alberto/Applications/boost \
 			-I/Users/alberto/Applications/maersk \
 			-std=c++11 -O3 -DIL_STD
 
-column.o: column.h column_pool.h column.cpp
-	$(CXX) $(CPPFLAGS) -c -o column.o
+labelling.o: id_maps.g labelling.h labelling.cpp
+	$(CXX) $(CPPFLAGS) -c -o labelling.o
 
-solution.o: solution.h solution.cpp
-	$(CXX) $(CPPFLAGS) -c -o solution.o
+heuristics_solver.o: heuristics_solver.h heuristics_solver.cpp
+	$(CXX) $(CPPFLAGS) -c -o heuristics_solver.o

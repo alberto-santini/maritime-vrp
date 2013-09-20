@@ -7,20 +7,20 @@
 Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
     obj_coeff = sol.cost;
     
-    Graph& g = prob.graphs.at(sol.vessel_class);
+    const Graph& g = prob.graphs.at(sol.vessel_class);
     int np = prob.data.num_ports;
     int nv = prob.data.num_vessel_classes;
     
     /*  "np - 1" to remove the hub;
         "2 *" to create one coefficient for (port, pu) and one for (port, de) */
     port_coeff = vector<float>(2 * (np - 1), 0);
-    for(Edge e : sol.path) {
+    for(const Edge& e : sol.path) {
         Node n = *g.graph[target(e, g.graph)];
         if(n.n_type == NodeType::REGULAR_PORT) {
             for(int i = 1; i < np; i++) {
                 if(n.port == prob.data.ports[i]) {
                     int constr_index = (n.pu_type == PickupType::PICKUP ? (i - 1) : (np - 1 + i - 1));
-                    prob_coeff[constr_index]++;
+                    port_coeff[constr_index]++;
                 }
             }
         } else {
@@ -38,8 +38,17 @@ Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
     dummy = false;
 }
 
+void Column::operator=(const Column& other) {
+    /*  prob is always the same */
+    sol = other.sol;
+    obj_coeff = other.obj_coeff;
+    port_coeff = other.port_coeff;
+    vc_coeff = other.vc_coeff;
+    dummy = other.dummy;
+}
+
 void Column::make_dummy(const float huge_cost) {
-    solution = Solution();
+    sol = Solution();
     obj_coeff = huge_cost;
     port_coeff = vector<float>(2 * (prob.data.num_ports - 1), 1);
     vc_coeff = vector<float>(prob.data.num_vessel_classes, 0);
@@ -47,9 +56,9 @@ void Column::make_dummy(const float huge_cost) {
 }
 
 bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
-    Graph& g = prob.graphs.at(solution.vessel_class);
+    const Graph& g = prob.graphs.at(sol.vessel_class);
     
-    for(Edge e : solution.path) {
+    for(const Edge& e : sol.path) {
         Node orig = *g.graph[source(e, g.graph)];
         Node dest = *g.graph[target(e, g.graph)];
         
@@ -65,9 +74,9 @@ bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
 }
 
 bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
-    Graph& g = prob.graphs.at(solution.vessel_class);
+    const Graph& g = prob.graphs.at(sol.vessel_class);
     
-    for(Edge e : solution.path) {
+    for(const Edge& e : sol.path) {
         Node orig = *g.graph[source(e, g.graph)];
         Node dest = *g.graph[target(e, g.graph)];
         

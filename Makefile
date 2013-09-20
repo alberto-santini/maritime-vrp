@@ -14,9 +14,14 @@ LDLIBS=		-lcplex -lilocplex -lconcert -lm
 OBJS=		base/graph.o \
 			base/node.o \
 			base/problem.o \
+			branching/bb_node.o \
+			column/column.o \
+			column/solution.o \
 			preprocessing/graph_generator.o \
 			preprocessing/problem_data.o \
 			preprocessing/program_params.o \
+			subproblem/heuristics_solver.o \
+			subproblem/labelling.o \
 			util/knapsack.o
 
 main: $(OBJS) base/base.h main.cpp

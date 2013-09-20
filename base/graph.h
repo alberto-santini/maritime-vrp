@@ -27,24 +27,28 @@ typedef vector<Edge> Path;
 typedef pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
 typedef vector<pair<std::shared_ptr<Node>, std::shared_ptr<Node>>> VisitRuleList;
 
+typedef std::unordered_map<std::shared_ptr<Port>, pair<float, float>> PortDuals;
+typedef std::unordered_map<std::shared_ptr<VesselClass>, float> VcDuals;
+
 class Graph {
 public:
     BGraph                          graph;
     std::shared_ptr<VesselClass>    vessel_class;
     string                          name;
-    float                           dual_price;
+    PortDuals                       port_duals;
+    float                           vc_dual;
     int                             pu_upper_bound;
     int                             de_upper_bound;
-    
-    Graph(const BGraph graph = BGraph(),
-          std::shared_ptr<VesselClass> vessel_class = nullptr,
-          const string name = "Graph",
-          const float dual_price = 0) : graph(graph), vessel_class(vessel_class), name(name), dual_price(dual_price) {
-        pu_upper_bound = 0;
-        de_upper_bound = 0;
-    }
+
+    Graph() {}
+    Graph(const BGraph graph,
+          std::shared_ptr<VesselClass> vessel_class,
+          const string name,
+          const PortDuals port_duals = PortDuals(),
+          const float vc_dual = 0) : graph(graph), vessel_class(vessel_class), name(name), port_duals(port_duals), vc_dual(vc_dual) {}
     
     void print(const bool detailed = false) const;
+    void print_path(const Path& p) const;
     
     /*  The first item is true if the H1/h2 vertex has been found or false otherwise
         The second item is the vertex (in case it has been found) */
@@ -72,6 +76,15 @@ public:
     
     /*  Calculates the cost of a path as the sum of the cost of the edges */
     float calculate_cost(const Path& p) const;
+    
+    /*  Gets the correct dual value */
+    float dual_of(const Node n) const;
+    
+    /*  Transfers a path fro a subgraph to the current graph. Typically the subgraph
+        is the reduced graph of the current graph. */
+    Path transfer_path(const Path& path, const Graph& subgraph) const;
+    
+    int n_port_ub() const { return (pu_upper_bound + de_upper_bound); }
     
 private:
     pair<bool, Vertex> get_vertex_by_node_type(const NodeType n_type) const;
