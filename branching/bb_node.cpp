@@ -62,5 +62,6 @@ void BBNode::copy_compatible_columns() {
 }
 
 void BBNode::generate_nrc_columns() {
-    // Todo...
+    SPSolver solv(local_prob);
+    solv.solve(local_pool);
 }

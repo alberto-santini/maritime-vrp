@@ -6,10 +6,9 @@
 #define BB_NODE_H
 
 #include <base/base.h>
-#include <base/graph.h>
 #include <base/problem.h>
-#include <column/column.h>
 #include <column/column_pool.h>
+#include <subproblem/sp_solver.h>
 
 class BBNode {
 public:

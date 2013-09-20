@@ -173,7 +173,7 @@ void Graph::reduce_graph(const float lambda, Graph& dest) const {
     tie(ei, ei_end) = edges(dest.graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        if(dest.graph[*ei]->cost >= cost_limit + numeric_limits<float>::epsilon()) {
+        if(dest.graph[*ei]->cost > cost_limit - numeric_limits<float>::epsilon()) {
             remove_edge(*ei, dest.graph);
         }
     }

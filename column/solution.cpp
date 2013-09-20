@@ -4,7 +4,7 @@
 
 #include <column/solution.h>
 
-bool Solution::satisfies_capacity_constraints(const Graph& g) {
+bool Solution::satisfies_capacity_constraints(const Graph& g) const {
     int qty_delivered = 0;
     
     Path::const_reverse_iterator pit;
@@ -35,4 +35,9 @@ bool Solution::satisfies_capacity_constraints(const Graph& g) {
     }
     
     return true;
+}
+
+bool Solution::operator==(const Solution& other) const {
+    return (path == other.path && vessel_class == other.vessel_class &&
+            fabs(cost - other.cost) < numeric_limits<float>::epsilon());
 }

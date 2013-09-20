@@ -6,6 +6,7 @@
 #include <base/problem.h>
 #include <column/solution.h>
 #include <subproblem/heuristics_solver.h>
+#include <subproblem/exact_solver.h>
 
 int main() {
     Problem prob = Problem();
@@ -19,10 +20,17 @@ int main() {
         g.port_duals.emplace(p, make_pair(0.0, 0.0));
     }
 
-    HeuristicsSolver solv(prob.params, g);
+    HeuristicsSolver hsolv(prob.params, g);
+    ExactSolver esolv(g);
     vector<Solution> sols;
     
-    sols = solv.solve_fast_backward();
+    sols = hsolv.solve_fast_backward();
+    
+    for(const Solution& s : sols) {
+        g.print_path(s.path);
+    }
+    
+    sols = esolv.solve();
     
     for(const Solution& s : sols) {
         g.print_path(s.path);
