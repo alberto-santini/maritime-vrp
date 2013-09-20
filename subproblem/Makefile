@@ -6,7 +6,7 @@ CPPFLAGS=	-I/Users/alberto/Applications/boost \
 			-I/Users/alberto/Applications/maersk \
 			-std=c++11 -O3 -DIL_STD
 
-labelling.o: id_maps.g labelling.h labelling.cpp
+labelling.o: id_maps.h labelling.h labelling.cpp
 	$(CXX) $(CPPFLAGS) -c -o labelling.o
 
 heuristics_solver.o: heuristics_solver.h heuristics_solver.cpp

@@ -143,7 +143,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     Graph red;
     
     g.reduce_graph(lambda, red);
-    
+        
     vector<Path> optimal_paths;
     vector<Label> optimal_labels;
     
@@ -151,6 +151,8 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     ArcIdFunctor af(red);
     
     std::shared_ptr<VesselClass> vc = red.vessel_class;
+    
+    clock_t cl_begin = clock();
     
     r_c_shortest_paths(
         red.graph,
@@ -167,10 +169,14 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
         default_r_c_shortest_paths_visitor()
     );
         
+    clock_t cl_end = clock();
+    
+    cout << "\tLabelling completed in " << (double(cl_end - cl_begin) / CLOCKS_PER_SEC) << " seconds" << endl;
+    
     for(int i = 0; i < optimal_paths.size(); i++) {
         Path og_path = g.transfer_path(optimal_paths[i], red);
         sols.push_back(Solution(og_path, g.calculate_cost(og_path), optimal_labels[i].cost, vc));
     }
-    
+        
     return sols;
 }

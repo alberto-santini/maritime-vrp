@@ -97,6 +97,7 @@ bool SPSolver::solve(ColumnPool& pool) {
         float lambda = prob.params.lambda_start;
         
         while(valid_sols.size() == 0 && lambda <= prob.params.lambda_end) {
+            cout << "Lambda: " << lambda << endl;
             vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
         
             for(const Solution& s : red_sols) {

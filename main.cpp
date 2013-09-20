@@ -2,11 +2,8 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
-#include <base/base.h>
-#include <base/problem.h>
-#include <column/solution.h>
-#include <subproblem/heuristics_solver.h>
-#include <subproblem/exact_solver.h>
+#include <masterproblem/mp_solver.h>
+#include <subproblem/sp_solver.h>
 
 int main() {
     Problem prob = Problem();
@@ -15,26 +12,46 @@ int main() {
         cout << vg.second.name << " has " << num_vertices(vg.second.graph) << " vertices and " << num_edges(vg.second.graph) << " edges" << endl;
     }
 
-    Graph& g = prob.graphs.at(prob.data.vessel_classes.front());
-    for(std::shared_ptr<Port> p : prob.data.ports) {
-        g.port_duals.emplace(p, make_pair(0.0, 0.0));
+    Problem pb_prob = prob;
+    ColumnPool pool;
+    Column dummy(pb_prob);
+    dummy.make_dummy(999);
+    pool.push_back(dummy);
+    
+    MPSolver mp_solv(pb_prob);
+    MPLinearSolution sol = mp_solv.solve_lp(pool);
+    cout << "Objective value: " << sol.obj_value << endl;
+    
+    bool optimal = false;
+    
+    while(!optimal) {
+        for(auto& vg : pb_prob.graphs) {
+            vg.second.port_duals = sol.port_duals;
+            vg.second.vc_dual = sol.vc_duals.at(vg.first);
+        }
+        
+        SPSolver sp_solv(pb_prob);
+        
+        if(sp_solv.solve(pool)) {
+           sol = mp_solv.solve_lp(pool);
+           cout << "Objective value: " << sol.obj_value << endl;
+        } else {
+            bool infeasible = false;
+            for(int i = 0; i < sol.variables.size(); i++) {
+                if(pool[i].dummy && sol.variables[i] > numeric_limits<float>::epsilon()) {
+                    cout << "Infeasible!" << endl;
+                    infeasible = true;
+                    break;
+                }
+            }
+            
+            if(!infeasible) {
+                cout << "We are optimal!" << endl;
+            }
+            
+            optimal = true;
+        }
     }
-
-    HeuristicsSolver hsolv(prob.params, g);
-    ExactSolver esolv(g);
-    vector<Solution> sols;
     
-    sols = hsolv.solve_fast_backward();
-    
-    for(const Solution& s : sols) {
-        g.print_path(s.path);
-    }
-    
-    sols = esolv.solve();
-    
-    for(const Solution& s : sols) {
-        g.print_path(s.path);
-    }
-
     return 0;
 }

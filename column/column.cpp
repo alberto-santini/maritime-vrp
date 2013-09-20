@@ -23,8 +23,6 @@ Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
                     port_coeff[constr_index]++;
                 }
             }
-        } else {
-            throw runtime_error("The hub is not the first port!");
         }
     }
     

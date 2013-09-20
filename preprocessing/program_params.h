@@ -11,9 +11,9 @@ class ProgramParams {
 public:
     int     delta;
     int     theta;
-    int     lambda_start;
-    int     lambda_end;
-    int     lambda_inc;
+    float   lambda_start;
+    float   lambda_end;
+    float   lambda_inc;
     
     ProgramParams(string data_file_name = "data/program_params.json");
 };

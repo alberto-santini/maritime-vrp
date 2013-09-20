@@ -8,7 +8,7 @@ bool Label::operator==(const Label& other) const {
     return( q_pickupable == other.q_pickupable &&
             q_deliverable == other.q_deliverable &&
             n_visited == other.n_visited &&
-            (cost - other.cost) < numeric_limits<float>::epsilon());
+            fabs(cost - other.cost) < numeric_limits<float>::epsilon());
 }
 
 bool Label::operator<(const Label& other) const {

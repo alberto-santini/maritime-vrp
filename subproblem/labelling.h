@@ -27,7 +27,6 @@ public:
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;
-    bool operator<=(const Label& other) const { return (*this == other || *this == other); };
 };
 
 class LabelExtender {
@@ -37,7 +36,7 @@ public:
 
 class Dominance {
 public:
-    bool operator()(const Label& l1, const Label& l2) const { return (l1 <= l2); }
+    bool operator()(const Label& l1, const Label& l2) const { return (l1 == l2 || l1 < l2); }
 };
 
 #endif

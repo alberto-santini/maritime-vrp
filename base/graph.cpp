@@ -183,12 +183,10 @@ void Graph::reduce_graph(const float lambda, Graph& dest) const {
 
 float Graph::max_dual_prize() const {
     float max_prize = 0;
-    
-    pair<vit, vit> vp;
-    for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        Node n = *graph[*vp.first];
-        max_prize = max(max_prize, port_duals.at(n.port).first);
-        max_prize = max(max_prize, port_duals.at(n.port).second);
+
+    for(const auto& pp : port_duals) {
+        max_prize = max(max_prize, pp.second.first);
+        max_prize = max(max_prize, pp.second.second);
     }
     
     return max_prize;

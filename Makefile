@@ -17,6 +17,7 @@ OBJS=		base/graph.o \
 			branching/bb_node.o \
 			column/column.o \
 			column/solution.o \
+			masterproblem/mp_solver.o \
 			preprocessing/graph_generator.o \
 			preprocessing/problem_data.o \
 			preprocessing/program_params.o \
