@@ -11,3 +11,6 @@ labelling.o: id_maps.g labelling.h labelling.cpp
 
 heuristics_solver.o: heuristics_solver.h heuristics_solver.cpp
 	$(CXX) $(CPPFLAGS) -c -o heuristics_solver.o
+	
+exact_solver.o: exact_solver.h exact_solver.cpp
+	$(CXX) $(CPPFLAGS) -c -o exact_solver.o

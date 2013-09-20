@@ -20,6 +20,7 @@ OBJS=		base/graph.o \
 			preprocessing/graph_generator.o \
 			preprocessing/problem_data.o \
 			preprocessing/program_params.o \
+			subproblem/exact_solver.o \
 			subproblem/heuristics_solver.o \
 			subproblem/labelling.o \
 			util/knapsack.o
