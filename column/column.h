@@ -29,4 +29,6 @@ public:
     bool is_compatible_with_separate_rule(VisitRule vr) const;
 };
 
+ostream& operator<<(ostream& out, const Column& c);
+
 #endif

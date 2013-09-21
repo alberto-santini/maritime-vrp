@@ -56,6 +56,10 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
+            if(path.size() > g.n_port_ub() + 1) {
+                break;
+            }
+            
             current = target(chosen.e, g.graph);
             
             if(current == h2) {
@@ -123,6 +127,10 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
+            if(path.size() > g.n_port_ub() + 1) {
+                break;
+            }
+            
             current = source(chosen.e, g.graph);
             
             if(current == h1) {
@@ -151,9 +159,9 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     ArcIdFunctor af(red);
     
     std::shared_ptr<VesselClass> vc = red.vessel_class;
-    
-    clock_t cl_begin = clock();
-    
+
+    clock_t cl_start = clock();
+
     r_c_shortest_paths(
         red.graph,
         make_property_map<Vertex>(nf),
@@ -162,7 +170,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
         red.h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0, 0, red),
+        Label(vc->capacity, vc->capacity, 0, 0, red.port_duals, red.vc_dual, red.n_port_ub()),
         LabelExtender(),
         Dominance(),
         allocator<r_c_shortest_paths_label<BGraph, Label>>(),
@@ -170,8 +178,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     );
         
     clock_t cl_end = clock();
-    
-    cout << "\tLabelling completed in " << (double(cl_end - cl_begin) / CLOCKS_PER_SEC) << " seconds" << endl;
+    cout << "Time elapsed (on " << lambda << "-reduced graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(int i = 0; i < optimal_paths.size(); i++) {
         Path og_path = g.transfer_path(optimal_paths[i], red);

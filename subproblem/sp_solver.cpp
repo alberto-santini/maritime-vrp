@@ -27,44 +27,19 @@ bool SPSolver::solve(ColumnPool& pool) {
     int discarded_generated = 0;
     int discarded_in_pool = 0;
     
-    for(auto& vg : prob.graphs) {
-        const Graph& g = vg.second;
+    vector<std::shared_ptr<VesselClass>>::const_iterator vcit;
+    
+    for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
+        const Graph& g = prob.graphs.at(*vcit);
         HeuristicsSolver hsolv(prob.params, g);
+                
         vector<Solution> fast_fwd_sols = hsolv.solve_fast_forward();
-        
-        for(const Solution& s : fast_fwd_sols) {
-            if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
-                discarded_prc++;
-            } else if(!s.satisfies_capacity_constraints(g)) {
-                discarded_infeasible++;
-            } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
-                discarded_generated++;
-            } else if(solution_in_pool(s, pool)) {
-                discarded_in_pool++;
-            } else {
-                valid_sols.push_back(s);
-            }
-        }
-    }
-    
-    cout << "Fast forward heuristics." << endl;
-    print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-    
-    if(valid_sols.size() > 0) {
-        for(const Solution& s : valid_sols) {
-            pool.push_back(Column(prob, s));
-        }
-        return true;
-    } else {
-        discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
-    }
-    
-    for(auto& vg : prob.graphs) {
-        const Graph& g = vg.second;
-        HeuristicsSolver hsolv(prob.params, g);
         vector<Solution> fast_bwd_sols = hsolv.solve_fast_backward();
         
-        for(const Solution& s : fast_bwd_sols) {
+        vector<Solution> total = fast_fwd_sols;
+        total.insert(total.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
+        
+        for(const Solution& s : total) {
             if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints(g)) {
@@ -79,7 +54,7 @@ bool SPSolver::solve(ColumnPool& pool) {
         }
     }
     
-    cout << "Fast backward heuristics." << endl;
+    cout << "Fast heuristics." << endl;
     print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     
     if(valid_sols.size() > 0) {
@@ -91,13 +66,12 @@ bool SPSolver::solve(ColumnPool& pool) {
         discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
     }
     
-    for(auto& vg : prob.graphs) {
-        const Graph& g = vg.second;
+    for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
+        const Graph& g = prob.graphs.at(*vcit);
         HeuristicsSolver hsolv(prob.params, g);
         float lambda = prob.params.lambda_start;
-        
+                
         while(valid_sols.size() == 0 && lambda <= prob.params.lambda_end) {
-            cout << "Lambda: " << lambda << endl;
             vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
         
             for(const Solution& s : red_sols) {
@@ -130,9 +104,10 @@ bool SPSolver::solve(ColumnPool& pool) {
         discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
     }
     
-    for(auto& vg : prob.graphs) {
-        const Graph& g = vg.second;
+    for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
+        const Graph& g = prob.graphs.at(*vcit);
         ExactSolver esolv(g);
+                
         vector<Solution> e_sols = esolv.solve();
     
         for(const Solution& s : e_sols) {

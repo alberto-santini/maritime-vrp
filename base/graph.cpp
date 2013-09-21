@@ -14,7 +14,12 @@ void Graph::print(const bool detailed) const {
         pair<vit, vit> vp;
         for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
             Node n = *graph[*vp.first];
-            float prize = dual_of(n);
+            string prize;
+            try {
+                prize = to_string(dual_of(n));
+            } catch(std::out_of_range& e) {
+                prize = "undefined";
+            }
             cout << n << " - Dual prize/price: " << prize << endl;
         }
         cout << "Edges:" << endl;

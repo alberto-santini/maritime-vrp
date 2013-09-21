@@ -16,14 +16,17 @@ public:
     int             q_deliverable;
     int             n_visited;
     float           cost;
-    const Graph&    g;
+    PortDuals&  port_duals;
+    float       vc_dual;
+    int         upper_bound;
     
-    Label(const Graph& g) : g(g) {}
     Label(const int qp,
           const int qd,
           const int n,
           const float c,
-          const Graph& g) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c), g(g) {}
+          PortDuals& port_duals,
+          const float vc_dual,
+          const int upper_bound) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c), port_duals(port_duals), vc_dual(vc_dual), upper_bound(upper_bound) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;

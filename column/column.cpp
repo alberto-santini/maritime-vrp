@@ -86,3 +86,15 @@ bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
     
     return true;
 }
+
+ostream& operator<<(ostream& out, const Column& c) {
+    cout << setw(6) << c.obj_coeff << " | ";
+    int hs = c.port_coeff.size() / 2;
+    for(int i = 0; i < hs; i++) {
+        cout << c.port_coeff[i] << " " << c.port_coeff[hs + i] << "\t";
+    }
+    cout << "| ";
+    for(int i = 0; i < c.vc_coeff.size(); i++) {
+        cout << c.vc_coeff[i] << " ";
+    }
+}

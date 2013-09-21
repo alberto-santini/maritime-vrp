@@ -33,8 +33,19 @@ int main() {
         SPSolver sp_solv(pb_prob);
         
         if(sp_solv.solve(pool)) {
-           sol = mp_solv.solve_lp(pool);
-           cout << "Objective value: " << sol.obj_value << endl;
+            sol = mp_solv.solve_lp(pool);
+            cout << "Objective value: " << sol.obj_value << endl;
+            cout << "Columns: " << endl;
+            for(int i = 0; i < pool.size(); i++) {
+                cout << pool[i];
+                if(!pool[i].dummy) {
+                    cout << " VC: " << pool[i].sol.vessel_class->name << ";";
+                }
+                if(sol.variables[i] != 0) {
+                    cout << " selected with theta = " << sol.variables[i];
+                }
+                cout << endl;
+            }
         } else {
             bool infeasible = false;
             for(int i = 0; i < sol.variables.size(); i++) {
