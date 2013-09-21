@@ -41,7 +41,6 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     float dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? label.port_duals.at(n_dest.port).first : label.port_duals.at(n_dest.port).second) : -label.vc_dual);
     
     new_label.cost = label.cost + graph[e]->cost - dual;
-    // new_label.cur_node = graph[target(e, graph)];
     new_label.port_duals = label.port_duals;
     new_label.vc_dual = label.vc_dual;
     new_label.upper_bound = label.upper_bound;
