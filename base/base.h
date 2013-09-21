@@ -63,6 +63,8 @@ using std::remove;
 using std::string;
 using std::to_string;
 #include <unordered_map>
+#include <queue>
+using std::priority_queue;
 // std::unordered_map could confilct with boost::
 
 

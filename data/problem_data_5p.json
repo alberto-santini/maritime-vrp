@@ -15,11 +15,11 @@
         {
         "name":             "VC2",
         "num_vessels":      3,
-        "num_speeds":       1,
+        "num_speeds":       2,
         "capacity":         150,
-        "base_cost":        1.2,
-        "speeds":           [12.5],
-        "speeds_cost":      [0.08]
+        "base_cost":        0.8,
+        "speeds":           [6, 12.5],
+        "speeds_cost":      [0.03, 0.06]
         }
     ],
     "ports": [
@@ -45,7 +45,7 @@
         "pickup_dem":       45,
         "delivery_dem":     15,
         "allowed_vc":       [true, true],
-        "calling_fee":      [2.5, 3],
+        "calling_fee":      [2.5, 0.5],
         "pickup_trans":     84,
         "delivery_trans":   84,
         "pickup_hand":      1,
@@ -61,7 +61,7 @@
         "pickup_dem":       10,
         "delivery_dem":     20,
         "allowed_vc":       [true, true],
-        "calling_fee":      [1.5, 2],
+        "calling_fee":      [1.5, 0.3],
         "pickup_trans":     84,
         "delivery_trans":   84,
         "pickup_hand":      0,
@@ -77,7 +77,7 @@
         "pickup_dem":       35,
         "delivery_dem":     45,
         "allowed_vc":       [true, true],
-        "calling_fee":      [0.4, 0.6],
+        "calling_fee":      [0.4, 0.2],
         "pickup_trans":     84,
         "delivery_trans":   84,
         "pickup_hand":      1,
@@ -93,7 +93,7 @@
         "pickup_dem":       15,
         "delivery_dem":     65,
         "allowed_vc":       [true, true],
-        "calling_fee":      [0.8, 1.0],
+        "calling_fee":      [0.8, 0.2],
         "pickup_trans":     84,
         "delivery_trans":   84,
         "pickup_hand":      1,

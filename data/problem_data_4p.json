@@ -1,0 +1,75 @@
+{
+    "num_ports":            3,
+    "num_times":            84,
+    "num_vessel_classes":   2,
+    "vessel_classes": [
+        {
+        "name":             "VC1",
+        "num_vessels":      1,
+        "num_speeds":       5,
+        "capacity":         100,
+        "base_cost":        0,
+        "speeds":           [0.25, 0.5, 1, 1.5, 2],
+        "speeds_cost":      [0.25, 0.5, 1, 1.5, 2]
+        },
+        {
+        "name":             "VC2",
+        "num_vessels":      2,
+        "num_speeds":       5,
+        "capacity":         100,
+        "base_cost":        0,
+        "speeds":           [0.25, 0.5, 1, 1.5, 2],
+        "speeds_cost":      [5, 10, 15, 20, 25]
+        }
+    ],
+    "ports": [
+        {
+        "name":             "DEBRV",
+        "hub":              true,
+        "pickup_dem":       0,
+        "delivery_dem":     0,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [0, 0],
+        "pickup_trans":     0,
+        "delivery_trans":   0,
+        "pickup_hand":      0,
+        "delivery_hand":    0,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [0, 15, 15]
+        },
+        {
+        "name":             "DKAAR",
+        "hub":              false,
+        "pickup_dem":       60,
+        "delivery_dem":     60,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [1, 0],
+        "pickup_trans":     84,
+        "delivery_trans":   84,
+        "pickup_hand":      0,
+        "delivery_hand":    0,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [15, 0, 15]
+        },
+        {
+        "name":             "FIRAU",
+        "hub":              false,
+        "pickup_dem":       30,
+        "delivery_dem":     30,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [1, 0],
+        "pickup_trans":     84,
+        "delivery_trans":   84,
+        "pickup_hand":      0,
+        "delivery_hand":    0,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [15, 15, 0]
+        }
+    ]
+}

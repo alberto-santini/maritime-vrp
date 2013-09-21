@@ -27,6 +27,7 @@ vector<Solution> ExactSolver::solve() const {
         g.h2().second,
         optimal_paths,
         optimal_labels,
+        // Label(vc->capacity, vc->capacity, 0, 0, g.graph[g.h1().second], pd, vd, g.n_port_ub()),
         Label(vc->capacity, vc->capacity, 0, 0, pd, vd, g.n_port_ub()),
         LabelExtender(),
         Dominance(),

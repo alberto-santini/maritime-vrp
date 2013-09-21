@@ -66,14 +66,14 @@ bool SPSolver::solve(ColumnPool& pool) {
         discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
     }
     
-    for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
-        const Graph& g = prob.graphs.at(*vcit);
-        HeuristicsSolver hsolv(prob.params, g);
-        float lambda = prob.params.lambda_start;
-                
-        while(valid_sols.size() == 0 && lambda <= prob.params.lambda_end) {
-            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
+    float lambda = prob.params.lambda_start;
+    while(valid_sols.size() == 0 && lambda <= prob.params.lambda_end) {
+        for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
+            const Graph& g = prob.graphs.at(*vcit);
+            HeuristicsSolver hsolv(prob.params, g);
         
+            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
+    
             for(const Solution& s : red_sols) {
                 if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
                     discarded_prc++;
@@ -87,9 +87,8 @@ bool SPSolver::solve(ColumnPool& pool) {
                     valid_sols.push_back(s);
                 }
             }
-            
-            lambda += prob.params.lambda_inc;
         }
+        lambda += prob.params.lambda_inc;
     }
     
     cout << "Labelling on the reduced graph." << endl;

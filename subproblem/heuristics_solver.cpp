@@ -159,6 +159,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     ArcIdFunctor af(red);
     
     std::shared_ptr<VesselClass> vc = red.vessel_class;
+    // ShortestPathDebugVisitor vis;
 
     clock_t cl_start = clock();
 
@@ -171,14 +172,16 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
         optimal_paths,
         optimal_labels,
         Label(vc->capacity, vc->capacity, 0, 0, red.port_duals, red.vc_dual, red.n_port_ub()),
+        // Label(vc->capacity, vc->capacity, 0, 0, red.graph[red.h1().second], red.port_duals, red.vc_dual, red.n_port_ub()),
         LabelExtender(),
         Dominance(),
         allocator<r_c_shortest_paths_label<BGraph, Label>>(),
+        // vis
         default_r_c_shortest_paths_visitor()
     );
         
     clock_t cl_end = clock();
-    cout << "Time elapsed (on " << lambda << "-reduced graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
+    cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red.graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(int i = 0; i < optimal_paths.size(); i++) {
         Path og_path = g.transfer_path(optimal_paths[i], red);

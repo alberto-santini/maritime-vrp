@@ -1,25 +1,25 @@
 {
-    "num_ports":            3,
+    "num_ports":            5,
     "num_times":            84,
     "num_vessel_classes":   2,
     "vessel_classes": [
         {
         "name":             "VC1",
-        "num_vessels":      1,
-        "num_speeds":       5,
+        "num_vessels":      2,
+        "num_speeds":       3,
         "capacity":         100,
-        "base_cost":        0,
-        "speeds":           [0.25, 0.5, 1, 1.5, 2],
-        "speeds_cost":      [0.25, 0.5, 1, 1.5, 2]
+        "base_cost":        1,
+        "speeds":           [3, 6, 12.5],
+        "speeds_cost":      [0.01, 0.03, 0.07]
         },
         {
         "name":             "VC2",
-        "num_vessels":      2,
-        "num_speeds":       5,
-        "capacity":         100,
-        "base_cost":        0,
-        "speeds":           [0.25, 0.5, 1, 1.5, 2],
-        "speeds_cost":      [5, 10, 15, 20, 25]
+        "num_vessels":      3,
+        "num_speeds":       2,
+        "capacity":         150,
+        "base_cost":        0.8,
+        "speeds":           [6, 12.5],
+        "speeds_cost":      [0.03, 0.06]
         }
     ],
     "ports": [
@@ -37,31 +37,31 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [0, 15, 15]
+        "distances":        [0, 100, 150, 200, 100]
         },
         {
         "name":             "DKAAR",
         "hub":              false,
-        "pickup_dem":       60,
-        "delivery_dem":     60,
+        "pickup_dem":       45,
+        "delivery_dem":     15,
         "allowed_vc":       [true, true],
-        "calling_fee":      [1, 0],
+        "calling_fee":      [2.5, 0.5],
         "pickup_trans":     84,
         "delivery_trans":   84,
-        "pickup_hand":      0,
+        "pickup_hand":      1,
         "delivery_hand":    0,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [15, 0, 15]
+        "distances":        [100, 0, 50, 100, 50]
         },
         {
         "name":             "FIRAU",
         "hub":              false,
-        "pickup_dem":       30,
-        "delivery_dem":     30,
+        "pickup_dem":       10,
+        "delivery_dem":     20,
         "allowed_vc":       [true, true],
-        "calling_fee":      [1, 0],
+        "calling_fee":      [1.5, 0.3],
         "pickup_trans":     84,
         "delivery_trans":   84,
         "pickup_hand":      0,
@@ -69,7 +69,39 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [15, 15, 0]
+        "distances":        [150, 50, 0, 50, 50]
+        },
+        {
+        "name":             "RULED",
+        "hub":              false,
+        "pickup_dem":       35,
+        "delivery_dem":     45,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [0.4, 0.2],
+        "pickup_trans":     84,
+        "delivery_trans":   84,
+        "pickup_hand":      1,
+        "delivery_hand":    1,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [200, 100, 50, 0, 150]
+        },
+        {
+        "name":             "DKCPH",
+        "hub":              false,
+        "pickup_dem":       15,
+        "delivery_dem":     65,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [0.8, 0.2],
+        "pickup_trans":     84,
+        "delivery_trans":   84,
+        "pickup_hand":      1,
+        "delivery_hand":    2,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [100, 50, 50, 150, 0]
         }
     ]
 }
