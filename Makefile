@@ -7,7 +7,7 @@ CPPFLAGS=	-I/Users/alberto/Applications/boost \
 			-std=c++11 -O0 -DIL_STD -g
 
 LDFLAGS=	-L/Users/alberto/Applications/cplex/lib/x86-64_darwin/static_pic \
-			-L/Users/alberto/Applications/concert/lib/x86-64_darwin/static_pic
+			-L/Users/alberto/Applications/concert/lib/x86-64_darwin/static_pic \
 					
 LDLIBS=		-lcplex -lilocplex -lconcert -lm
 

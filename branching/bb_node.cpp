@@ -5,7 +5,7 @@ BBNode::BBNode(const Problem& prob, const Problem local_prob, ColumnPool& pool, 
 }
 
 void BBNode::populate_pool() {
-    copy_compatible_columns();
+    remove_incompatible_columns();
     generate_nrc_columns();
 }
 
@@ -27,7 +27,7 @@ void BBNode::make_local_graphs() {
     }
 }
 
-void BBNode::copy_compatible_columns() {
+void BBNode::remove_incompatible_columns() {
     ColumnPool new_local_pool;
     
     for(const Column& c : local_pool) {
@@ -55,13 +55,19 @@ void BBNode::copy_compatible_columns() {
             break;
         }
         
-        new_local_pool.push_back(c);
+        new_local_pool.push_back(c.transfer_to(local_prob));
     }
     
     local_pool = new_local_pool;
 }
 
 void BBNode::generate_nrc_columns() {
+    ColumnPool nrc_columns = local_pool;
     SPSolver solv(local_prob);
-    solv.solve(local_pool);
+    solv.solve(nrc_columns);
+    
+    for(const Column c : nrc_columns) {
+        local_pool.push_back(c);
+        pool.push_back(c.transfer_to(prob));
+    }
 }

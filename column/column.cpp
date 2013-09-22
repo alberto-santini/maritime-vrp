@@ -87,6 +87,17 @@ bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
     return true;
 }
 
+Column Column::transfer_to(const Problem& other_prob) const {
+    const Graph& other_g = other_prob.graphs.at(sol.vessel_class);
+    const Graph& my_g = prob.graphs.at(sol.vessel_class);
+    
+    Path other_p = other_g.transfer_path(sol.path, my_g);
+    Solution other_s(other_p, sol.cost, sol.reduced_cost, sol.vessel_class);
+    Column other_c(other_prob, other_s, obj_coeff, port_coeff, vc_coeff, dummy);
+    
+    return other_c;
+}
+
 ostream& operator<<(ostream& out, const Column& c) {
     cout << setw(6) << c.obj_coeff << " | ";
     int hs = c.port_coeff.size() / 2;

@@ -47,11 +47,24 @@ public:
            const PortDuals port_duals,
            const VcDuals vc_duals);
     
+    /* Gets the new column pool by calling remove_incompatible_columns()
+       and generate_nrc_columns() */
     void populate_pool();
     
+    // Next step: solve LP with the new pool, update the bounds and eventually generate children nodes
+    
 private:
+    /*  Modifies the graphs in local_prob according to the rules
+        in unite_rules and separate_rules and sets the duals from
+        port_duals and vc_duals */
     void make_local_graphs();
-    void copy_compatible_columns();
+    
+    /*  Removes from local_pool those columns that are not compatible
+        with unite_rules and separate_rules */
+    void remove_incompatible_columns();
+    
+    /*  Generates new <0 reduced cost columns by solving the pricing
+        problem. Adds them to the global pool and to the local pool. */
     void generate_nrc_columns();
 };
 
