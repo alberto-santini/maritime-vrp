@@ -5,7 +5,7 @@
     "vessel_classes": [
         {
         "name":             "VC1",
-        "num_vessels":      2,
+        "num_vessels":      1,
         "num_speeds":       3,
         "capacity":         100,
         "base_cost":        1,
@@ -14,7 +14,7 @@
         },
         {
         "name":             "VC2",
-        "num_vessels":      3,
+        "num_vessels":      1,
         "num_speeds":       2,
         "capacity":         150,
         "base_cost":        0.8,

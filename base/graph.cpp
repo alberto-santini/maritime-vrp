@@ -227,7 +227,7 @@ float Graph::dual_of(const Node n) const {
             return port_duals.at(n.port).second;
         }
     } else if(n.n_type == NodeType::H2) {
-        return -vc_dual;
+        return vc_dual;
     }
     
     return 0;

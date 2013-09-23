@@ -38,7 +38,7 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     
     new_label.n_visited = label.n_visited + (n_dest.n_type == NodeType::REGULAR_PORT ? 1 : 0);
     
-    float dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? label.port_duals.at(n_dest.port).first : label.port_duals.at(n_dest.port).second) : -label.vc_dual);
+    float dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? label.port_duals.at(n_dest.port).first : label.port_duals.at(n_dest.port).second) : label.vc_dual);
     
     new_label.cost = label.cost + graph[e]->cost - dual;
     new_label.port_duals = label.port_duals;
