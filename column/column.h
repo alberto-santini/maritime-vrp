@@ -17,15 +17,17 @@ public:
     vector<float>   port_coeff;
     vector<float>   vc_coeff;
     bool            dummy;
+    string          created_by;
     
     Column(const Problem& prob) : prob(prob) {}
-    Column(const Problem& prob, const Solution sol);
+    Column(const Problem& prob, const Solution sol, const string created_by);
     Column(const Problem& prob,
-           Solution sol,
-           float obj_coeff,
-           vector<float> port_coeff,
-           vector<float> vc_coeff,
-           bool dummy) : prob(prob), sol(sol), obj_coeff(obj_coeff), port_coeff(port_coeff), vc_coeff(vc_coeff), dummy(dummy) {}
+           const Solution sol,
+           const float obj_coeff,
+           const vector<float> port_coeff,
+           const vector<float> vc_coeff,
+           const bool dummy,
+           const string created_by) : prob(prob), sol(sol), obj_coeff(obj_coeff), port_coeff(port_coeff), vc_coeff(vc_coeff), dummy(dummy), created_by(created_by) {}
     ~Column() {}
     void operator=(const Column& other);
     

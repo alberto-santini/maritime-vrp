@@ -4,7 +4,7 @@
 
 #include <column/column.h>
 
-Column::Column(const Problem& prob, const Solution sol) : prob(prob), sol(sol) {
+Column::Column(const Problem& prob, const Solution sol, const string created_by) : prob(prob), sol(sol), created_by(created_by) {
     obj_coeff = sol.cost;
     
     const Graph& g = prob.graphs.at(sol.vessel_class);
@@ -51,6 +51,7 @@ void Column::make_dummy(const float huge_cost) {
     port_coeff = vector<float>(2 * (prob.data.num_ports - 1), 1);
     vc_coeff = vector<float>(prob.data.num_vessel_classes, 0);
     dummy = true;
+    created_by = "dummy";
 }
 
 bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
@@ -93,19 +94,21 @@ Column Column::transfer_to(const Problem& other_prob) const {
     
     Path other_p = other_g.transfer_path(sol.path, my_g);
     Solution other_s(other_p, sol.cost, sol.reduced_cost, sol.vessel_class);
-    Column other_c(other_prob, other_s, obj_coeff, port_coeff, vc_coeff, dummy);
+    Column other_c(other_prob, other_s, obj_coeff, port_coeff, vc_coeff, dummy, created_by);
     
     return other_c;
 }
 
 ostream& operator<<(ostream& out, const Column& c) {
-    cout << setw(6) << c.obj_coeff << " | ";
+    out << setw(6) << c.obj_coeff << " | ";
     int hs = c.port_coeff.size() / 2;
     for(int i = 0; i < hs; i++) {
-        cout << c.port_coeff[i] << " " << c.port_coeff[hs + i] << "\t";
+        out << c.port_coeff[i] << " " << c.port_coeff[hs + i] << "\t";
     }
-    cout << "| ";
+    out << "| ";
     for(int i = 0; i < c.vc_coeff.size(); i++) {
         cout << c.vc_coeff[i] << " ";
     }
+    out << "by " << c.created_by << " ";
+    return out;
 }

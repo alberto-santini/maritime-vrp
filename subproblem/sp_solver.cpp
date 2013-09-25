@@ -59,7 +59,7 @@ bool SPSolver::solve(ColumnPool& pool) {
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
-            pool.push_back(Column(prob, s));
+            pool.push_back(Column(prob, s, "fast heuristic"));
         }
         return true;
     } else {
@@ -67,7 +67,7 @@ bool SPSolver::solve(ColumnPool& pool) {
     }
     
     float lambda = prob.params.lambda_start;
-    while(valid_sols.size() == 0 && lambda <= prob.params.lambda_end) {
+    while(valid_sols.size() == 0 && lambda < prob.params.lambda_end + numeric_limits<float>::epsilon()) {
         for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
             const Graph& g = prob.graphs.at(*vcit);
             HeuristicsSolver hsolv(prob.params, g);
@@ -96,7 +96,7 @@ bool SPSolver::solve(ColumnPool& pool) {
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
-            pool.push_back(Column(prob, s));
+            pool.push_back(Column(prob, s, "labelling on the " + to_string(lambda - prob.params.lambda_inc) + "-reduced graph"));
         }
         return true;
     } else {
@@ -129,7 +129,7 @@ bool SPSolver::solve(ColumnPool& pool) {
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
-            pool.push_back(Column(prob, s));
+            pool.push_back(Column(prob, s, "labelling on the complete graph"));
         }
         return true;
     }
