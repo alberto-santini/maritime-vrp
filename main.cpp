@@ -58,6 +58,13 @@ int main() {
             
             if(!infeasible) {
                 cout << "We are optimal!" << endl;
+                cout << "Selected columns: " << endl;
+                for(int i = 0; i < sol.variables.size(); i++) {
+                    if(sol.variables[i] > numeric_limits<float>::epsilon()) {
+                        cout << "Selected with theta: " << sol.variables[i] << endl;
+                        prob.graphs.at(pool[i].sol.vessel_class).print_path(pool[i].sol.path);
+                    }
+                }
             }
             
             optimal = true;
