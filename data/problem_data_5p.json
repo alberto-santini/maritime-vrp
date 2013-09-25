@@ -59,7 +59,7 @@
         "name":             "FIRAU",
         "hub":              false,
         "pickup_dem":       10,
-        "delivery_dem":     20,
+        "delivery_dem":     50,
         "allowed_vc":       [true, true],
         "calling_fee":      [1.5, 0.3],
         "pickup_trans":     84,

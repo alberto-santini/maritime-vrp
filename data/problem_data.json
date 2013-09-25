@@ -43,7 +43,7 @@
         "name":             "DKAAR",
         "hub":              false,
         "pickup_dem":       45,
-        "delivery_dem":     15,
+        "delivery_dem":     35,
         "allowed_vc":       [true, true],
         "calling_fee":      [2.5, 0.5],
         "pickup_trans":     84,
