@@ -24,9 +24,9 @@ public:
           const int qd,
           const int n,
           const float c,
-          PortDuals& port_duals,
-          const float vc_dual,
-          const int upper_bound) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c), port_duals(port_duals), vc_dual(vc_dual), upper_bound(upper_bound) {}
+          PortDuals& pd,
+          const float vd,
+          const int upper_bound) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c), port_duals(pd), vc_dual(vd), upper_bound(upper_bound) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;
