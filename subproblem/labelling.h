@@ -16,17 +16,11 @@ public:
     int             q_deliverable;
     int             n_visited;
     float           cost;
-    PortDuals&      port_duals;
-    float           vc_dual;
-    int             upper_bound;
     
     Label(const int qp,
           const int qd,
           const int n,
-          const float c,
-          PortDuals& pd,
-          const float vd,
-          const int upper_bound) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c), port_duals(pd), vc_dual(vd), upper_bound(upper_bound) {}
+          const float c) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;

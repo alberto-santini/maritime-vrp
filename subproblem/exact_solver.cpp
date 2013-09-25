@@ -14,8 +14,6 @@ vector<Solution> ExactSolver::solve() const {
     ArcIdFunctor af(g);
     
     std::shared_ptr<VesselClass> vc = g.vessel_class;
-    PortDuals pd = g.port_duals;
-    float vd = g.vc_dual;
     
     clock_t cl_start = clock();
     
@@ -27,7 +25,7 @@ vector<Solution> ExactSolver::solve() const {
         g.h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0, 0, pd, vd, g.n_port_ub()),
+        Label(vc->capacity, vc->capacity, 0, 0),
         LabelExtender(),
         Dominance(),
         allocator<r_c_shortest_paths_label<BGraph, Label>>(),

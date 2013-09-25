@@ -38,16 +38,15 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     
     new_label.n_visited = label.n_visited + (n_dest.n_type == NodeType::REGULAR_PORT ? 1 : 0);
     
-    float dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? label.port_duals.at(n_dest.port).first : label.port_duals.at(n_dest.port).second) : label.vc_dual);
+    float dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
     
     new_label.cost = label.cost + graph[e]->cost - dual;
-    new_label.port_duals = label.port_duals;
-    new_label.vc_dual = label.vc_dual;
-    new_label.upper_bound = label.upper_bound;
+    
+    int up_bound = graph[graph_bundle].pu_upper_bound + graph[graph_bundle].de_upper_bound;
     
     bool ext = ( label.q_pickupable >= n_dest.pu_demand() &&
                  label.q_deliverable >= n_dest.de_demand() &&
-                 (n_dest.n_type == NodeType::H2 || label.n_visited < label.upper_bound));
+                 (n_dest.n_type == NodeType::H2 || label.n_visited < up_bound));
     
     return ext;
 }

@@ -79,8 +79,8 @@ void Graph::prepare_for_labelling() {
         }
     }
     
-    pu_upper_bound = Knapsack::solve(pickup_demands, vessel_class->capacity);
-    de_upper_bound = Knapsack::solve(delivery_demands, vessel_class->capacity);
+    graph[graph_bundle].pu_upper_bound = Knapsack::solve(pickup_demands, vessel_class->capacity);
+    graph[graph_bundle].de_upper_bound = Knapsack::solve(delivery_demands, vessel_class->capacity);
     
     i = 0;
     pair<eit, eit> ep;
@@ -102,7 +102,7 @@ void Graph::unite_ports(VisitRule vr, Graph& dest) const {
     }
     
     string new_name = name + " uniting " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
+    dest = Graph(graph, vessel_class, new_name);
     
     pair<vit, vit> vp;
     for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
@@ -147,7 +147,7 @@ void Graph::separate_ports(VisitRule vr, Graph& dest) const {
     }
     
     string new_name = name + " separating " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
+    dest = Graph(graph, vessel_class, new_name);
 
     pair<vit, vit> vp;
     for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
@@ -172,7 +172,7 @@ void Graph::separate_ports(VisitRule vr, Graph& dest) const {
 void Graph::reduce_graph(const float lambda, Graph& dest) const {
     float cost_limit = lambda * max_dual_prize();
     string new_name = name + " reduced for arc cost < " + to_string(cost_limit);
-    dest = Graph(graph, vessel_class, new_name, port_duals, vc_dual);
+    dest = Graph(graph, vessel_class, new_name);
     
     eit ei, ei_end, ei_next;
     tie(ei, ei_end) = edges(dest.graph);
@@ -189,7 +189,7 @@ void Graph::reduce_graph(const float lambda, Graph& dest) const {
 float Graph::max_dual_prize() const {
     float max_prize = 0;
 
-    for(const auto& pp : port_duals) {
+    for(const auto& pp : graph[graph_bundle].port_duals) {
         max_prize = max(max_prize, pp.second.first);
         max_prize = max(max_prize, pp.second.second);
     }
@@ -222,12 +222,12 @@ float Graph::calculate_cost(const Path& p) const {
 float Graph::dual_of(const Node n) const {
     if(n.n_type == NodeType::REGULAR_PORT) {
         if(n.pu_type == PickupType::PICKUP) {
-            return port_duals.at(n.port).first;
+            return graph[graph_bundle].port_duals.at(n.port).first;
         } else {
-            return port_duals.at(n.port).second;
+            return graph[graph_bundle].port_duals.at(n.port).second;
         }
     } else if(n.n_type == NodeType::H2) {
-        return vc_dual;
+        return graph[graph_bundle].vc_dual;
     }
     
     return 0;

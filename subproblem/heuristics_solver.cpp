@@ -56,7 +56,7 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
-            if(path.size() > g.n_port_ub() + 1) {
+            if(path.size() > g.graph[graph_bundle].pu_upper_bound + g.graph[graph_bundle].de_upper_bound + 1) {
                 break;
             }
             
@@ -127,7 +127,7 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
-            if(path.size() > g.n_port_ub() + 1) {
+            if(path.size() > g.graph[graph_bundle].pu_upper_bound + g.graph[graph_bundle].de_upper_bound + 1) {
                 break;
             }
             
@@ -170,7 +170,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
         red.h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0, 0, red.port_duals, red.vc_dual, red.n_port_ub()),
+        Label(vc->capacity, vc->capacity, 0, 0),
         LabelExtender(),
         Dominance(),
         allocator<r_c_shortest_paths_label<BGraph, Label>>(),

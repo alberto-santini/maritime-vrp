@@ -26,8 +26,8 @@ int main() {
     
     while(!optimal) {
         for(auto& vg : pb_prob.graphs) {
-            vg.second.port_duals = sol.port_duals;
-            vg.second.vc_dual = sol.vc_duals.at(vg.first);
+            vg.second.graph[graph_bundle].port_duals = sol.port_duals;
+            vg.second.graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
         }
         
         SPSolver sp_solv(pb_prob);

@@ -22,8 +22,8 @@ void BBNode::make_local_graphs() {
     }
     for(std::shared_ptr<VesselClass> vc : local_prob.data.vessel_classes) {
         Graph& g = local_prob.graphs.at(vc);
-        g.port_duals = port_duals;
-        g.vc_dual = vc_duals.at(vc);
+        g.graph[graph_bundle].port_duals = port_duals;
+        g.graph[graph_bundle].vc_dual = vc_duals.at(vc);
     }
 }
 
