@@ -4,7 +4,7 @@ CPPFLAGS=	-I/Users/alberto/Applications/boost \
 			-I/Users/alberto/Applications/cplex/include \
 			-I/Users/alberto/Applications/concert/include \
 			-I/Users/alberto/Applications/maersk \
-			-std=c++11 -O0 -DIL_STD -g
+			-std=c++11 -O3 -DIL_STD 
 
 LDFLAGS=	-L/Users/alberto/Applications/cplex/lib/x86-64_darwin/static_pic \
 			-L/Users/alberto/Applications/concert/lib/x86-64_darwin/static_pic \
