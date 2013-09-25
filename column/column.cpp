@@ -107,7 +107,7 @@ ostream& operator<<(ostream& out, const Column& c) {
     }
     out << "| ";
     for(int i = 0; i < c.vc_coeff.size(); i++) {
-        cout << c.vc_coeff[i] << " ";
+        out << c.vc_coeff[i] << " ";
     }
     out << "by " << c.created_by << " ";
     return out;

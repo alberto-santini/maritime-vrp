@@ -8,9 +8,9 @@
 int main() {
     Problem prob = Problem();
     
-    for(auto& vg : prob.graphs) {
-        cout << vg.second.name << " has " << num_vertices(vg.second.graph) << " vertices and " << num_edges(vg.second.graph) << " edges" << endl;
-    }
+    // for(auto& vg : prob.graphs) {
+    //     cout << vg.second.name << " has " << num_vertices(vg.second.graph) << " vertices and " << num_edges(vg.second.graph) << " edges" << endl;
+    // }
 
     Problem pb_prob = prob;
     ColumnPool pool;
@@ -20,7 +20,7 @@ int main() {
     
     MPSolver mp_solv(pb_prob);
     MPLinearSolution sol = mp_solv.solve_lp(pool);
-    cout << "Objective value: " << sol.obj_value << endl;
+    // cout << "Objective value: " << sol.obj_value << endl;
     
     bool optimal = false;
     
@@ -34,18 +34,18 @@ int main() {
         
         if(sp_solv.solve(pool)) {
             sol = mp_solv.solve_lp(pool);
-            cout << "Objective value: " << sol.obj_value << endl;
-            cout << "Columns: " << endl;
-            for(int i = 0; i < pool.size(); i++) {
-                cout << pool[i];
-                if(!pool[i].dummy) {
-                    cout << " VC: " << pool[i].sol.vessel_class->name << ";";
-                }
-                if(sol.variables[i] != 0) {
-                    cout << " selected with theta = " << sol.variables[i];
-                }
-                cout << endl;
-            }
+            // cout << "Objective value: " << sol.obj_value << endl;
+            // cout << "Columns: " << endl;
+            // for(int i = 0; i < pool.size(); i++) {
+            //     cout << pool[i];
+            //     if(!pool[i].dummy) {
+            //         cout << " VC: " << pool[i].sol.vessel_class->name << ";";
+            //     }
+            //     if(sol.variables[i] != 0) {
+            //         cout << " selected with theta = " << sol.variables[i];
+            //     }
+            //     cout << endl;
+            // }
         } else {
             bool infeasible = false;
             for(int i = 0; i < sol.variables.size(); i++) {
@@ -65,6 +65,7 @@ int main() {
                         prob.graphs.at(pool[i].sol.vessel_class).print_path(pool[i].sol.path);
                     }
                 }
+                cout << "Objective value: " << sol.obj_value << endl;
             }
             
             optimal = true;

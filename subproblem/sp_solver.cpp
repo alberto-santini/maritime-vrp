@@ -54,8 +54,8 @@ bool SPSolver::solve(ColumnPool& pool) {
         }
     }
     
-    cout << "Fast heuristics." << endl;
-    print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+    // cout << "Fast heuristics." << endl;
+    // print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
@@ -91,8 +91,8 @@ bool SPSolver::solve(ColumnPool& pool) {
         lambda += prob.params.lambda_inc;
     }
     
-    cout << "Labelling on the reduced graph." << endl;
-    print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+    // cout << "Labelling on the reduced graph." << endl;
+    // print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
@@ -124,8 +124,8 @@ bool SPSolver::solve(ColumnPool& pool) {
         }
     }
     
-    cout << "Labelling on the complete graph." << endl;
-    print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+    // cout << "Labelling on the complete graph." << endl;
+    // print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {

@@ -33,7 +33,7 @@ vector<Solution> ExactSolver::solve() const {
     );
         
     clock_t cl_end = clock();
-    cout << "Time elapsed (on complete graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
+    // cout << "Time elapsed (on complete graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
         
     for(int i = 0; i < optimal_paths.size(); i++) {
         sols.push_back(Solution(optimal_paths[i], g.calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc));

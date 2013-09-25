@@ -5,6 +5,8 @@
 #include <masterproblem/mp_solver.h>
 
 MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
+    clock_t cl_start = clock();
+    
     IloEnv env;
     IloModel model(env);
     
@@ -47,14 +49,17 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     model.add(vc_constr);
     
     IloCplex cplex(model);
+    cplex.setOut(env.getNullStream());
     
+    clock_t cl_startsolv = clock();
     cplex.solve();
+    clock_t cl_endsolv = clock();
     
     float obj_value = cplex.getObjValue();
     
     IloNumArray values(env);
     cplex.getDuals(values, port_constr);
-    cout << "Port duals: " << values << endl;
+    // cout << "Port duals: " << values << endl;
     
     PortDuals port_duals;
     for(int i = 1; i <= (values.getSize() / 2); i++) {
@@ -63,7 +68,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     }
     
     cplex.getDuals(values, vc_constr);
-    cout << "Vessel class duals: " << values << endl;
+    // cout << "Vessel class duals: " << values << endl;
     
     VcDuals vc_duals;
     for(int i = 0; i < values.getSize(); i++) {
@@ -79,6 +84,13 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     
     values.end();
     env.end();
+    
+    clock_t cl_end= clock();
+    
+    // cout << "Time to solve LP: " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << endl;
+    // cout << "\t- Time spent preparing & adding columns: " << (double(cl_startsolv - cl_start) / CLOCKS_PER_SEC) << endl;
+    // cout << "\t- Actual time spent by the solver: " << (double(cl_endsolv - cl_startsolv) / CLOCKS_PER_SEC) << endl;
+    // cout << "\t- Time spent in retrieving results: " << (double(cl_end - cl_endsolv) / CLOCKS_PER_SEC) << endl;
     
     return MPLinearSolution(obj_value, port_duals, vc_duals, variables);
 }

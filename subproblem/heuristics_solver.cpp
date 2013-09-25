@@ -178,7 +178,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     );
         
     clock_t cl_end = clock();
-    cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red.graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
+    // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red.graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(int i = 0; i < optimal_paths.size(); i++) {
         Path og_path = g.transfer_path(optimal_paths[i], red);
