@@ -55,12 +55,16 @@ void Column::make_dummy(const float huge_cost) {
 }
 
 bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
-    const Graph& g = prob.graphs.at(sol.vessel_class);
+    if(dummy) {
+        return true;
+    }
     
+    const Graph& g = prob.graphs.at(sol.vessel_class);
+
     for(const Edge& e : sol.path) {
         Node orig = *g.graph[source(e, g.graph)];
         Node dest = *g.graph[target(e, g.graph)];
-        
+    
         /*  If orig~vr.first and !dest~vr.second OR
                !orig~vr.first and dest~vr.second
             then the path is not compatible! */
@@ -73,6 +77,10 @@ bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
 }
 
 bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
+    if(dummy) {
+        return true;
+    }
+    
     const Graph& g = prob.graphs.at(sol.vessel_class);
     
     for(const Edge& e : sol.path) {
@@ -89,6 +97,10 @@ bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
 }
 
 Column Column::transfer_to(const Problem& other_prob) const {
+    if(dummy) {
+        return *this;
+    }
+    
     const Graph& other_g = other_prob.graphs.at(sol.vessel_class);
     const Graph& my_g = prob.graphs.at(sol.vessel_class);
     
