@@ -63,10 +63,13 @@ using std::remove;
 using std::string;
 using std::to_string;
 #include <unordered_map>
+// std::unordered_map could confilct with boost::
 #include <queue>
 using std::priority_queue;
-// std::unordered_map could confilct with boost::
-
+#include <tuple>
+// std::tuple could conflict with boost::
+using std::make_tuple;
+using std::get;
 
 // CPLEX
 #include <ilcplex/ilocplex.h>
