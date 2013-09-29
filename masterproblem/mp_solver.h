@@ -9,6 +9,9 @@
 #include <base/problem.h>
 #include <column/column_pool.h>
 #include <masterproblem/mp_linear_solution.h>
+#include <masterproblem/mp_integer_solution.h>
+
+typedef std::tuple<IloEnv, IloNumVarArray, IloRangeArray, IloRangeArray, IloCplex> IloData;
 
 class MPSolver {
 public:
@@ -17,6 +20,10 @@ public:
     MPSolver(const Problem& prob) : prob(prob) {}
     
     MPLinearSolution solve_lp(const ColumnPool& pool) const;
+    MPIntegerSolution solve_mip(const ColumnPool& pool) const;
+    
+private:
+    IloData solve(const ColumnPool& pool, const bool linear) const;
 };
 
 #endif

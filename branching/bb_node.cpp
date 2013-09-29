@@ -1,29 +1,25 @@
+//  Created by Alberto Santini on 18/09/13.
+//  Copyright (c) 2013 Alberto Santini. All rights reserved.
+//
+
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const Problem& prob, const Problem local_prob, ColumnPool& pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const PortDuals port_duals, const VcDuals vc_duals) : prob(prob), local_prob(local_prob), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), port_duals(port_duals), vc_duals(vc_duals) {
+BBNode::BBNode(const Problem& prob, const Problem local_prob, ColumnPool& pool, const ColumnPool local_pool, const VisitRule unite_rule, const VisitRule separate_rule) : prob(prob), local_prob(local_prob), pool(pool), local_pool(local_pool), unite_rule(unite_rule), separate_rule(separate_rule) {
     make_local_graphs();
-}
-
-void BBNode::populate_pool() {
     remove_incompatible_columns();
-    generate_nrc_columns();
 }
 
 void BBNode::make_local_graphs() {
-    for(const VisitRule& vr : unite_rules) {
-        std::shared_ptr<VesselClass> vc = vr.first->vessel_class;
-        Graph& g = local_prob.graphs.at(vc);
-        g.unite_ports(vr, g);
+    if(unite_rule.first != nullptr) {
+        // Unite rule applies
+        Graph& g = local_prob.graphs.at(unite_rule.first->vessel_class);
+        g.unite_ports(unite_rule, g);
     }
-    for(const VisitRule& vr : separate_rules) {
-        std::shared_ptr<VesselClass> vc = vr.first->vessel_class;
-        Graph& g = local_prob.graphs.at(vc);
-        g.separate_ports(vr, g);
-    }
-    for(std::shared_ptr<VesselClass> vc : local_prob.data.vessel_classes) {
-        Graph& g = local_prob.graphs.at(vc);
-        g.graph[graph_bundle].port_duals = port_duals;
-        g.graph[graph_bundle].vc_dual = vc_duals.at(vc);
+
+    if(separate_rule.first != nullptr) {
+        // Separate rule applies
+        Graph& g = local_prob.graphs.at(separate_rule.first->vessel_class);
+        g.separate_ports(separate_rule, g);
     }
 }
 
@@ -31,43 +27,65 @@ void BBNode::remove_incompatible_columns() {
     ColumnPool new_local_pool;
     
     for(const Column& c : local_pool) {
-        bool compatible = true;
-        
-        for(const VisitRule& vr : unite_rules) {
-            if(!c.is_compatible_with_unite_rule(vr)) {
-                compatible = false;
-                break;
-            }
+        if(c.is_compatible_with_unite_rule(unite_rule) && c.is_compatible_with_separate_rule(separate_rule)) {
+            new_local_pool.push_back(c.transfer_to(local_prob));
         }
-        
-        if(!compatible) {
-            break;
-        }
-        
-        for(const VisitRule& vr : separate_rules) {
-            if(!c.is_compatible_with_separate_rule(vr)) {
-                compatible = false;
-                break;
-            }
-        }
-        
-        if(!compatible) {
-            break;
-        }
-        
-        new_local_pool.push_back(c.transfer_to(local_prob));
     }
     
     local_pool = new_local_pool;
 }
 
-void BBNode::generate_nrc_columns() {
-    ColumnPool nrc_columns = local_pool;
-    SPSolver solv(local_prob);
-    solv.solve(nrc_columns);
+void BBNode::solve() {
+    // Clear any eventual previous solutions
+    base_columns = vector<pair<Column, float>>();
+    sol_value = 0;
     
-    for(const Column c : nrc_columns) {
-        local_pool.push_back(c);
-        pool.push_back(c.transfer_to(prob));
+    MPSolver mp_solv(local_prob);
+    MPLinearSolution sol = mp_solv.solve_lp(local_pool);
+
+    bool node_explored = false;
+    while(!node_explored) {
+        for(auto& vg : local_prob.graphs) {
+            vg.second.graph[graph_bundle].port_duals = sol.port_duals;
+            vg.second.graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
+        }
+
+        SPSolver sp_solv(local_prob);
+        bool sp_found_columns;
+
+        sp_found_columns = sp_solv.solve(local_pool);
+
+        if(sp_found_columns) {
+            // If new columns are found, solve the LP again
+            sol = mp_solv.solve_lp(local_pool);
+        } else {
+            // Otherwise, the exploration is done
+            sol_value = sol.obj_value;
+
+            for(int i = 0; i < sol.variables.size(); i++) {
+                if(sol.variables[i] > BBNode::cplex_epsilon) {
+                    base_columns.push_back(make_pair(local_pool[i].transfer_to(prob), sol.variables[i]));
+                }
+            }
+
+            node_explored = true;
+        }
+    }
+}
+
+void BBNode::solve_integer() {
+    // Clear any eventual previous solutions
+    base_columns = vector<pair<Column, float>>();
+    sol_value = 0;
+    
+    MPSolver mp_solv(local_prob);
+    MPIntegerSolution sol = mp_solv.solve_mip(local_pool);
+
+    sol_value = sol.obj_value;
+
+    for(int i = 0; i < sol.variables.size(); i++) {
+        if(sol.variables[i] > BBNode::cplex_epsilon) {
+            base_columns.push_back(make_pair(local_pool[i].transfer_to(prob), sol.variables[i]));
+        }
     }
 }

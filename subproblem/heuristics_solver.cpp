@@ -20,7 +20,7 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
                 
         while(current != h2) {
             vector<EdgeWithCost> out_e;
-            
+                        
             pair<oeit, oeit> ep;
             for(ep = out_edges(current, g.graph); ep.first != ep.second; ++ep.first) {
                 Node n_dest = *g.graph[target(*ep.first, g.graph)];

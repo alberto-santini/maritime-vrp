@@ -32,7 +32,7 @@ bool SPSolver::solve(ColumnPool& pool) {
     for(vcit = prob.data.vessel_classes.begin(); vcit != prob.data.vessel_classes.end(); ++vcit) {
         const Graph& g = prob.graphs.at(*vcit);
         HeuristicsSolver hsolv(prob.params, g);
-                
+
         vector<Solution> fast_fwd_sols = hsolv.solve_fast_forward();
         vector<Solution> fast_bwd_sols = hsolv.solve_fast_backward();
         
@@ -53,7 +53,7 @@ bool SPSolver::solve(ColumnPool& pool) {
             }
         }
     }
-    
+        
     // cout << "Fast heuristics." << endl;
     // print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     

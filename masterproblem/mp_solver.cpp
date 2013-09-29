@@ -4,9 +4,7 @@
 
 #include <masterproblem/mp_solver.h>
 
-MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
-    clock_t cl_start = clock();
-    
+IloData MPSolver::solve(const ColumnPool& pool, const bool linear) const {
     IloEnv env;
     IloModel model(env);
     
@@ -40,7 +38,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
             ilo_c += vc_constr[i](cit->vc_coeff[i]);
         }
         
-        IloNumVar v(ilo_c, 0, 1, IloNumVar::Float, ("theta_" + to_string(col_n++)).c_str());
+        IloNumVar v(ilo_c, 0, 1, (linear ? IloNumVar::Float : IloNumVar::Bool), ("theta_" + to_string(col_n++)).c_str());
         var.add(v);
     }
     
@@ -51,9 +49,21 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     IloCplex cplex(model);
     cplex.setOut(env.getNullStream());
     
-    clock_t cl_startsolv = clock();
     cplex.solve();
-    clock_t cl_endsolv = clock();
+    
+    return std::make_tuple(env, var, port_constr, vc_constr, cplex);
+}
+
+MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
+    IloEnv env;    
+    IloNumVarArray var;
+    IloRangeArray port_constr;
+    IloRangeArray vc_constr;
+    IloCplex cplex;
+    
+    int np = prob.data.num_ports;
+    
+    std::tie(env, var, port_constr, vc_constr, cplex) = solve(pool, true);
     
     float obj_value = cplex.getObjValue();
     
@@ -85,12 +95,32 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     values.end();
     env.end();
     
-    clock_t cl_end= clock();
-    
-    // cout << "Time to solve LP: " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << endl;
-    // cout << "\t- Time spent preparing & adding columns: " << (double(cl_startsolv - cl_start) / CLOCKS_PER_SEC) << endl;
-    // cout << "\t- Actual time spent by the solver: " << (double(cl_endsolv - cl_startsolv) / CLOCKS_PER_SEC) << endl;
-    // cout << "\t- Time spent in retrieving results: " << (double(cl_end - cl_endsolv) / CLOCKS_PER_SEC) << endl;
-    
     return MPLinearSolution(obj_value, port_duals, vc_duals, variables);
+}
+
+MPIntegerSolution MPSolver::solve_mip(const ColumnPool& pool) const {
+    IloEnv env;    
+    IloNumVarArray var;
+    IloRangeArray port_constr;
+    IloRangeArray vc_constr;
+    IloCplex cplex;
+    
+    int np = prob.data.num_ports;
+    
+    std::tie(env, var, port_constr, vc_constr, cplex) = solve(pool, false);
+    
+    float obj_value = cplex.getObjValue();
+    
+    IloNumArray values(env);
+    
+    cplex.getValues(values, var);
+    vector<float> variables;
+    for(int i = 0; i < values.getSize(); i++) {
+        variables.push_back(values[i]);
+    }
+    
+    values.end();
+    env.end();
+    
+    return MPIntegerSolution(obj_value, variables);
 }
