@@ -15,6 +15,7 @@ OBJS=		base/graph.o \
 			base/node.o \
 			base/problem.o \
 			branching/bb_node.o \
+			branching/cycle.o \
 			column/column.o \
 			column/solution.o \
 			masterproblem/mp_solver.o \
