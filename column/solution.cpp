@@ -4,12 +4,12 @@
 
 #include <column/solution.h>
 
-bool Solution::satisfies_capacity_constraints(const Graph& g) const {
+bool Solution::satisfies_capacity_constraints() const {
     int qty_delivered = 0;
     
     Path::const_reverse_iterator pit;
     for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g.graph[target(*pit, g.graph)];
+        Node n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             qty_delivered += n.de_demand();
         }
@@ -22,7 +22,7 @@ bool Solution::satisfies_capacity_constraints(const Graph& g) const {
     int used_capacity = qty_delivered;
     
     for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g.graph[target(*pit, g.graph)];
+        Node n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             used_capacity -= n.de_demand();
         }
@@ -38,6 +38,19 @@ bool Solution::satisfies_capacity_constraints(const Graph& g) const {
 }
 
 bool Solution::operator==(const Solution& other) const {
-    return (path == other.path && vessel_class == other.vessel_class &&
-            fabs(cost - other.cost) < numeric_limits<float>::epsilon());
+    if(other.vessel_class != vessel_class) {
+        return false;
+    }
+    if(other.path.size() != path.size()) {
+        return false;
+    }
+    if(fabs(cost - other.cost) > numeric_limits<float>::epsilon()) {
+        return false;
+    }
+    for(int i = 0; i < path.size(); i++) {
+        if(*other.g->graph[source(other.path[i], other.g->graph)] != *g->graph[source(path[i], g->graph)]) {
+            return false;
+        }
+    }
+    return true;
 }

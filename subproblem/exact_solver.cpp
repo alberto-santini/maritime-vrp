@@ -17,6 +17,7 @@ vector<Solution> ExactSolver::solve() const {
     
     clock_t cl_start = clock();
     
+    // Problem here! VVV
     r_c_shortest_paths(
         g.graph,
         make_property_map<Vertex>(nf),
@@ -36,7 +37,7 @@ vector<Solution> ExactSolver::solve() const {
     // cout << "Time elapsed (on complete graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
         
     for(int i = 0; i < optimal_paths.size(); i++) {
-        sols.push_back(Solution(optimal_paths[i], g.calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc));
+        sols.push_back(Solution(optimal_paths[i], g.calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
     }
     
     return sols;

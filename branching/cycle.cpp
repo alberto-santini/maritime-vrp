@@ -21,7 +21,6 @@ Path Cycle::shortest_cycle(const Path& route, const Graph& g) {
         int closing_port_position;
         
         Node current_node = *g.graph[target(route[i], g.graph)];
-        
         std::shared_ptr<Port> current_port = current_node.port;
         PickupType current_pu = current_node.pu_type;
         
@@ -51,11 +50,18 @@ Path Cycle::shortest_cycle(const Path& route, const Graph& g) {
         }
     }
     
-    reverse(cycles[shortest_cycle_idx].begin(), cycles[shortest_cycle_idx].end());
+    // reverse(cycles[shortest_cycle_idx].begin(), cycles[shortest_cycle_idx].end());
     
     if(num_cycles == 0) {
         return Path();
     } else {
         return cycles[shortest_cycle_idx];
     }
+}
+
+void Cycle::print_cycle(const Path& cycle, const Graph& g, ostream& out) {
+    for(const Edge& e : cycle) {
+        out << g.graph[source(e, g.graph)]->port->name << " -> ";
+    }
+    out << g.graph[target(cycle.back(), g.graph)]->port->name << endl;
 }

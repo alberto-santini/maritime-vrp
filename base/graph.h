@@ -26,7 +26,7 @@ typedef graph_traits<BGraph>::edge_descriptor Edge;
 typedef vector<Edge> Path;
 
 typedef pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
-typedef vector<pair<std::shared_ptr<Node>, std::shared_ptr<Node>>> VisitRuleList;
+typedef vector<VisitRule> VisitRuleList;
 
 class Graph {
 public:
@@ -40,7 +40,7 @@ public:
           const string name) : graph(graph), vessel_class(vessel_class), name(name) {}
     
     void print(const bool detailed = false) const;
-    void print_path(const Path& p) const;
+    void print_path(const Path& p, ostream& out = cerr) const;
     
     /*  The first item is true if the H1/h2 vertex has been found or false otherwise
         The second item is the vertex (in case it has been found) */

@@ -34,6 +34,7 @@ public:
     float de_demand() const;
     bool same_row_as(const Node& other) const;
     bool operator==(const Node& other) const;
+    bool operator!=(const Node& other) const { return !(*this == other); }
 };
 
 ostream& operator<<(ostream& out, const PickupType& pu);

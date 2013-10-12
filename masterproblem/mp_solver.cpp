@@ -14,15 +14,15 @@ IloData MPSolver::solve(const ColumnPool& pool, const bool linear) const {
     
     IloObjective obj = IloMinimize(env);
     
-    int np = prob.data.num_ports;
-    int nv = prob.data.num_vessel_classes;
+    int np = prob->data.num_ports;
+    int nv = prob->data.num_vessel_classes;
     
     for(int i = 1; i < np; i++) {
-        port_constr.add(IloRange(env, 1.0, IloInfinity)); // Pickup port
-        port_constr.add(IloRange(env, 1.0, IloInfinity)); // Delivery port
+        port_constr.add(IloRange(env, 1.0, (linear ? IloInfinity : 1.0))); // Pickup port
+        port_constr.add(IloRange(env, 1.0, (linear ? IloInfinity : 1.0))); // Delivery port
     }
     for(int i = 0; i < nv; i++) {
-        vc_constr.add(IloRange(env, -IloInfinity, prob.data.vessel_classes[i]->num_vessels));
+        vc_constr.add(IloRange(env, -IloInfinity, prob->data.vessel_classes[i]->num_vessels));
     }
     
     int col_n = 0;
@@ -49,7 +49,9 @@ IloData MPSolver::solve(const ColumnPool& pool, const bool linear) const {
     IloCplex cplex(model);
     cplex.setOut(env.getNullStream());
     
-    cplex.solve();
+    if(!cplex.solve()) {
+        throw runtime_error("Infeasible problem!");
+    }
     
     return std::make_tuple(env, var, port_constr, vc_constr, cplex);
 }
@@ -61,7 +63,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     IloRangeArray vc_constr;
     IloCplex cplex;
     
-    int np = prob.data.num_ports;
+    int np = prob->data.num_ports;
     
     std::tie(env, var, port_constr, vc_constr, cplex) = solve(pool, true);
     
@@ -73,7 +75,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     
     PortDuals port_duals;
     for(int i = 1; i <= (values.getSize() / 2); i++) {
-        std::shared_ptr<Port> p = prob.data.ports[i];
+        std::shared_ptr<Port> p = prob->data.ports[i];
         port_duals.emplace(p, make_pair(values[i - 1], values[np - 1 + i - 1]));
     }
     
@@ -82,7 +84,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     
     VcDuals vc_duals;
     for(int i = 0; i < values.getSize(); i++) {
-        std::shared_ptr<VesselClass> vc = prob.data.vessel_classes[i];
+        std::shared_ptr<VesselClass> vc = prob->data.vessel_classes[i];
         vc_duals.emplace(vc, values[i]);
     }
     
@@ -105,7 +107,7 @@ MPIntegerSolution MPSolver::solve_mip(const ColumnPool& pool) const {
     IloRangeArray vc_constr;
     IloCplex cplex;
     
-    int np = prob.data.num_ports;
+    int np = prob->data.num_ports;
     
     std::tie(env, var, port_constr, vc_constr, cplex) = solve(pool, false);
     

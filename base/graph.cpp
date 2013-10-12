@@ -31,10 +31,10 @@ void Graph::print(const bool detailed) const {
     }
 }
 
-void Graph::print_path(const Path& p) const {
+void Graph::print_path(const Path& p, ostream& out) const {
     Path::const_reverse_iterator pit;
     for(pit = p.rbegin(); pit != p.rend(); ++pit) {
-        cout << *graph[source(*pit, graph)] << " -> " << *graph[target(*pit, graph)] << endl;
+        out << *graph[source(*pit, graph)] << " -> " << *graph[target(*pit, graph)] << endl;
     }
 }
 

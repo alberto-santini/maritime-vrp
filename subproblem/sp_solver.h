@@ -13,12 +13,13 @@
 
 class SPSolver {
 public:
-    const Problem&  prob;
+    const std::shared_ptr<const Problem> prob;
+    const GraphMap& local_graphs;
     
-    SPSolver(const Problem& prob) : prob(prob) {}
+    SPSolver(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs) : prob(prob), local_graphs(local_graphs) {}
     
     /*  Returns true if new columns were added to the pool or false otherwise */
-    bool solve(ColumnPool& pool);
+    int solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool);
 };
 
 #endif

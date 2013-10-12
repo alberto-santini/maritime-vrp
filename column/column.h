@@ -11,7 +11,7 @@
 
 class Column {
 public:
-    const Problem&  prob;
+    std::shared_ptr<const Problem> prob;
     Solution        sol;
     float           obj_coeff;
     vector<float>   port_coeff;
@@ -19,9 +19,9 @@ public:
     bool            dummy;
     string          created_by;
     
-    Column(const Problem& prob) : prob(prob) {}
-    Column(const Problem& prob, const Solution sol, const string created_by);
-    Column(const Problem& prob,
+    Column(const std::shared_ptr<const Problem> prob) : prob(prob) {}
+    Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by);
+    Column(const std::shared_ptr<const Problem> prob,
            const Solution sol,
            const float obj_coeff,
            const vector<float> port_coeff,
@@ -29,14 +29,13 @@ public:
            const bool dummy,
            const string created_by) : prob(prob), sol(sol), obj_coeff(obj_coeff), port_coeff(port_coeff), vc_coeff(vc_coeff), dummy(dummy), created_by(created_by) {}
     ~Column() {}
-    void operator=(const Column& other);
     
     void make_dummy(const float huge_cost);
     
     bool is_compatible_with_unite_rule(VisitRule vr) const;
     bool is_compatible_with_separate_rule(VisitRule vr) const;
     
-    Column transfer_to(const Problem& other_prob) const;
+    bool has_cycles() const;
 };
 
 ostream& operator<<(ostream& out, const Column& c);

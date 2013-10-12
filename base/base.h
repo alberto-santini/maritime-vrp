@@ -5,6 +5,12 @@
 #ifndef BASE_H
 #define BASE_H
 
+#ifdef LOG
+#define PEDANTIC true
+#else
+#define PEDANTIC false
+#endif
+
 // Boost Graph
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -43,9 +49,12 @@ using std::make_pair;
 using std::runtime_error;
 #include <iostream>
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::setw;
 using std::ostream;
+using std::unitbuf;
+using std::setprecision;
 #include <limits>
 using std::numeric_limits;
 #include <algorithm>

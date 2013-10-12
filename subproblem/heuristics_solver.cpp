@@ -68,7 +68,7 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
         }
                 
         if(done) {
-            sols.push_back(Solution(path, tot_c, tot_rc, g.vessel_class));
+            sols.push_back(Solution(path, tot_c, tot_rc, g.vessel_class, g));
         }
     }
     
@@ -139,7 +139,7 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
         }
         
         if(done) {
-            sols.push_back(Solution(path, tot_c, tot_rc, g.vessel_class));
+            sols.push_back(Solution(path, tot_c, tot_rc, g.vessel_class, g));
         }
     }
     
@@ -182,7 +182,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
     
     for(int i = 0; i < optimal_paths.size(); i++) {
         Path og_path = g.transfer_path(optimal_paths[i], red);
-        sols.push_back(Solution(og_path, g.calculate_cost(og_path), optimal_labels[i].cost, vc));
+        sols.push_back(Solution(og_path, g.calculate_cost(og_path), optimal_labels[i].cost, vc, red));
     }
         
     return sols;
