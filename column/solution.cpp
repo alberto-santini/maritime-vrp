@@ -9,7 +9,7 @@ bool Solution::satisfies_capacity_constraints() const {
     
     Path::const_reverse_iterator pit;
     for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g->graph[target(*pit, g->graph)];
+        Node n = *g.graph[target(*pit, g.graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             qty_delivered += n.de_demand();
         }
@@ -22,7 +22,7 @@ bool Solution::satisfies_capacity_constraints() const {
     int used_capacity = qty_delivered;
     
     for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g->graph[target(*pit, g->graph)];
+        Node n = *g.graph[target(*pit, g.graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             used_capacity -= n.de_demand();
         }
@@ -48,7 +48,7 @@ bool Solution::operator==(const Solution& other) const {
         return false;
     }
     for(int i = 0; i < path.size(); i++) {
-        if(*other.g->graph[source(other.path[i], other.g->graph)] != *g->graph[source(path[i], g->graph)]) {
+        if(*other.g.graph[source(other.path[i], other.g.graph)] != *g.graph[source(path[i], g.graph)]) {
             return false;
         }
     }
