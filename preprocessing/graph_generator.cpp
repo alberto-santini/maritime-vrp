@@ -43,13 +43,13 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
             float distance = data.distances.at(make_pair(n_h1.port, p));
             float speed = sc.first, u_cost = sc.second;
             int arrival_time = 0 + ceil(distance / speed);
-            
+                        
             if(arrival_time >= data.num_times) {
                 continue;
             }
             
             int final_time_pu = GraphGenerator::final_time(data, p, arrival_time, PickupType::PICKUP);
-            
+                        
             if( (final_time_pu <= GraphGenerator::latest_departure(data, p, n_h2.port, vessel_class)) &&
                 (final_time_pu >= data.num_times - 1 - p->pickup_transit)) {
                 
@@ -61,7 +61,7 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
             }
             
             int final_time_de = GraphGenerator::final_time(data, p, arrival_time, PickupType::DELIVERY);
-            
+                        
             if( (final_time_de <= GraphGenerator::latest_departure(data, p, n_h2.port, vessel_class)) &&
                 (final_time_de <= p->delivery_transit)) {
                 
@@ -73,7 +73,7 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
             }
         }
     }
-        
+            
     /*  Add port-to-hub edges */
     for(std::shared_ptr<Port> p : data.ports) {
         if(p->hub) {
@@ -122,7 +122,7 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
             }
         }
     }
-            
+                
     /*  Add port-to-port edges */
     for(std::shared_ptr<Port> p : data.ports) {
         if(p->hub) {
@@ -217,7 +217,7 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
             }
         }
     }
-        
+            
     /*  Add delivery-to-pickup edges */
     pair<vit, vit> vp;
     for(vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
@@ -256,12 +256,12 @@ int GraphGenerator::final_time(const ProblemData& data, std::shared_ptr<Port> p,
     int ft_handling = arrival_time + (pu == PickupType::PICKUP ? p->pickup_handling : p->delivery_handling);
     int ft = ft_handling;
     bool free_from_tw = false;
-    
+        
     while(!free_from_tw) {
         free_from_tw = true;
         for(pair<int, int> tw : p->closing_time_windows) {
             int t1 = tw.first, t2 = tw.second;
-            if(arrival_time <= t2 && ft > t1) {
+            if(ft <= t2 && ft > t1) {
                 ft += (t2 - t1);
                 free_from_tw = false;
             }
@@ -290,13 +290,13 @@ void GraphGenerator::create_edge(std::shared_ptr<Port> origin_p, const PickupTyp
     tie(origin_found, origin_v) = g->get_vertex(origin_p, origin_pu, origin_t);
     
     if(!origin_found) {
-        throw runtime_error("Can't find the origin vertex");
+        throw runtime_error("Can't find the origin vertex: " + origin_p->name + " at time " + to_string(origin_t));
     }
     
     tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_t);
     
     if(!destination_found) {
-        throw runtime_error("Can't find the destination vertex");
+        throw runtime_error("Can't find the destination vertex: " + destination_p->name + " at time " + to_string(destination_t));
     }
     
     Edge e = add_edge(origin_v, destination_v, g->graph).first;
