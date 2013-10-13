@@ -6,8 +6,6 @@
 
 BBTree::BBTree() {
     prob = make_shared<Problem>();
-    GraphMap local_graphs = prob->graphs;
-    
     ub = numeric_limits<float>::max();
 
     Column dummy(prob);
@@ -15,9 +13,10 @@ BBTree::BBTree() {
     pool = make_shared<ColumnPool>();
     pool->push_back(dummy);
 
-    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, local_graphs, pool, *pool, VisitRuleList(), VisitRuleList(), numeric_limits<float>::max());
+    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), numeric_limits<float>::max());
 
     unexplored_nodes.push(root_node);
+    
     node_attaining_ub = root_node;
     node_bound_type = BoundType::FROM_LP;
 }
@@ -55,7 +54,7 @@ void BBTree::explore_tree() {
         Cycles cycles;
         for(const auto& cc : current_node->base_columns) {
             if(!cc.first.dummy) {
-                const Graph& g = cc.first.sol.g;
+                std::shared_ptr<const Graph> g = cc.first.sol.g;
                 Path cycle = Cycle::shortest_cycle(cc.first.sol.path, g);
                 if(!cycle.empty()) {
                     cycles.push_back(make_pair(cycle, g));
@@ -110,43 +109,43 @@ void BBTree::explore_tree() {
         cout << "*** OBTAINED FROM LP ***" << endl;
         for(const auto& cc : node_attaining_ub->base_columns) {
             cout << cc.first << " selected with coefficient " << cc.second << endl;
-            cc.first.sol.g.print_path(cc.first.sol.path, cout);
+            cc.first.sol.g->print_path(cc.first.sol.path, cout);
         }
     } else {
         // UB was attained as MIP solution
         cout << "*** OBTAINED FROM MIP ***" << endl;
         for(const auto& cc : node_attaining_ub->mip_base_columns) {
             cout << cc.first << " selected with coefficient " << cc.second << endl;
-            cc.first.sol.g.print_path(cc.first.sol.path, cout);
+            cc.first.sol.g->print_path(cc.first.sol.path, cout);
         }
     }
 }
 
 void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode> current_node) {    
     Cycles::const_iterator shortest = min_element(cycles.begin(), cycles.end(),
-        [] (const pair<Path, const Graph&>& c1, const pair<Path, const Graph&>& c2) {
+        [] (const pair<Path, const std::shared_ptr<const Graph>>& c1, const pair<Path, const std::shared_ptr<const Graph>>& c2) {
             return(c1.first.size() < c2.first.size());
         });
 
-    const Graph& g = shortest->second;    
+    const std::shared_ptr<const Graph> g = shortest->second;    
     Path::const_iterator fix_forb, fix_impo;
     VisitRuleList unite_rules, separate_rules;
 
-    cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc " << g.vessel_class->name << ": ";
+    cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc " << g->vessel_class->name << ": ";
     Cycle::print_cycle(shortest->first, g, cerr);
 
     for(fix_forb = shortest->first.begin(); fix_forb != shortest->first.end(); ++fix_forb) {
         cerr << "\t\t\tCreating child node:" << endl;
         
         for(fix_impo = shortest->first.begin(); fix_impo != fix_forb; ++fix_impo) {
-            std::shared_ptr<Node> n_source_impo = g.graph[source(*fix_impo, g.graph)];
-            std::shared_ptr<Node> n_target_impo = g.graph[target(*fix_impo, g.graph)];
+            std::shared_ptr<Node> n_source_impo = g->graph[source(*fix_impo, g->graph)];
+            std::shared_ptr<Node> n_target_impo = g->graph[target(*fix_impo, g->graph)];
             cerr << "\t\t\t\tForcing the traversal of " << n_source_impo->port->name << " -> " << n_target_impo->port->name << endl;
             unite_rules.push_back(make_pair(n_source_impo, n_target_impo));
         }
         
-        std::shared_ptr<Node> n_source_forb = g.graph[source(*fix_forb, g.graph)];
-        std::shared_ptr<Node> n_target_forb = g.graph[target(*fix_forb, g.graph)];
+        std::shared_ptr<Node> n_source_forb = g->graph[source(*fix_forb, g->graph)];
+        std::shared_ptr<Node> n_target_forb = g->graph[target(*fix_forb, g->graph)];
         cerr << "\t\t\t\tForbidding the traversal of " << n_source_forb->port->name << " -> " << n_target_forb->port->name << endl;
         separate_rules.push_back(make_pair(n_source_forb, n_target_forb));
         
@@ -172,20 +171,20 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
         });
     
     for(const Edge& e : cc_it->first.sol.path) {
-        const Graph& g = cc_it->first.sol.g;
-        std::shared_ptr<Node> n = g.graph[target(e, g.graph)];
+        const std::shared_ptr<const Graph> g = cc_it->first.sol.g;
+        std::shared_ptr<Node> n = g->graph[target(e, g->graph)];
         if(n->n_type != NodeType::REGULAR_PORT) {
             continue;
         }
         for(const auto& cc : current_node->base_columns) {
             for(const Edge& e_inner : cc.first.sol.path) {
-                const Graph& g_inner = cc.first.sol.g;
-                std::shared_ptr<Node> n_inner = g_inner.graph[target(e_inner, g_inner.graph)];
+                const std::shared_ptr<const Graph> g_inner = cc.first.sol.g;
+                std::shared_ptr<Node> n_inner = g_inner->graph[target(e_inner, g_inner->graph)];
                 if(n_inner->same_row_as(*n)) {
-                    std::shared_ptr<Node> n_src = g.graph[source(e, g.graph)];
-                    std::shared_ptr<Node> n_inner_src = g_inner.graph[source(e_inner, g_inner.graph)];
+                    std::shared_ptr<Node> n_src = g->graph[source(e, g->graph)];
+                    std::shared_ptr<Node> n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
                     if(!n_inner_src->same_row_as(*n_src)) {
-                        cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g.vessel_class->name << ":" << endl;
+                        cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << endl;
                         VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s;
                         unite_rules_u.push_back(make_pair(n_src, n));
                         separate_rules_s.push_back(make_pair(n_src, n));

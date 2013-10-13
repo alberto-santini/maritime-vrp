@@ -8,11 +8,11 @@
 #include <base/base.h>
 #include <base/graph.h>
 
-typedef vector<pair<Path, const Graph&>> Cycles;
+typedef vector<pair<Path, const std::shared_ptr<const Graph>>> Cycles;
 
 namespace Cycle {
-    Path shortest_cycle(const Path& route, const Graph& g);
-    void print_cycle(const Path& cycle, const Graph& g, ostream& out = cerr);
+    Path shortest_cycle(const Path& route, const std::shared_ptr<const Graph> g);
+    void print_cycle(const Path& cycle, const std::shared_ptr<const Graph> g, ostream& out = cerr);
 }
 
 #endif

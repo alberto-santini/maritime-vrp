@@ -13,17 +13,17 @@ vector<Solution> ExactSolver::solve() const {
     NodeIdFunctor nf(g);
     ArcIdFunctor af(g);
     
-    std::shared_ptr<VesselClass> vc = g.vessel_class;
+    std::shared_ptr<VesselClass> vc = g->vessel_class;
     
     clock_t cl_start = clock();
     
     // Problem here! VVV
     r_c_shortest_paths(
-        g.graph,
+        g->graph,
         make_property_map<Vertex>(nf),
         make_property_map<Edge>(af),
-        g.h1().second,
-        g.h2().second,
+        g->h1().second,
+        g->h2().second,
         optimal_paths,
         optimal_labels,
         Label(vc->capacity, vc->capacity, 0, 0),
@@ -37,7 +37,7 @@ vector<Solution> ExactSolver::solve() const {
     // cout << "Time elapsed (on complete graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
         
     for(int i = 0; i < optimal_paths.size(); i++) {
-        sols.push_back(Solution(optimal_paths[i], g.calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+        sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
     }
     
     return sols;

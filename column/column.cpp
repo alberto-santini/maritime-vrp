@@ -5,10 +5,10 @@
 #include <column/column.h>
 
 Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by) : prob(prob), created_by(created_by) {
-    const Graph& g = prob->graphs.at(sol.vessel_class);
-    const Graph& node_g = sol.g;
+    const std::shared_ptr<const Graph> g = prob->graphs.at(sol.vessel_class);
+    const std::shared_ptr<const Graph> node_g = sol.g;
     
-    Path global_p = g.transfer_path(sol.path, node_g);
+    Path global_p = g->transfer_path(sol.path, node_g);
     Solution global_sol(global_p, sol.cost, sol.reduced_cost, sol.vessel_class, g);
     
     obj_coeff = global_sol.cost;    
@@ -20,7 +20,7 @@ Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, co
         "2 *" to create one coefficient for (port, pu) and one for (port, de) */
     port_coeff = vector<float>(2 * (np - 1), 0);
     for(const Edge& e : sol.path) {
-        Node n = *g.graph[target(e, g.graph)];
+        Node n = *g->graph[target(e, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT) {
             for(int i = 1; i < np; i++) {
                 if(n.port == prob->data.ports[i]) {
@@ -56,11 +56,11 @@ bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
         return true;
     }
     
-    const Graph& g = sol.g;
+    const std::shared_ptr<const Graph> g = sol.g;
     
     for(const Edge& e : sol.path) {
-        Node orig = *g.graph[source(e, g.graph)];
-        Node dest = *g.graph[target(e, g.graph)];
+        Node orig = *g->graph[source(e, g->graph)];
+        Node dest = *g->graph[target(e, g->graph)];
     
         /*  If orig~vr.first and !dest~vr.second OR
                !orig~vr.first and dest~vr.second
@@ -78,11 +78,11 @@ bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
         return true;
     }
     
-    const Graph& g = sol.g;
+    const std::shared_ptr<const Graph> g = sol.g;
     
     for(const Edge& e : sol.path) {
-        Node orig = *g.graph[source(e, g.graph)];
-        Node dest = *g.graph[target(e, g.graph)];
+        Node orig = *g->graph[source(e, g->graph)];
+        Node dest = *g->graph[target(e, g->graph)];
         
         /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
         if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {

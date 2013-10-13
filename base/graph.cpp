@@ -89,7 +89,7 @@ void Graph::prepare_for_labelling() {
     }
 }
 
-void Graph::unite_ports(VisitRule vr, Graph& dest) const {
+void Graph::unite_ports(VisitRule vr) {
     std::shared_ptr<Node> n1, n2;
     tie(n1, n2) = vr;
     
@@ -101,40 +101,39 @@ void Graph::unite_ports(VisitRule vr, Graph& dest) const {
         throw runtime_error("Trying to unite ports of nodes not both in this graph");
     }
     
-    string new_name = name + " uniting " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name);
+    name = name + " uniting " + n1->port->name + " with " + n2->port->name;
     
     pair<vit, vit> vp;
-    for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
+    for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
         Vertex v1 = *vp.first;
         
-        if(dest.graph[v1]->same_row_as(*n1)) {
+        if(graph[v1]->same_row_as(*n1)) {
             oeit ei, ei_end, ei_next;
-            tie(ei, ei_end) = out_edges(v1, dest.graph);
+            tie(ei, ei_end) = out_edges(v1, graph);
             for(ei_next = ei; ei != ei_end; ei = ei_next) {
                 ++ei_next;
-                Vertex v2 = target(*ei, dest.graph);
-                if(!dest.graph[v2]->same_row_as(*n2)) {
-                    remove_edge(*ei, dest.graph);
+                Vertex v2 = target(*ei, graph);
+                if(!graph[v2]->same_row_as(*n2)) {
+                    remove_edge(*ei, graph);
                 }
             }
-        } else if(dest.graph[v1]->same_row_as(*n2)) {
+        } else if(graph[v1]->same_row_as(*n2)) {
             ieit ei, ei_end, ei_next;
-            tie(ei, ei_end) = in_edges(v1, dest.graph);
+            tie(ei, ei_end) = in_edges(v1, graph);
             for(ei_next = ei; ei != ei_end; ei = ei_next) {
                 ++ei_next;
-                Vertex v2 = source(*ei, dest.graph);
-                if(!dest.graph[v2]->same_row_as(*n1)) {
-                    remove_edge(*ei, dest.graph);
+                Vertex v2 = source(*ei, graph);
+                if(!graph[v2]->same_row_as(*n1)) {
+                    remove_edge(*ei, graph);
                 }
             }
         }
     }
     
-    dest.prepare_for_labelling();
+    prepare_for_labelling();
 }
 
-void Graph::separate_ports(VisitRule vr, Graph& dest) const {
+void Graph::separate_ports(VisitRule vr) {
     std::shared_ptr<Node> n1, n2;
     tie(n1, n2) = vr;
     
@@ -146,44 +145,126 @@ void Graph::separate_ports(VisitRule vr, Graph& dest) const {
         throw runtime_error("Trying to unite ports of nodes not both in this graph");
     }
     
-    string new_name = name + " separating " + n1->port->name + " with " + n2->port->name;
-    dest = Graph(graph, vessel_class, new_name);
+    name = name + " separating " + n1->port->name + " with " + n2->port->name;
 
     pair<vit, vit> vp;
-    for(vp = vertices(dest.graph); vp.first != vp.second; ++vp.first) {
+    for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
         Vertex v1 = *vp.first;
         
-        if(dest.graph[v1]->same_row_as(*n1)) {
+        if(graph[v1]->same_row_as(*n1)) {
             oeit ei, ei_end, ei_next;
-            tie(ei, ei_end) = out_edges(v1, dest.graph);
+            tie(ei, ei_end) = out_edges(v1, graph);
             for(ei_next = ei; ei != ei_end; ei = ei_next) {
                 ++ei_next;
-                Vertex v2 = target(*ei, dest.graph);
-                if(dest.graph[v2]->same_row_as(*n2)) {
-                    remove_edge(*ei, dest.graph);
+                Vertex v2 = target(*ei, graph);
+                if(graph[v2]->same_row_as(*n2)) {
+                    remove_edge(*ei, graph);
                 }
             }
         }
     }
     
-    dest.prepare_for_labelling();
+    prepare_for_labelling();
 }
 
-void Graph::reduce_graph(const float lambda, Graph& dest) const {
+// std::shared_ptr<Graph> Graph::unite_ports(VisitRule vr) {
+//     std::shared_ptr<Node> n1, n2;
+//     tie(n1, n2) = vr;
+//     
+//     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
+//         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
+//     }
+//     
+//     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
+//         throw runtime_error("Trying to unite ports of nodes not both in this graph");
+//     }
+//     
+//     string new_name = name + " uniting " + n1->port->name + " with " + n2->port->name;
+//     std::shared_ptr<Graph> unite_graph = make_shared<Graph>(graph, vessel_class, new_name);
+//     
+//     pair<vit, vit> vp;
+//     for(vp = vertices(unite_graph->graph); vp.first != vp.second; ++vp.first) {
+//         Vertex v1 = *vp.first;
+//         
+//         if(unite_graph->graph[v1]->same_row_as(*n1)) {
+//             oeit ei, ei_end, ei_next;
+//             tie(ei, ei_end) = out_edges(v1, unite_graph->graph);
+//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                 ++ei_next;
+//                 Vertex v2 = target(*ei, unite_graph->graph);
+//                 if(!unite_graph->graph[v2]->same_row_as(*n2)) {
+//                     remove_edge(*ei, unite_graph->graph);
+//                 }
+//             }
+//         } else if(unite_graph->graph[v1]->same_row_as(*n2)) {
+//             ieit ei, ei_end, ei_next;
+//             tie(ei, ei_end) = in_edges(v1, unite_graph->graph);
+//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                 ++ei_next;
+//                 Vertex v2 = source(*ei, unite_graph->graph);
+//                 if(!unite_graph->graph[v2]->same_row_as(*n1)) {
+//                     remove_edge(*ei, unite_graph->graph);
+//                 }
+//             }
+//         }
+//     }
+//     
+//     unite_graph->prepare_for_labelling();
+//     return unite_graph;
+// }
+// 
+// std::shared_ptr<Graph> Graph::separate_ports(VisitRule vr) {
+//     std::shared_ptr<Node> n1, n2;
+//     tie(n1, n2) = vr;
+//     
+//     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
+//         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
+//     }
+//     
+//     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
+//         throw runtime_error("Trying to unite ports of nodes not both in this graph");
+//     }
+//     
+//     string new_name = name + " separating " + n1->port->name + " with " + n2->port->name;
+//     std::shared_ptr<Graph> separate_graph = make_shared<Graph>(graph, vessel_class, new_name);
+// 
+//     pair<vit, vit> vp;
+//     for(vp = vertices(separate_graph->graph); vp.first != vp.second; ++vp.first) {
+//         Vertex v1 = *vp.first;
+//         
+//         if(separate_graph->graph[v1]->same_row_as(*n1)) {
+//             oeit ei, ei_end, ei_next;
+//             tie(ei, ei_end) = out_edges(v1, separate_graph->graph);
+//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                 ++ei_next;
+//                 Vertex v2 = target(*ei, separate_graph->graph);
+//                 if(graph[v2]->same_row_as(*n2)) {
+//                     remove_edge(*ei, separate_graph->graph);
+//                 }
+//             }
+//         }
+//     }
+//     
+//     separate_graph->prepare_for_labelling();
+//     return separate_graph;
+// }
+
+std::shared_ptr<Graph> Graph::reduce_graph(const float lambda) const {
     float cost_limit = lambda * max_dual_prize();
     string new_name = name + " reduced for arc cost < " + to_string(cost_limit);
-    dest = Graph(graph, vessel_class, new_name);
+    std::shared_ptr<Graph> dest = make_shared<Graph>(graph, vessel_class, new_name);
     
     eit ei, ei_end, ei_next;
-    tie(ei, ei_end) = edges(dest.graph);
+    tie(ei, ei_end) = edges(dest->graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        if(dest.graph[*ei]->cost > cost_limit - numeric_limits<float>::epsilon()) {
-            remove_edge(*ei, dest.graph);
+        if(dest->graph[*ei]->cost > cost_limit - numeric_limits<float>::epsilon()) {
+            remove_edge(*ei, dest->graph);
         }
     }
     
-    dest.prepare_for_labelling();
+    dest->prepare_for_labelling();
+    return dest;
 }
 
 float Graph::max_dual_prize() const {
@@ -233,13 +314,13 @@ float Graph::dual_of(const Node n) const {
     return 0;
 }
 
-Path Graph::transfer_path(const Path& path, const Graph& subgraph) const {
+Path Graph::transfer_path(const Path& path, const std::shared_ptr<const Graph> subgraph) const {
     Path local_path;
     Path::const_iterator pit;
     for(pit = path.begin(); pit != path.end(); ++pit) {
         Edge e = *pit;
-        Node n_orig = *graph[source(e, graph)];
-        Node n_dest = *graph[target(e, graph)];
+        Node n_orig = *subgraph->graph[source(e, subgraph->graph)];
+        Node n_dest = *subgraph->graph[target(e, subgraph->graph)];
         
         bool o_found;
         Vertex local_orig;

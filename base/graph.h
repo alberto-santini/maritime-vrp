@@ -53,11 +53,11 @@ public:
     
     /*  Used in branching when we want to enforce that n2->port is [not] visited just
         after n1->port */
-    void unite_ports(VisitRule vr, Graph& dest) const;
-    void separate_ports(VisitRule vr, Graph& dest) const;
+    void unite_ports(VisitRule vr);
+    void separate_ports(VisitRule vr);
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
-    void reduce_graph(const float lambda, Graph& dest) const;
+    std::shared_ptr<Graph> reduce_graph(const float lambda) const;
 
     /*  The highest dual prize among all ports */
     float max_dual_prize() const;
@@ -74,7 +74,7 @@ public:
     
     /*  Transfers a path fro a subgraph to the current graph. Typically the subgraph
         is the reduced graph of the current graph. */
-    Path transfer_path(const Path& path, const Graph& subgraph) const;
+    Path transfer_path(const Path& path, const std::shared_ptr<const Graph> subgraph) const;
     
 private:
     pair<bool, Vertex> get_vertex_by_node_type(const NodeType n_type) const;

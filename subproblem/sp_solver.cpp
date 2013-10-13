@@ -32,7 +32,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     cerr << "@";
     
     for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-        const Graph& g = local_graphs.at(*vcit);
+        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
         HeuristicsSolver hsolv(prob->params, g);
 
         vector<Solution> fast_fwd_sols = hsolv.solve_fast_forward();
@@ -77,7 +77,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     float lambda = prob->params.lambda_start;
     while(valid_sols.size() == 0 && lambda < prob->params.lambda_end + numeric_limits<float>::epsilon()) {
         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-            const Graph& g = local_graphs.at(*vcit);
+            const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
             HeuristicsSolver hsolv(prob->params, g);
         
             vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
@@ -118,7 +118,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     cerr << "@";
     
     for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-        const Graph& g = local_graphs.at(*vcit);
+        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
         ExactSolver esolv(g);
 
         vector<Solution> e_sols = esolv.solve();

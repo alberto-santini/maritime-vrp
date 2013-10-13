@@ -12,7 +12,7 @@
 #include <preprocessing/problem_data.h>
 
 namespace GraphGenerator {
-    void create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class, Graph& g);
+    std::shared_ptr<Graph> create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class);
     
     /*  Time at which a vessel arriving at port ("p","pu") at time "arrival_time" can leave that port */
     int final_time(const ProblemData& data, std::shared_ptr<Port> p, const int arrival_time, const PickupType pu);
@@ -26,7 +26,7 @@ namespace GraphGenerator {
     
     void create_edge(std::shared_ptr<Port> origin_p, const PickupType origin_pu, const int origin_t,
                      std::shared_ptr<Port> destination_p, const PickupType destination_pu, const int destination_t,
-                     Graph& g, const float cost);
+                     std::shared_ptr<Graph> g, const float cost);
 }
 
 #endif

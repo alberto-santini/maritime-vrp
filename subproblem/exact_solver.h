@@ -12,9 +12,9 @@
 
 class ExactSolver {
 public:
-    const Graph&    g;
+    const std::shared_ptr<const Graph>    g;
     
-    ExactSolver(const Graph& g) : g(g) {}
+    ExactSolver(const std::shared_ptr<const Graph> g) : g(g) {}
     
     vector<Solution> solve() const;
 };

@@ -12,7 +12,7 @@
 #include <preprocessing/problem_data.h>
 #include <preprocessing/program_params.h>
 
-typedef std::unordered_map<std::shared_ptr<VesselClass>, Graph> GraphMap;
+typedef std::unordered_map<std::shared_ptr<VesselClass>, std::shared_ptr<Graph>> GraphMap;
 
 class Problem {
 public:

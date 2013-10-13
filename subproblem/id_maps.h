@@ -9,28 +9,28 @@
 #include <base/graph.h>
 
 class NodeIdFunctor {
-    const Graph& g;
+    const std::shared_ptr<const Graph> g;
     
 public:
     typedef int result_type;
   
-    NodeIdFunctor(const Graph& g) : g(g) {}
+    NodeIdFunctor(const std::shared_ptr<const Graph> g) : g(g) {}
   
     result_type operator()(const Vertex v) const {
-        return g.graph[v]->boost_vertex_id;
+        return g->graph[v]->boost_vertex_id;
     }
 };
 
 class ArcIdFunctor {
-    const Graph& g;
+    const std::shared_ptr<const Graph> g;
 
 public:
     typedef int result_type;
   
-    ArcIdFunctor(const Graph& g) : g(g) {}
+    ArcIdFunctor(const std::shared_ptr<const Graph> g) : g(g) {}
   
     result_type operator()(const Edge e) const {
-        return g.graph[e]->boost_edge_id;
+        return g->graph[e]->boost_edge_id;
     }
 };
 

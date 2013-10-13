@@ -15,14 +15,14 @@ public:
     float                           cost;
     float                           reduced_cost;
     std::shared_ptr<VesselClass>    vessel_class;
-    Graph                           g;
+    std::shared_ptr<const Graph>    g;
     
     Solution() {}
     Solution(const Path path, 
              const float cost,
              const float reduced_cost,
              std::shared_ptr<VesselClass> vessel_class,
-             Graph g) : path(path), cost(cost), reduced_cost(reduced_cost), vessel_class(vessel_class), g(g) {}
+             const std::shared_ptr<const Graph> g) : path(path), cost(cost), reduced_cost(reduced_cost), vessel_class(vessel_class), g(g) {}
     
     bool satisfies_capacity_constraints() const;
     bool operator==(const Solution& other) const;

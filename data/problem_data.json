@@ -1,5 +1,5 @@
 {
-    "num_ports":            8,
+    "num_ports":            9,
     "num_times":            84,
     "num_vessel_classes":   2,
     "vessel_classes": [
@@ -37,7 +37,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [0, 447, 1060, 1178, 366, 832, 545, 762]
+        "distances":        [0, 447, 1060, 1178, 366, 832, 545, 762, 362]
         },
         {
         "name":             "DKAAR",
@@ -53,7 +53,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [447, 0, 776, 819, 348, 456, 577, 406]
+        "distances":        [447, 0, 776, 819, 348, 456, 577, 406, 139]
         },
         {
         "name":             "FIRAU",
@@ -69,7 +69,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [1060, 776, 0, 616, 961, 678, 1190, 608]
+        "distances":        [1060, 776, 0, 616, 961, 678, 1190, 608, 782]
         },
         {
         "name":             "RULED",
@@ -85,7 +85,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [1178, 819, 616, 0, 1079, 580, 1291, 578]
+        "distances":        [1178, 819, 616, 0, 1079, 580, 1291, 578, 838]
         },
         {
         "name":             "NOSVG",
@@ -101,7 +101,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [366, 348, 961, 1079, 0, 733, 278, 663]
+        "distances":        [366, 348, 961, 1079, 0, 733, 278, 663, 263]
         },
         {
         "name":             "RUKGD",
@@ -117,7 +117,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [832, 456, 678, 580, 733, 0, 962, 70]
+        "distances":        [832, 456, 678, 580, 733, 0, 962, 70, 533]
         },
         {
         "name":             "NOAES",
@@ -133,7 +133,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892]
+        "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892, 453]
         },
         {
         "name":             "PLGDY",
@@ -149,7 +149,23 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [762, 406, 608, 578, 663, 70, 892, 0]
+        "distances":        [762, 406, 608, 578, 663, 70, 892, 0, 463]
+        },
+        {
+        "name":             "SEGOT",
+        "hub":              false,
+        "pickup_dem":       597,
+        "delivery_dem":     660,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [187.67, 197.42],
+        "pickup_trans":     84,
+        "delivery_trans":   84,
+        "pickup_hand":      0,
+        "delivery_hand":    0,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [362, 139, 782, 838, 263, 533, 453, 463, 0]
         }
     ]
 }

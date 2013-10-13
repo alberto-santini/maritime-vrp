@@ -4,8 +4,8 @@
 
 #include <preprocessing/graph_generator.h>
 
-void GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class, Graph& g) {
-    g = Graph(BGraph(), vessel_class, "Graph for " + vessel_class->name);
+std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class) {
+    std::shared_ptr<Graph> g = make_shared<Graph>(BGraph(), vessel_class, "Graph for " + vessel_class->name);
     
     /*  Add vertices */
     Vertex v_h1, v_h2;
@@ -13,18 +13,18 @@ void GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<Vesse
     for(std::shared_ptr<Port> p : data.ports) {
         /*  Create nodes H1 and H2 */
         if(p->hub) {
-            v_h1 = add_vertex(g.graph);
-            g.graph[v_h1] = make_shared<Node>(p, PickupType::PICKUP, NodeType::H1, 0, vessel_class);
-            n_h1 = *g.graph[v_h1];
-            v_h2 = add_vertex(g.graph);
-            g.graph[v_h2] = make_shared<Node>(p, PickupType::DELIVERY, NodeType::H2, data.num_times - 1, vessel_class);
-            n_h2 = *g.graph[v_h2];
+            v_h1 = add_vertex(g->graph);
+            g->graph[v_h1] = make_shared<Node>(p, PickupType::PICKUP, NodeType::H1, 0, vessel_class);
+            n_h1 = *g->graph[v_h1];
+            v_h2 = add_vertex(g->graph);
+            g->graph[v_h2] = make_shared<Node>(p, PickupType::DELIVERY, NodeType::H2, data.num_times - 1, vessel_class);
+            n_h2 = *g->graph[v_h2];
             continue;
         }
         for(int t = 0; t < data.num_times; t++) {
             for(PickupType pu : {PickupType::PICKUP, PickupType::DELIVERY}) {
-                Vertex v = add_vertex(g.graph);
-                g.graph[v] = make_shared<Node>(p, pu, NodeType::REGULAR_PORT, t, vessel_class);
+                Vertex v = add_vertex(g->graph);
+                g->graph[v] = make_shared<Node>(p, pu, NodeType::REGULAR_PORT, t, vessel_class);
             }
         }
     }
@@ -220,8 +220,8 @@ void GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<Vesse
         
     /*  Add delivery-to-pickup edges */
     pair<vit, vit> vp;
-    for(vp = vertices(g.graph); vp.first != vp.second; ++vp.first) {
-        Node n = *g.graph[*vp.first];
+    for(vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
+        Node n = *g->graph[*vp.first];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             GraphGenerator::create_edge(n.port, n.pu_type, n.time_step,
                                         n.port, PickupType::PICKUP, n.time_step,
@@ -234,20 +234,22 @@ void GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<Vesse
     while(!clean) {
         clean = true;
         vit vi, vi_end, vi_next;
-        tie(vi, vi_end) = vertices(g.graph);
+        tie(vi, vi_end) = vertices(g->graph);
         for(vi_next = vi; vi != vi_end; vi = vi_next) {
             ++vi_next;
-            int n_out = (int)out_degree(*vi, g.graph);
-            int n_in = (int)in_degree(*vi, g.graph);
-            if((g.graph[*vi]->n_type == NodeType::REGULAR_PORT) && (n_out == 0 || n_in == 0 || n_out + n_in <= 1)) {
-                clear_vertex(*vi, g.graph);
-                remove_vertex(*vi, g.graph);
+            int n_out = (int)out_degree(*vi, g->graph);
+            int n_in = (int)in_degree(*vi, g->graph);
+            if((g->graph[*vi]->n_type == NodeType::REGULAR_PORT) && (n_out == 0 || n_in == 0 || n_out + n_in <= 1)) {
+                clear_vertex(*vi, g->graph);
+                remove_vertex(*vi, g->graph);
                 clean = false;
             }
         }
     }
     
-    g.prepare_for_labelling();
+    g->prepare_for_labelling();
+    
+    return g;
 }
 
 int GraphGenerator::final_time(const ProblemData& data, std::shared_ptr<Port> p, const int arrival_time, const PickupType pu) {
@@ -281,22 +283,22 @@ int GraphGenerator::earliest_arrival(const ProblemData& data, std::shared_ptr<Po
 
 void GraphGenerator::create_edge(std::shared_ptr<Port> origin_p, const PickupType origin_pu, const int origin_t,
                                  std::shared_ptr<Port> destination_p, const PickupType destination_pu, const int destination_t,
-                                 Graph& g, const float cost) {
+                                 std::shared_ptr<Graph> g, const float cost) {
     bool origin_found, destination_found;
     Vertex origin_v, destination_v;
 
-    tie(origin_found, origin_v) = g.get_vertex(origin_p, origin_pu, origin_t);
+    tie(origin_found, origin_v) = g->get_vertex(origin_p, origin_pu, origin_t);
     
     if(!origin_found) {
         throw runtime_error("Can't find the origin vertex");
     }
     
-    tie(destination_found, destination_v) = g.get_vertex(destination_p, destination_pu, destination_t);
+    tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_t);
     
     if(!destination_found) {
         throw runtime_error("Can't find the destination vertex");
     }
     
-    Edge e = add_edge(origin_v, destination_v, g.graph).first;
-    g.graph[e] = make_shared<Arc>(cost);
+    Edge e = add_edge(origin_v, destination_v, g->graph).first;
+    g->graph[e] = make_shared<Arc>(cost);
 }

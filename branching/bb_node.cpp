@@ -12,16 +12,24 @@ BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs,
 }
 
 void BBNode::make_local_graphs() {
+    GraphMap new_graphs;
+    for(const auto& vg : local_graphs) {
+        std::shared_ptr<Graph> g = make_shared<Graph>(vg.second->graph, vg.second->vessel_class, vg.second->name);
+        new_graphs.emplace(vg.first, g);
+    }
+    
     for(const VisitRule& vr : unite_rules) {
         std::shared_ptr<VesselClass> vc = vr.first->vessel_class;
-        Graph& g = local_graphs.at(vc);
-        g.unite_ports(vr, g);
+        std::shared_ptr<Graph> g = new_graphs.at(vc);
+        g->unite_ports(vr);
     }
     for(const VisitRule& vr : separate_rules) {
         std::shared_ptr<VesselClass> vc = vr.first->vessel_class;
-        Graph& g = local_graphs.at(vc);
-        g.separate_ports(vr, g);
+        std::shared_ptr<Graph> g = new_graphs.at(vc);
+        g->separate_ports(vr);
     }
+    
+    local_graphs = new_graphs;
 }
 
 void BBNode::remove_incompatible_columns() {
@@ -53,6 +61,13 @@ void BBNode::remove_incompatible_columns() {
 }
 
 void BBNode::solve() {
+    cerr << "\tGraphs at this node:" << endl;
+    for(const auto& vg : local_graphs) {
+        cerr << "\t\tVessel class: " << vg.first->name << endl;
+        cerr << "\t\t\t" << num_vertices(vg.second->graph) << " vertices" << endl;
+        cerr << "\t\t\t" << num_edges(vg.second->graph) << " edges" << endl;
+    }
+    
     // Clear any eventual previous solutions
     base_columns = vector<pair<Column, float>>();
     sol_value = 0;
@@ -64,8 +79,8 @@ void BBNode::solve() {
     bool node_explored = false;
     while(!node_explored) {
         for(auto& vg : local_graphs) {
-            vg.second.graph[graph_bundle].port_duals = sol.port_duals;
-            vg.second.graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
+            vg.second->graph[graph_bundle].port_duals = sol.port_duals;
+            vg.second->graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
         }
 
         SPSolver sp_solv(prob, local_graphs);

@@ -4,7 +4,7 @@
 
 #include <branching/cycle.h>
 
-Path Cycle::shortest_cycle(const Path& route, const Graph& g) {
+Path Cycle::shortest_cycle(const Path& route, const std::shared_ptr<const Graph> g) {
     if(route.size() < 2) {
         return Path();
     }
@@ -20,12 +20,12 @@ Path Cycle::shortest_cycle(const Path& route, const Graph& g) {
         bool closing_cycle = false;
         int closing_port_position;
         
-        Node current_node = *g.graph[target(route[i], g.graph)];
+        Node current_node = *g->graph[target(route[i], g->graph)];
         std::shared_ptr<Port> current_port = current_node.port;
         PickupType current_pu = current_node.pu_type;
         
         for(int k = 0; k < cycles[num_cycles].size(); k++) {
-            Node cycle_node = *g.graph[source(cycles[num_cycles][k], g.graph)];
+            Node cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
             std::shared_ptr<Port> cycle_port = cycle_node.port;
             PickupType cycle_pu = cycle_node.pu_type;
             
@@ -59,9 +59,11 @@ Path Cycle::shortest_cycle(const Path& route, const Graph& g) {
     }
 }
 
-void Cycle::print_cycle(const Path& cycle, const Graph& g, ostream& out) {
+void Cycle::print_cycle(const Path& cycle, const std::shared_ptr<const Graph> g, ostream& out) {
     for(const Edge& e : cycle) {
-        out << g.graph[source(e, g.graph)]->port->name << " -> ";
+        std::shared_ptr<Node> n = g->graph[source(e, g->graph)];
+        out << n->port->name << "(" << (n->pu_type == PickupType::PICKUP ? "pu" : "de") << ") -> ";
     }
-    out << g.graph[target(cycle.back(), g.graph)]->port->name << endl;
+    std::shared_ptr<Node> n = g->graph[target(cycle.back(), g->graph)];
+    out << n->port->name << "(" << (n->pu_type == PickupType::PICKUP ? "pu" : "de") << ")" << endl;
 }

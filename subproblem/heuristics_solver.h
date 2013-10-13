@@ -13,10 +13,10 @@
 
 class HeuristicsSolver {
 public:
-    const ProgramParams&  params;
-    const Graph&          g;
+    const ProgramParams&                params;
+    const std::shared_ptr<const Graph>  g;
     
-    HeuristicsSolver(const ProgramParams& params, const Graph& g) : params(params), g(g) {}
+    HeuristicsSolver(const ProgramParams& params, const std::shared_ptr<const Graph> g) : params(params), g(g) {}
     
     vector<Solution> solve_fast_forward() const;
     vector<Solution> solve_fast_backward() const;
