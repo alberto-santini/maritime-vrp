@@ -14,13 +14,11 @@ class Label {
 public:
     int             q_pickupable;
     int             q_deliverable;
-    int             n_visited;
     float           cost;
     
     Label(const int qp,
           const int qd,
-          const int n,
-          const float c) : q_pickupable(qp), q_deliverable(qd), n_visited(n), cost(c) {}
+          const float c) : q_pickupable(qp), q_deliverable(qd), cost(c) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;

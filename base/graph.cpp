@@ -57,30 +57,11 @@ pair<bool, Vertex> Graph::get_vertex_by_node_type(const NodeType n_type) const {
 }
 
 void Graph::prepare_for_labelling() {
-    int i = 0;
-    vector<pair<std::shared_ptr<Port>, PickupType>> checked_ports;
-    vector<int> pickup_demands;
-    vector<int> delivery_demands;
-    
+    int i = 0;    
     pair<vit, vit> vp;
     for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        Vertex v = *vp.first;
-        graph[v]->boost_vertex_id = i++;
-        if(graph[v]->n_type == NodeType::REGULAR_PORT) {
-            auto pp = make_pair(graph[v]->port, graph[v]->pu_type);
-            if(find(checked_ports.begin(), checked_ports.end(), pp) == checked_ports.end()) {
-                checked_ports.push_back(pp);
-                if(graph[v]->pu_type == PickupType::PICKUP) {
-                    pickup_demands.push_back(graph[v]->pu_demand());
-                } else {
-                    delivery_demands.push_back(graph[v]->de_demand());
-                }
-            }
-        }
+        graph[*vp.first]->boost_vertex_id = i++;
     }
-    
-    graph[graph_bundle].pu_upper_bound = Knapsack::solve(pickup_demands, vessel_class->capacity);
-    graph[graph_bundle].de_upper_bound = Knapsack::solve(delivery_demands, vessel_class->capacity);
     
     i = 0;
     pair<eit, eit> ep;
