@@ -18,9 +18,12 @@ public:
     
     HeuristicsSolver(const ProgramParams& params, const std::shared_ptr<const Graph> g) : params(params), g(g) {}
     
+    vector<Solution> solve_fast() const;
+    vector<Solution> solve_on_reduced_graph(const float lambda) const;
+    
+private:
     vector<Solution> solve_fast_forward() const;
     vector<Solution> solve_fast_backward() const;
-    vector<Solution> solve_on_reduced_graph(const float lambda) const;
 };
 
 #endif

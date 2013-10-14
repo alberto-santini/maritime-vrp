@@ -146,6 +146,16 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
     return sols;
 }
 
+vector<Solution> HeuristicsSolver::solve_fast() const {
+    vector<Solution> fast_fwd_sols = solve_fast_forward();
+    vector<Solution> fast_bwd_sols = solve_fast_backward();
+    
+    vector<Solution> total = fast_fwd_sols;
+    total.insert(total.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
+    
+    return total;
+}
+
 vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) const {
     vector<Solution> sols;
     std::shared_ptr<Graph> red = g->reduce_graph(lambda);

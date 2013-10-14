@@ -321,13 +321,13 @@ Path Graph::transfer_path(const Path& path, const std::shared_ptr<const Graph> s
         Edge e = *pit;
         Node n_orig = *subgraph->graph[source(e, subgraph->graph)];
         Node n_dest = *subgraph->graph[target(e, subgraph->graph)];
-        
+                
         bool o_found;
         Vertex local_orig;
         tie(o_found, local_orig) = get_vertex(n_orig.port, n_orig.pu_type, n_orig.time_step);
         
         if(!o_found) {
-            throw runtime_error("Can't find the origin of an edge while transferring paths");
+            throw runtime_error("In transferring a path from " + subgraph->name + " to " + name + " - " + "Can't find the origin of an edge while transferring paths: " + n_orig.port->name + " at time " + to_string(n_orig.time_step));
         }
         
         bool d_found;
@@ -335,7 +335,7 @@ Path Graph::transfer_path(const Path& path, const std::shared_ptr<const Graph> s
         tie(d_found, local_dest) = get_vertex(n_dest.port, n_dest.pu_type, n_dest.time_step);
         
         if(!d_found) {
-            throw runtime_error("Can't find the destination of an edge while transferring paths");
+            throw runtime_error("In transferring a path from " + subgraph->name + " to " + name + " - " + "Can't find the destination of an edge while transferring paths: " + n_dest.port->name + " at time " + to_string(n_dest.time_step));
         }
         
         bool e_found;
@@ -343,7 +343,7 @@ Path Graph::transfer_path(const Path& path, const std::shared_ptr<const Graph> s
         tie(local_edge, e_found) = edge(local_orig, local_dest, graph);
         
         if(!e_found) {
-            throw runtime_error("The two vertices are not connected in the graph where you want to transfer the path");
+            throw runtime_error("In transferring a path from " + subgraph->name + " to " + name + " - " + "The two vertices are not connected in the graph where you want to transfer the path");
         }
         
         local_path.push_back(local_edge);
