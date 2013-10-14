@@ -35,11 +35,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
         const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
         HeuristicsSolver hsolv(prob->params, g);
 
-        vector<Solution> fast_fwd_sols = hsolv.solve_fast_forward();
-        vector<Solution> fast_bwd_sols = hsolv.solve_fast_backward();
-        
-        vector<Solution> total = fast_fwd_sols;
-        total.insert(total.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
+        vector<Solution> total = hsolv.solve_fast();
         
         for(const Solution& s : total) {
             if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
