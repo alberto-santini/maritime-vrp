@@ -27,7 +27,6 @@ OBJS=		base/graph.o \
 			subproblem/heuristics_solver.o \
 			subproblem/labelling.o \
 			subproblem/sp_solver.o \
-			subproblem/threaded_solver.o \
 			util/knapsack.o
 
 main: $(OBJS) base/base.h main.cpp

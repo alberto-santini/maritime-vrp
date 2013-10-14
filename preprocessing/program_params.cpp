@@ -16,5 +16,4 @@ ProgramParams::ProgramParams(string data_file_name) {
     max_cols_to_solve_mp = pt.get<int>("max_cols_to_solve_mp");
     gap_to_be_considered_optimal = pt.get<float>("gap_to_be_considered_optimal");
     dummy_column_price = pt.get<int>("dummy_column_price");
-    num_cores = pt.get<int>("num_cores");
 }

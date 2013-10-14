@@ -18,7 +18,7 @@ public:
     GraphMap                    local_graphs;
     
     const std::shared_ptr<ColumnPool> pool;
-    std::shared_ptr<ColumnPool> local_pool;
+    ColumnPool                  local_pool;
 
     VisitRuleList               unite_rules;
     VisitRuleList               separate_rules;
@@ -42,7 +42,7 @@ public:
     BBNode(const std::shared_ptr<const Problem> prob,
            const GraphMap local_graphs,
            const std::shared_ptr<ColumnPool> pool,
-           const std::shared_ptr<ColumnPool> local_pool,
+           const ColumnPool local_pool,
            const VisitRuleList unite_rules,
            const VisitRuleList separate_rules,
            const float father_lb);
