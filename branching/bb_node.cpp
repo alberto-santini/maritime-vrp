@@ -4,7 +4,7 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb) {
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const std::shared_ptr<ColumnPool> local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb) {
     sol_value = numeric_limits<float>::max();
     mip_sol_value = numeric_limits<float>::max();
     make_local_graphs();
@@ -33,9 +33,9 @@ void BBNode::make_local_graphs() {
 }
 
 void BBNode::remove_incompatible_columns() {
-    ColumnPool new_local_pool;
+    std::shared_ptr<ColumnPool> new_local_pool = make_shared<ColumnPool>();
         
-    for(const Column& c : local_pool) {
+    for(const Column& c : *local_pool) {
         bool compatible = true;
         for(const VisitRule& vr : unite_rules) {
             if(!c.is_compatible_with_unite_rule(vr)) {
@@ -53,7 +53,7 @@ void BBNode::remove_incompatible_columns() {
             }
         }
         if(compatible) {
-            new_local_pool.push_back(c);
+            new_local_pool->push_back(c);
         }
     }
     
@@ -73,7 +73,7 @@ void BBNode::solve() {
     sol_value = 0;
     
     MPSolver mp_solv(prob);
-    MPLinearSolution sol = mp_solv.solve_lp(local_pool);
+    MPLinearSolution sol = mp_solv.solve_lp(*local_pool);
     cerr << unitbuf << "\tMP: " << sol.obj_value << " ";
 
     bool node_explored = false;
@@ -90,7 +90,7 @@ void BBNode::solve() {
 
         if(sp_found_columns > 0) {
             // If new columns are found, solve the LP again
-            sol = mp_solv.solve_lp(local_pool);
+            sol = mp_solv.solve_lp(*local_pool);
             cerr << "> " << sol.obj_value << " ";
         } else {
             // Otherwise, the exploration is done
@@ -98,7 +98,7 @@ void BBNode::solve() {
 
             for(int i = 0; i < sol.variables.size(); i++) {
                 if(sol.variables[i] > BBNode::cplex_epsilon) {
-                    base_columns.push_back(make_pair(local_pool[i], sol.variables[i]));
+                    base_columns.push_back(make_pair((*local_pool)[i], sol.variables[i]));
                 }
             }
 

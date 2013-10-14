@@ -79,6 +79,13 @@ using std::priority_queue;
 // std::tuple could conflict with boost::
 using std::make_tuple;
 using std::get;
+#include <thread>
+using std::thread;
+#include <mutex>
+using std::mutex;
+using std::lock_guard;
+#include <functional>
+using std::ref;
 
 // CPLEX
 #include <ilcplex/ilocplex.h>

@@ -17,6 +17,7 @@ public:
     int     max_cols_to_solve_mp;
     float   gap_to_be_considered_optimal; // This is given in %
     int     dummy_column_price;
+    int     num_cores;
     
     ProgramParams(string data_file_name = "data/program_params.json");
 };
