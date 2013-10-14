@@ -11,11 +11,9 @@ BBTree::BBTree() {
     Column dummy(prob);
     dummy.make_dummy(prob->params.dummy_column_price);
     pool = make_shared<ColumnPool>();
-    std::shared_ptr<ColumnPool> local_pool = make_shared<ColumnPool>();
     pool->push_back(dummy);
-    local_pool->push_back(dummy);
 
-    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, local_pool, VisitRuleList(), VisitRuleList(), numeric_limits<float>::max());
+    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), numeric_limits<float>::max());
 
     unexplored_nodes.push(root_node);
     
@@ -151,17 +149,12 @@ void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode
         cerr << "\t\t\t\tForbidding the traversal of " << n_source_forb->port->name << " -> " << n_target_forb->port->name << endl;
         separate_rules.push_back(make_pair(n_source_forb, n_target_forb));
         
-        std::shared_ptr<ColumnPool> new_local_pool = make_shared<ColumnPool>();
-        for(const Column& c : *(current_node->local_pool)) {
-            new_local_pool->push_back(c);
-        }
-        
         unexplored_nodes.push(
             make_shared<BBNode>(
                 current_node->prob,
                 current_node->local_graphs,
                 current_node->pool,
-                new_local_pool,
+                current_node->local_pool,
                 unite_rules,
                 separate_rules,
                 current_node->sol_value
@@ -196,13 +189,6 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                         unite_rules_u.push_back(make_pair(n_src, n));
                         separate_rules_s.push_back(make_pair(n_src, n));
                         
-                        std::shared_ptr<ColumnPool> new_local_pool_force = make_shared<ColumnPool>();
-                        std::shared_ptr<ColumnPool> new_local_pool_forbid = make_shared<ColumnPool>();
-                        for(const Column& c : *(current_node->local_pool)) {
-                            new_local_pool_force->push_back(c);
-                            new_local_pool_forbid->push_back(c);
-                        }
-                        
                         cerr << "\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << endl;
                         // Forcing the traversal
                         unexplored_nodes.push(
@@ -210,7 +196,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->prob,
                                 current_node->local_graphs,
                                 current_node->pool,
-                                new_local_pool_force,
+                                current_node->local_pool,
                                 unite_rules_u,
                                 separate_rules_u,
                                 current_node->sol_value
@@ -224,7 +210,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->prob,
                                 current_node->local_graphs,
                                 current_node->pool,
-                                new_local_pool_forbid,
+                                current_node->local_pool,
                                 unite_rules_s,
                                 separate_rules_s,
                                 current_node->sol_value
@@ -245,7 +231,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
 void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
     ColumnPool feasible_columns;
     
-    for(const Column& c : *(current_node->local_pool)) {
+    for(const Column& c : current_node->local_pool) {
         if(!c.dummy && !c.has_cycles()) {
             feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination"));
         }
