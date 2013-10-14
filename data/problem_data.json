@@ -6,20 +6,20 @@
         {
         "name":             "Feeder_450",
         "num_vessels":      3,
-        "num_speeds":       3,
+        "num_speeds":       5,
         "capacity":         450,
         "base_cost":        120,
-        "speeds":           [20, 24, 28],
-        "speeds_cost":      [0.00091, 0.00157, 0.00249]
+        "speeds":           [20, 22, 24, 26, 28],
+        "speeds_cost":      [0.00091, 0.0012, 0.00157, 0.002, 0.00249]
         },
         {
         "name":             "Panamax_1200",
         "num_vessels":      2,
-        "num_speeds":       3,
+        "num_speeds":       5,
         "capacity":         1200,
         "base_cost":        200,
-        "speeds":           [24, 31, 38],
-        "speeds_cost":      [0.00130, 0.00279, 0.00515]
+        "speeds":           [24, 27, 31, 34, 38],
+        "speeds_cost":      [0.00130, 0.00184, 0.00279, 0.00378, 0.00515]
         }
     ],
     "ports": [
@@ -50,9 +50,9 @@
         "delivery_trans":   84,
         "pickup_hand":      2,
         "delivery_hand":    2,
-        "num_tw":           8,
-        "tw_left":          [1, 11, 23, 35, 47, 59, 71, 83],
-        "tw_right":         [3, 15, 27, 39, 51, 63, 75, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [447, 0, 776, 819, 348, 456, 577, 406, 139, 432, 796]
         },
         {
@@ -66,9 +66,9 @@
         "delivery_trans":   84,
         "pickup_hand":      1,
         "delivery_hand":    1,
-        "num_tw":           8,
-        "tw_left":          [1, 11, 23, 35, 47, 59, 71, 83],
-        "tw_right":         [3, 15, 27, 39, 51, 63, 75, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [1060, 776, 0, 616, 961, 678, 1190, 608, 782, 1045, 541]
         },
         {
@@ -78,8 +78,8 @@
         "delivery_dem":     1200,
         "allowed_vc":       [true, true],
         "calling_fee":      [206.37, 234.12],
-        "pickup_trans":     60,
-        "delivery_trans":   60,
+        "pickup_trans":     84,
+        "delivery_trans":   84,
         "pickup_hand":      1,
         "delivery_hand":    4,
         "num_tw":           0,
@@ -98,9 +98,9 @@
         "delivery_trans":   84,
         "pickup_hand":      1,
         "delivery_hand":    1,
-        "num_tw":           8,
-        "tw_left":          [1, 11, 23, 35, 47, 59, 71, 83],
-        "tw_right":         [3, 15, 27, 39, 51, 63, 75, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [366, 348, 961, 1079, 0, 733, 278, 663, 263, 111, 976]
         },
         {
@@ -114,9 +114,9 @@
         "delivery_trans":   84,
         "pickup_hand":      2,
         "delivery_hand":    1,
-        "num_tw":           8,
-        "tw_left":          [1, 11, 23, 35, 47, 59, 71, 83],
-        "tw_right":         [3, 15, 27, 39, 51, 63, 75, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [832, 456, 678, 580, 733, 0, 962, 70, 533, 817, 475]
         },
         {
@@ -130,9 +130,9 @@
         "delivery_trans":   84,
         "pickup_hand":      1,
         "delivery_hand":    1,
-        "num_tw":           2,
-        "tw_left":          [12, 48],
-        "tw_right":         [16, 52],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892, 453, 167, 1178]
         },
         {
@@ -142,8 +142,8 @@
         "delivery_dem":     98,
         "allowed_vc":       [true, true],
         "calling_fee":      [99.78, 203.28],
-        "pickup_trans":     48,
-        "delivery_trans":   60,
+        "pickup_trans":     84,
+        "delivery_trans":   84,
         "pickup_hand":      2,
         "delivery_hand":    1,
         "num_tw":           0,
@@ -162,9 +162,9 @@
         "delivery_trans":   84,
         "pickup_hand":      3,
         "delivery_hand":    3,
-        "num_tw":           8,
-        "tw_left":          [1, 11, 23, 35, 47, 59, 71, 83],
-        "tw_right":         [3, 15, 27, 39, 51, 63, 75, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [362, 139, 782, 838, 263, 533, 453, 463, 0, 347, 725]
         },
         {
@@ -178,9 +178,9 @@
         "delivery_trans":   84,
         "pickup_hand":      1,
         "delivery_hand":    1,
-        "num_tw":           8,
-        "tw_left":          [1, 12, 24, 36, 48, 60, 72, 84],
-        "tw_right":         [2, 14, 26, 38, 50, 62, 74, 84],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [447, 432, 1045, 1163, 111, 817, 167, 747, 347, 0, 1060]
         },
         {
@@ -194,9 +194,9 @@
         "delivery_trans":   84,
         "pickup_hand":      2,
         "delivery_hand":    2,
-        "num_tw":           1,
-        "tw_left":          [36],
-        "tw_right":         [42],
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
         "distances":        [1075, 796, 541, 113, 976, 475, 1178, 514, 725, 1060, 0]
         }
     ]
