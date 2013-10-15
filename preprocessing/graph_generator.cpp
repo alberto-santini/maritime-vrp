@@ -268,7 +268,7 @@ int GraphGenerator::final_time(const ProblemData& data, std::shared_ptr<Port> p,
         }
     }
     
-    return ft;
+    return min(ft, data.num_times - 1);
 }
 
 int GraphGenerator::latest_departure(const ProblemData& data, std::shared_ptr<Port> p, std::shared_ptr<Port> h2, std::shared_ptr<VesselClass> vessel_class) {

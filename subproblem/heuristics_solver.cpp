@@ -178,7 +178,7 @@ vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda) co
         red->h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0, 0),
+        Label(vc->capacity, vc->capacity, 0),
         LabelExtender(),
         Dominance(),
         allocator<r_c_shortest_paths_label<BGraph, Label>>(),
