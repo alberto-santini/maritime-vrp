@@ -115,8 +115,8 @@
         "pickup_hand":      2,
         "delivery_hand":    1,
         "num_tw":           1,
-        "tw_left":          [12],
-        "tw_right":         [12],
+        "tw_left":          [18],
+        "tw_right":         [28],
         "distances":        [832, 456, 678, 580, 733, 0, 962, 70, 533, 817, 475]
         },
         {
@@ -131,8 +131,8 @@
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           3,
-        "tw_left":          [8, 16, 24],
-        "tw_right":         [8, 16, 24],
+        "tw_left":          [8, 16, 21],
+        "tw_right":         [8, 20, 24],
         "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892, 453, 167, 1178]
         },
         {
@@ -147,8 +147,8 @@
         "pickup_hand":      2,
         "delivery_hand":    1,
         "num_tw":           3,
-        "tw_left":          [8, 12, 24],
-        "tw_right":         [8, 12, 24],
+        "tw_left":          [8, 11, 24],
+        "tw_right":         [10, 16, 24],
         "distances":        [762, 406, 608, 578, 663, 70, 892, 0, 463, 747, 514]
         },
         {
@@ -179,7 +179,7 @@
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           1,
-        "tw_left":          [16],
+        "tw_left":          [4],
         "tw_right":         [16],
         "distances":        [447, 432, 1045, 1163, 111, 817, 167, 747, 347, 0, 1060]
         },
