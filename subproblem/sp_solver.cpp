@@ -11,12 +11,12 @@ inline bool solution_in_pool(const Solution& s, const ColumnPool& pool) {
     }) != pool.end());
 }
 
-inline void print_report(const int sols_found, const int discarded_prc, const int discarded_infeasible, const int discarded_generated, const int discarded_in_pool) {
-    cerr << "\t\t\t\tWe found " << sols_found << " new columns." << endl;
-    cerr << "\t\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << endl;
-    cerr << "\t\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << endl;
-    cerr << "\t\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << endl;
-    cerr << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << endl;
+inline void print_report(const int sols_found, const int discarded_prc, const int discarded_infeasible, const int discarded_generated, const int discarded_in_pool, ostream& out = cerr) {
+    out << "\t\t\t\tWe found " << sols_found << " new columns." << endl;
+    out << "\t\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << endl;
+    out << "\t\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << endl;
+    out << "\t\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << endl;
+    out << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << endl;
 }
 
 int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool) {
@@ -36,7 +36,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
         HeuristicsSolver hsolv(prob->params, g);
 
         vector<Solution> total = hsolv.solve_fast();
-        
+                
         for(const Solution& s : total) {
             if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
                 discarded_prc++;
