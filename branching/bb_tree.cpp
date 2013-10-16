@@ -26,6 +26,7 @@ BBTree::BBTree() {
 void BBTree::explore_tree() {
     cout << setw(20) << "# unexplored nodes";
     cout << setw(14) << "LB at node";
+    cout << setw(14) << "LB";
     cout << setw(14) << "UB";
     cout << setw(20) << "Gap at node";
     cout << setw(20) << "Gap";
@@ -37,7 +38,7 @@ void BBTree::explore_tree() {
         
         std::shared_ptr<BBNode> current_node = unexplored_nodes.top();
         unexplored_nodes.pop();
-        lb = current_node->sol_value;
+        lb = current_node->father_lb;
         
         // Solve the master problem to obtain a lower bound
         current_node->solve();
@@ -104,6 +105,7 @@ void BBTree::explore_tree() {
         
         cout << setw(20) << unexplored_nodes.size();
         cout << setw(14) << current_node->sol_value;
+        cout << setw(14) << lb;
         cout << setw(14) << ub;
         cout << setw(19) << setprecision(6) << gap_node << "\%";
         cout << setw(19) << setprecision(6) << gap << "\%";
