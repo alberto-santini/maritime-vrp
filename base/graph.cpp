@@ -93,9 +93,9 @@ void Graph::unite_ports(VisitRule vr) {
     std::shared_ptr<Node> n1, n2;
     tie(n1, n2) = vr;
     
-    if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
-        throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
-    }
+    //if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
+    //    throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
+    //}
     
     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
         throw runtime_error("Trying to unite ports of nodes not both in this graph");
@@ -137,9 +137,9 @@ void Graph::separate_ports(VisitRule vr) {
     std::shared_ptr<Node> n1, n2;
     tie(n1, n2) = vr;
     
-    if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
-        throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
-    }
+    //if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
+    //    throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
+    //}
     
     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
         throw runtime_error("Trying to unite ports of nodes not both in this graph");
