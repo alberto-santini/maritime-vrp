@@ -20,6 +20,7 @@ BBTree::BBTree() {
     
     node_attaining_ub = root_node;
     node_bound_type = BoundType::FROM_LP;
+    bb_nodes_generated = 1;
 }
 
 void BBTree::explore_tree() {
@@ -28,7 +29,8 @@ void BBTree::explore_tree() {
     cout << setw(14) << "UB";
     cout << setw(20) << "Gap at node";
     cout << setw(20) << "Gap";
-    cout << setw(20) << "# columns in pool" << endl;
+    cout << setw(20) << "# columns in pool";
+    cout << setw(14) << "# BB Nodes" << endl;
     
     while(!unexplored_nodes.empty()) {
         cerr << "Nodes in tree: " << unexplored_nodes.size() << endl;
@@ -105,7 +107,8 @@ void BBTree::explore_tree() {
         cout << setw(20) << ub;
         cout << setw(19) << setprecision(6) << gap_node << "\%";
         cout << setw(19) << setprecision(6) << gap << "\%";
-        cout << setw(20) << pool->size() << endl;
+        cout << setw(20) << pool->size();
+        cout << setw(14) << bb_nodes_generated << endl;
     }
     
     cout << endl << "*** SOLUTION ***" << endl;
@@ -165,6 +168,7 @@ void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode
                 current_node->sol_value
             )
         );
+        bb_nodes_generated++;
     }
 }
 
@@ -221,6 +225,8 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->sol_value
                             )
                         );
+                                
+                        bb_nodes_generated += 2;
                                 
                         goto exit_nested_loops;
                     }

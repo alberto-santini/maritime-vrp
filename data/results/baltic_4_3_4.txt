@@ -1,0 +1,52 @@
+  # unexplored nodes          LB at node                  UB         Gap at node   # columns in pool
+                   2             78443.4             81841.1            4.33139%                 635
+                   4             78443.8             81841.1             4.3309%                 647
+                   3             78467.7             81841.1            4.29907%                1857
+                   4             81558.7             81841.1           0.346233%                2180
+                   3             81572.4             81841.1           0.329385%                2794
+                   4             81572.8             81841.1           0.328857%                3464
+                   3               81611             81841.1            0.28193%                4118
+                   3             81612.6             81841.1           0.280001%                4293
+                   1               81694               81694                  0%                5168
+
+*** SOLUTION ***
+*** OBTAINED FROM LP ***
+16938.9 | 0 0   0 0     0 0     1 0     0 0     0 0     0 0     1 1     0 0     0 1     0 0     | 0 1 by labelling on the 0.100000-reduced graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [SEGOT, de, 7, dem: 660]
+[SEGOT, de, 7, dem: 660] -> [FIKTK, de, 18, dem: 187]
+[FIKTK, de, 18, dem: 187] -> [SEGOT, pu, 30, dem: 597]
+[SEGOT, pu, 30, dem: 597] -> [NOSVG, pu, 35, dem: 32]
+[NOSVG, pu, 35, dem: 32] -> [DEBRV, de, 41, dem: 0]
+9917.57 | 0 0   0 0     0 0     1 0     1 1     0 0     0 0     0 0     0 0     0 0     0 0     | 1 0 by labelling on the 0.100000-reduced graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [RUKGD, de, 16, dem: 7]
+[RUKGD, de, 16, dem: 7] -> [RUKGD, pu, 16, dem: 268]
+[RUKGD, pu, 16, dem: 268] -> [NOSVG, pu, 31, dem: 32]
+[NOSVG, pu, 31, dem: 32] -> [DEBRV, de, 41, dem: 0]
+17657.5 | 1 1   1 1     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     | 0 1 by labelling on the 0.100000-reduced graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [DKAAR, de, 7, dem: 456]
+[DKAAR, de, 7, dem: 456] -> [FIRAU, de, 21, dem: 18]
+[FIRAU, de, 21, dem: 18] -> [FIRAU, pu, 21, dem: 77]
+[FIRAU, pu, 21, dem: 77] -> [DKAAR, pu, 35, dem: 397]
+[DKAAR, pu, 35, dem: 397] -> [DEBRV, de, 41, dem: 0]
+9969.57 | 0 0   0 0     0 0     0 1     0 0     0 0     1 1     0 0     0 0     0 0     0 0     | 1 0 by labelling on the 0.200000-reduced graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [NOSVG, de, 8, dem: 65]
+[NOSVG, de, 8, dem: 65] -> [PLGDY, de, 21, dem: 98]
+[PLGDY, de, 21, dem: 98] -> [PLGDY, pu, 21, dem: 231]
+[PLGDY, pu, 21, dem: 231] -> [DEBRV, de, 41, dem: 0]
+16980.3 | 0 0   0 0     1 1     0 0     0 0     0 0     0 0     0 0     0 0     1 0     0 0     | 0 1 by labelling on the complete graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [RULED, de, 18, dem: 1200]
+[RULED, de, 18, dem: 1200] -> [FIKTK, pu, 21, dem: 162]
+[FIKTK, pu, 21, dem: 162] -> [RULED, pu, 25, dem: 298]
+[RULED, pu, 25, dem: 298] -> [DEBRV, de, 41, dem: 0]
+10230.1 | 0 0   0 0     0 0     0 0     0 0     1 1     0 0     0 0     1 1     0 0     1 1     | 1 0 by labelling on the complete graph  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [NOKRS, de, 12, dem: 6]
+[NOKRS, de, 12, dem: 6] -> [NOAES, de, 22, dem: 10]
+[NOAES, de, 22, dem: 10] -> [NOAES, pu, 22, dem: 50]
+[NOAES, pu, 22, dem: 50] -> [NOBGO, de, 26, dem: 17]
+[NOBGO, de, 26, dem: 17] -> [NOBGO, pu, 26, dem: 37]
+[NOBGO, pu, 26, dem: 37] -> [NOKRS, pu, 33, dem: 16]
+[NOKRS, pu, 33, dem: 16] -> [DEBRV, de, 41, dem: 0]
+
+real    0m39.936s
+user    0m35.838s
+sys     0m4.076s
