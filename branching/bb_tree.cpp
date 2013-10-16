@@ -198,7 +198,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                         cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << endl;
                         VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s, unite_rules_b, separate_rules_b;
                         unite_rules_u.push_back(make_pair(n_src, n));
-                        separate_rules_u.push_back(make_pair(n_inner_src, n));
+                        separate_rules_u.push_back(make_pair(n_inner_src, n_inner));
                         unite_rules_s.push_back(make_pair(n_inner_src, n_inner));
                         separate_rules_s.push_back(make_pair(n_src, n));
                         separate_rules_b.push_back(make_pair(n_src, n));
