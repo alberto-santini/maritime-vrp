@@ -103,8 +103,8 @@ void BBTree::explore_tree() {
         float gap = ((ub - lb) / lb) * 100;
         
         cout << setw(20) << unexplored_nodes.size();
-        cout << setw(20) << current_node->sol_value;
-        cout << setw(20) << ub;
+        cout << setw(14) << current_node->sol_value;
+        cout << setw(14) << ub;
         cout << setw(19) << setprecision(6) << gap_node << "\%";
         cout << setw(19) << setprecision(6) << gap << "\%";
         cout << setw(20) << pool->size();
