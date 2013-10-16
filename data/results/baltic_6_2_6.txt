@@ -1,0 +1,52 @@
+  # unexplored nodes          LB at node                  UB         Gap at node   # columns in pool
+                   4             74263.1             79413.6             6.9354%                 600
+                   6             74613.1             79413.6            6.43378%                 697
+                   7             76356.5             79413.6            4.00368%                1900
+                   7             74935.9             79413.6            5.97537%                2571
+                   8             76020.9             79413.6            4.46288%                2628
+                   7             76020.9             79413.6            4.46288%                4067
+                   8             76165.1             79413.6            4.26509%                4632
+                   8             76366.4             79413.6            3.99018%                5129
+                   2             76366.4             79413.6            3.99018%                8944
+                   5               77172             79413.6            2.90459%                9033
+
+*** SOLUTION ***
+*** OBTAINED FROM MIP ***
+16470.5 | 0 0   0 0     1 1     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     | 0 1 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [RULED, de, 16, dem: 1200]
+[RULED, de, 16, dem: 1200] -> [RULED, pu, 16, dem: 298]
+[RULED, pu, 16, dem: 298] -> [DEBRV, de, 27, dem: 0]
+10029.9 | 0 0   0 0     0 0     0 1     0 0     1 1     0 0     0 0     1 1     0 0     0 1     | 1 0 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [NOKRS, de, 10, dem: 6]
+[NOKRS, de, 10, dem: 6] -> [NOSVG, de, 13, dem: 65]
+[NOSVG, de, 13, dem: 65] -> [NOBGO, de, 16, dem: 17]
+[NOBGO, de, 16, dem: 17] -> [NOBGO, pu, 16, dem: 37]
+[NOBGO, pu, 16, dem: 37] -> [NOAES, de, 20, dem: 10]
+[NOAES, de, 20, dem: 10] -> [NOAES, pu, 20, dem: 50]
+[NOAES, pu, 20, dem: 50] -> [DEBRV, de, 27, dem: 0]
+9821.36 | 0 0   1 1     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     | 1 0 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [FIRAU, de, 14, dem: 18]
+[FIRAU, de, 14, dem: 18] -> [FIRAU, pu, 14, dem: 77]
+[FIRAU, pu, 14, dem: 77] -> [DEBRV, de, 27, dem: 0]
+9962.79 | 0 0   0 0     0 0     1 0     0 0     0 0     0 1     0 0     0 0     0 0     1 0     | 1 0 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [PLGDY, de, 11, dem: 98]
+[PLGDY, de, 11, dem: 98] -> [NOKRS, pu, 19, dem: 16]
+[NOKRS, pu, 19, dem: 16] -> [NOSVG, pu, 22, dem: 32]
+[NOSVG, pu, 22, dem: 32] -> [DEBRV, de, 27, dem: 0]
+16618.9 | 1 1   0 0     0 0     0 0     1 1     0 0     1 0     0 1     0 0     0 0     0 0     | 0 1 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [SEGOT, de, 7, dem: 660]
+[SEGOT, de, 7, dem: 660] -> [DKAAR, de, 11, dem: 456]
+[DKAAR, de, 11, dem: 456] -> [DKAAR, pu, 11, dem: 397]
+[DKAAR, pu, 11, dem: 397] -> [RUKGD, de, 17, dem: 7]
+[RUKGD, de, 17, dem: 7] -> [RUKGD, pu, 17, dem: 268]
+[RUKGD, pu, 17, dem: 268] -> [PLGDY, pu, 20, dem: 231]
+[PLGDY, pu, 20, dem: 231] -> [DEBRV, de, 27, dem: 0]
+ 16510 | 0 0    0 0     0 0     0 0     0 0     0 0     0 0     1 0     0 0     1 1     0 0     | 0 1 by MIP elimination  selected with coefficient 1
+[DEBRV, pu, 0, dem: 0] -> [FIKTK, de, 12, dem: 187]
+[FIKTK, de, 12, dem: 187] -> [FIKTK, pu, 12, dem: 162]
+[FIKTK, pu, 12, dem: 162] -> [SEGOT, pu, 23, dem: 597]
+[SEGOT, pu, 23, dem: 597] -> [DEBRV, de, 27, dem: 0]
+
+real    9m14.191s
+user    8m56.394s
+sys     0m17.741s
