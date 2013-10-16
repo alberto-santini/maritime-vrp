@@ -196,13 +196,17 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                     std::shared_ptr<Node> n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
                     if(!n_inner_src->same_row_as(*n_src)) {
                         cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << endl;
-                        VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s;
+                        VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s, unite_rules_b, separate_rules_b;
                         unite_rules_u.push_back(make_pair(n_src, n));
-                        separate_rules_s.push_back(make_pair(n_inner_src, n_inner));
+                        separate_rules_u.push_back(make_pair(n_inner_src, n));
+                        unite_rules_s.push_back(make_pair(n_inner_src, n_inner));
+                        separate_rules_s.push_back(make_pair(n_src, n));
+                        separate_rules_b.push_back(make_pair(n_src, n));
+                        separate_rules_b.push_back(make_pair(n_inner_src, n_inner));
                         
                         cerr << "\t\t\tCreating child node:" << endl;
-                        cerr << "\t\t\t\tForcing the traversal of " << n_inner_src->port->name << " -> " << n->port->name << endl;
-                        // Forcing the traversal
+                        cerr << "\t\t\t\tForcing the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
                         unexplored_nodes.push(
                             make_shared<BBNode>(
                                 current_node->prob,
@@ -216,8 +220,8 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                         );
                         
                         cerr << "\t\t\tCreating child node:" << endl;
-                        cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << endl;
-                        // Forbidding the traversal        
+                        cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
                         unexplored_nodes.push(
                             make_shared<BBNode>(
                                 current_node->prob,
@@ -226,6 +230,22 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->local_pool,
                                 unite_rules_s,
                                 separate_rules_s,
+                                current_node->sol_value
+                            )
+                        );
+                                
+                        cerr << "\t\t\tCreating child node:" << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
+                        // Forbidding the traversal        
+                        unexplored_nodes.push(
+                            make_shared<BBNode>(
+                                current_node->prob,
+                                current_node->local_graphs,
+                                current_node->pool,
+                                current_node->local_pool,
+                                unite_rules_b,
+                                separate_rules_b,
                                 current_node->sol_value
                             )
                         );
