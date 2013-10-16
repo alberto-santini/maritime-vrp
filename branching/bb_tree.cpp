@@ -7,6 +7,7 @@
 BBTree::BBTree() {
     prob = make_shared<Problem>();
     ub = numeric_limits<float>::max();
+    lb = numeric_limits<float>::max();
 
     Column dummy(prob);
     dummy.make_dummy(prob->params.dummy_column_price);
@@ -23,9 +24,10 @@ BBTree::BBTree() {
 
 void BBTree::explore_tree() {
     cout << setw(20) << "# unexplored nodes";
-    cout << setw(20) << "LB at node";
-    cout << setw(20) << "UB";
+    cout << setw(14) << "LB at node";
+    cout << setw(14) << "UB";
     cout << setw(20) << "Gap at node";
+    cout << setw(20) << "Gap";
     cout << setw(20) << "# columns in pool" << endl;
     
     while(!unexplored_nodes.empty()) {
@@ -33,6 +35,7 @@ void BBTree::explore_tree() {
         
         std::shared_ptr<BBNode> current_node = unexplored_nodes.top();
         unexplored_nodes.pop();
+        lb = current_node->sol_value;
         
         // Solve the master problem to obtain a lower bound
         current_node->solve();
@@ -94,11 +97,13 @@ void BBTree::explore_tree() {
             }
         }
         
-        float gap = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
+        float gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
+        float gap = ((ub - lb) / lb) * 100;
         
         cout << setw(20) << unexplored_nodes.size();
         cout << setw(20) << current_node->sol_value;
         cout << setw(20) << ub;
+        cout << setw(19) << setprecision(6) << gap_node << "\%";
         cout << setw(19) << setprecision(6) << gap << "\%";
         cout << setw(20) << pool->size() << endl;
     }
