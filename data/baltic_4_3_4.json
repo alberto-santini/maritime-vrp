@@ -10,7 +10,7 @@
         "capacity":         450,
         "base_cost":        240,
         "speeds":           [40, 48, 56],
-        "speeds_cost":      [0.00182, 0.00314, 0.00498]
+        "speeds_cost":      [1.82, 3.14, 4.98]
         },
         {
         "name":             "Panamax_1200",
@@ -19,7 +19,7 @@
         "capacity":         1200,
         "base_cost":        400,
         "speeds":           [48, 62, 76],
-        "speeds_cost":      [0.00260, 0.00558, 0.01030]
+        "speeds_cost":      [2.60, 5.58, 10.30]
         }
     ],
     "ports": [
