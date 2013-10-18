@@ -1,0 +1,68 @@
+  # unexplored nodes    LB at node            LB            UB         Gap at node                 Gap   # columns in pool    # BB Nodes
+                   0        474405   3.40282e+38        474405                  0%               -100%                1915             1
+
+*** SOLUTION ***
+*** OBTAINED FROM LP ***
+49905.9 | 0 1   0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     1 0     0 0     0 0     0 0     1 0     0 0     | 0 1 by labelling on the 0.100000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [BJCOO, de, 40, dem: 683]
+[BJCOO, de, 40, dem: 683] -> [CIABJ, pu, 48, dem: 326]
+[CIABJ, pu, 48, dem: 326] -> [LRMLW, pu, 55, dem: 52]
+[LRMLW, pu, 55, dem: 52] -> [ESALG, de, 83, dem: 0]
+ 40096 | 0 0    0 0     0 0     0 0     0 0     0 0     0 0     0 0     1 0     0 0     0 0     0 0     0 0     1 1     0 0     0 0     1 0     0 0     | 1 0 by labelling on the 0.200000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [GWOXB, de, 24, dem: 5]
+[GWOXB, de, 24, dem: 5] -> [GWOXB, pu, 24, dem: 40]
+[GWOXB, pu, 24, dem: 40] -> [GHTKD, pu, 55, dem: 227]
+[GHTKD, pu, 55, dem: 227] -> [LRMLW, pu, 63, dem: 52]
+[LRMLW, pu, 63, dem: 52] -> [ESALG, de, 83, dem: 0]
+40103.6 | 0 0   1 0     0 0     1 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     1 0     0 0     0 0     0 1     | 1 0 by labelling on the 0.200000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [TGLFW, de, 29, dem: 412]
+[TGLFW, de, 29, dem: 412] -> [GALBV, pu, 38, dem: 54]
+[GALBV, pu, 38, dem: 54] -> [GNCKY, pu, 60, dem: 59]
+[GNCKY, pu, 60, dem: 59] -> [SNDKR, pu, 67, dem: 189]
+[SNDKR, pu, 67, dem: 189] -> [ESALG, de, 83, dem: 0]
+50944.7 | 0 0   0 1     0 0     0 0     0 0     0 1     0 0     1 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 1     0 0     1 0     | 0 1 by labelling on the 0.300000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [CGPNR, de, 29, dem: 133]
+[CGPNR, de, 29, dem: 133] -> [AOLOB, de, 35, dem: 311]
+[AOLOB, de, 35, dem: 311] -> [GALBV, de, 45, dem: 128]
+[GALBV, de, 45, dem: 128] -> [CMDLA, pu, 51, dem: 286]
+[CMDLA, pu, 51, dem: 286] -> [TGLFW, pu, 57, dem: 140]
+[TGLFW, pu, 57, dem: 140] -> [ESALG, de, 83, dem: 0]
+50234.9 | 1 0   0 0     0 0     0 0     0 1     0 0     0 0     0 1     0 0     0 0     0 0     0 0     0 1     0 0     0 0     0 0     0 0     0 0     | 0 1 by labelling on the 0.300000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [SLFNA, de, 16, dem: 101]
+[SLFNA, de, 16, dem: 101] -> [CMDLA, de, 30, dem: 274]
+[CMDLA, de, 30, dem: 274] -> [CIABJ, de, 39, dem: 317]
+[CIABJ, de, 39, dem: 317] -> [BJCOO, pu, 46, dem: 94]
+[BJCOO, pu, 46, dem: 94] -> [ESALG, de, 83, dem: 0]
+50258.1 | 0 0   1 0     0 0     0 0     0 0     0 0     0 0     0 0     0 1     1 0     0 0     1 0     0 0     0 0     0 0     0 0     0 0     0 0     | 0 1 by labelling on the 0.300000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [GHTKD, de, 28, dem: 785]
+[GHTKD, de, 28, dem: 785] -> [GALBV, pu, 38, dem: 54]
+[GALBV, pu, 38, dem: 54] -> [CDMAT, pu, 47, dem: 17]
+[CDMAT, pu, 47, dem: 17] -> [GAPOG, pu, 52, dem: 8]
+[GAPOG, pu, 52, dem: 8] -> [ESALG, de, 83, dem: 0]
+51391.2 | 0 0   0 0     0 1     0 0     0 0     0 0     0 1     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     | 0 1 by labelling on the 0.400000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [CDBOA, de, 29, dem: 60]
+[CDBOA, de, 29, dem: 60] -> [AOLAD, de, 34, dem: 696]
+[AOLAD, de, 34, dem: 696] -> [ESALG, de, 83, dem: 0]
+49907.2 | 0 0   0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     1 1     0 0     0 0     0 0     0 0     0 0     1 0     0 0     | 0 1 by labelling on the 0.400000-reduced graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [NGAPP, de, 42, dem: 800]
+[NGAPP, de, 42, dem: 800] -> [NGAPP, pu, 42, dem: 88]
+[NGAPP, pu, 42, dem: 88] -> [LRMLW, pu, 55, dem: 52]
+[LRMLW, pu, 55, dem: 52] -> [ESALG, de, 83, dem: 0]
+40450.1 | 0 0   0 0     0 0     0 1     1 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 0     0 1     0 0     | 1 0 by labelling on the complete graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [GNCKY, de, 23, dem: 267]
+[GNCKY, de, 23, dem: 267] -> [LRMLW, de, 29, dem: 142]
+[LRMLW, de, 29, dem: 142] -> [SLFNA, pu, 58, dem: 16]
+[SLFNA, pu, 58, dem: 16] -> [ESALG, de, 83, dem: 0]
+ 51113 | 0 0    0 0     1 0     0 0     0 0     1 0     1 0     0 0     0 0     0 1     0 0     0 1     0 0     0 0     0 1     1 0     0 0     0 0     | 0 1 by labelling on the complete graph  selected with coefficient 1
+[ESALG, pu, 0, dem: 0] -> [SNDKR, de, 14, dem: 565]
+[SNDKR, de, 14, dem: 565] -> [GAPOG, de, 30, dem: 2]
+[GAPOG, de, 30, dem: 2] -> [CDMAT, de, 35, dem: 220]
+[CDMAT, de, 35, dem: 220] -> [AOLAD, pu, 40, dem: 2]
+[AOLAD, pu, 40, dem: 2] -> [CGPNR, pu, 45, dem: 19]
+[CGPNR, pu, 45, dem: 19] -> [AOLOB, pu, 51, dem: 51]
+[AOLOB, pu, 51, dem: 51] -> [CDBOA, pu, 55, dem: 0]
+[CDBOA, pu, 55, dem: 0] -> [ESALG, de, 83, dem: 0]
+
+real    1m12.829s
+user    1m9.156s
+sys     0m3.664s
