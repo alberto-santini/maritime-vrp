@@ -27,6 +27,7 @@ typedef vector<Edge> Path;
 
 typedef pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
 typedef vector<VisitRule> VisitRuleList;
+typedef pair<std::shared_ptr<Node>, std::shared_ptr<Node>> IsolateRule;
 
 class Graph {
 public:
@@ -55,6 +56,7 @@ public:
         after n1->port */
     void unite_ports(VisitRule vr);
     void separate_ports(VisitRule vr);
+    void isolate_port(std::shared_ptr<Node> n);
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
     std::shared_ptr<Graph> reduce_graph(const float lambda) const;

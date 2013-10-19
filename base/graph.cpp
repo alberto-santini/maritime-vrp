@@ -167,87 +167,18 @@ void Graph::separate_ports(VisitRule vr) {
     prepare_for_labelling();
 }
 
-// std::shared_ptr<Graph> Graph::unite_ports(VisitRule vr) {
-//     std::shared_ptr<Node> n1, n2;
-//     tie(n1, n2) = vr;
-//     
-//     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
-//         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
-//     }
-//     
-//     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
-//         throw runtime_error("Trying to unite ports of nodes not both in this graph");
-//     }
-//     
-//     string new_name = name + " uniting " + n1->port->name + " with " + n2->port->name;
-//     std::shared_ptr<Graph> unite_graph = make_shared<Graph>(graph, vessel_class, new_name);
-//     
-//     pair<vit, vit> vp;
-//     for(vp = vertices(unite_graph->graph); vp.first != vp.second; ++vp.first) {
-//         Vertex v1 = *vp.first;
-//         
-//         if(unite_graph->graph[v1]->same_row_as(*n1)) {
-//             oeit ei, ei_end, ei_next;
-//             tie(ei, ei_end) = out_edges(v1, unite_graph->graph);
-//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-//                 ++ei_next;
-//                 Vertex v2 = target(*ei, unite_graph->graph);
-//                 if(!unite_graph->graph[v2]->same_row_as(*n2)) {
-//                     remove_edge(*ei, unite_graph->graph);
-//                 }
-//             }
-//         } else if(unite_graph->graph[v1]->same_row_as(*n2)) {
-//             ieit ei, ei_end, ei_next;
-//             tie(ei, ei_end) = in_edges(v1, unite_graph->graph);
-//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-//                 ++ei_next;
-//                 Vertex v2 = source(*ei, unite_graph->graph);
-//                 if(!unite_graph->graph[v2]->same_row_as(*n1)) {
-//                     remove_edge(*ei, unite_graph->graph);
-//                 }
-//             }
-//         }
-//     }
-//     
-//     unite_graph->prepare_for_labelling();
-//     return unite_graph;
-// }
-// 
-// std::shared_ptr<Graph> Graph::separate_ports(VisitRule vr) {
-//     std::shared_ptr<Node> n1, n2;
-//     tie(n1, n2) = vr;
-//     
-//     if(n1->n_type != NodeType::REGULAR_PORT || n2->n_type != NodeType::REGULAR_PORT) {
-//         throw runtime_error("Trying to unite ports of nodes that are not both regular nodes");
-//     }
-//     
-//     if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
-//         throw runtime_error("Trying to unite ports of nodes not both in this graph");
-//     }
-//     
-//     string new_name = name + " separating " + n1->port->name + " with " + n2->port->name;
-//     std::shared_ptr<Graph> separate_graph = make_shared<Graph>(graph, vessel_class, new_name);
-// 
-//     pair<vit, vit> vp;
-//     for(vp = vertices(separate_graph->graph); vp.first != vp.second; ++vp.first) {
-//         Vertex v1 = *vp.first;
-//         
-//         if(separate_graph->graph[v1]->same_row_as(*n1)) {
-//             oeit ei, ei_end, ei_next;
-//             tie(ei, ei_end) = out_edges(v1, separate_graph->graph);
-//             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-//                 ++ei_next;
-//                 Vertex v2 = target(*ei, separate_graph->graph);
-//                 if(graph[v2]->same_row_as(*n2)) {
-//                     remove_edge(*ei, separate_graph->graph);
-//                 }
-//             }
-//         }
-//     }
-//     
-//     separate_graph->prepare_for_labelling();
-//     return separate_graph;
-// }
+void Graph::isolate_port(std::shared_ptr<Node> n) {
+    name = name + " isolating " + n->port->name;
+    
+    pair<vit, vit> vp;
+    for(vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+        if(graph[*vp.first]->same_row_as(*n)) {
+            clear_vertex(*vp.first, graph);
+        }
+    }
+    
+    prepare_for_labelling();
+}
 
 std::shared_ptr<Graph> Graph::reduce_graph(const float lambda) const {
     float cost_limit = lambda * max_dual_prize();

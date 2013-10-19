@@ -4,7 +4,7 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb) {
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb, const IsolateRule isolate_rule) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), isolate_rule(isolate_rule) {
     sol_value = numeric_limits<float>::max();
     mip_sol_value = numeric_limits<float>::max();
     make_local_graphs();
@@ -27,6 +27,31 @@ void BBNode::make_local_graphs() {
         std::shared_ptr<VesselClass> vc = vr.first->vessel_class;
         std::shared_ptr<Graph> g = new_graphs.at(vc);
         g->separate_ports(vr);
+    }
+    
+    if(isolate_rule.first != nullptr && isolate_rule.second != nullptr) {
+        for(auto& vg : new_graphs) {
+            pair<vit, vit> vp;
+            std::shared_ptr<Graph> g = vg.second;
+            bool found_first = false;
+            bool found_second = false;
+        
+            for(vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
+                if(g->graph[*vp.first]->same_row_as(*isolate_rule.first) && !found_first) {
+                    found_first = true;
+                    g->isolate_port(g->graph[*vp.first]);
+                    continue;
+                }
+                if(g->graph[*vp.first]->same_row_as(*isolate_rule.second) && !found_second) {
+                    found_second = true;
+                    g->isolate_port(g->graph[*vp.first]);
+                    continue;
+                }
+                if(found_first && found_second) {
+                    break;
+                }
+            }
+        }
     }
     
     local_graphs = new_graphs;

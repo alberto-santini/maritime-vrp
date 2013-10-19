@@ -22,6 +22,7 @@ public:
 
     VisitRuleList               unite_rules;
     VisitRuleList               separate_rules;
+    IsolateRule                 isolate_rule;
     
     /*  The optimal columns selected by the LP solver with the coefficient */
     vector<pair<Column, float>> base_columns;
@@ -45,7 +46,8 @@ public:
            const ColumnPool local_pool,
            const VisitRuleList unite_rules,
            const VisitRuleList separate_rules,
-           const float father_lb);
+           const float father_lb,
+           const IsolateRule isolate_rule = IsolateRule());
     
     void solve();
     bool solve_integer(const ColumnPool& feasible_columns);
