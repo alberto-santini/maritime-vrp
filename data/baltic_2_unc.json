@@ -1,5 +1,5 @@
 {
-    "num_ports":            11,
+    "num_ports":            12,
     "num_times":            84,
     "num_vessel_classes":   2,
     "vessel_classes": [
@@ -10,7 +10,7 @@
         "capacity":         450,
         "base_cost":        120,
         "speeds":           [20, 24, 28],
-        "speeds_cost":      [0.00091, 0.00157, 0.00249]
+        "speeds_cost":      [0.91, 1.57, 2.49]
         },
         {
         "name":             "Panamax_1200",
@@ -19,7 +19,7 @@
         "capacity":         1200,
         "base_cost":        200,
         "speeds":           [24, 31, 38],
-        "speeds_cost":      [0.00130, 0.00279, 0.00515]
+        "speeds_cost":      [1.30, 2.79, 5.15]
         }
     ],
     "ports": [
@@ -37,7 +37,7 @@
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [0, 447, 1060, 1178, 366, 832, 545, 762, 362, 447, 1075]
+        "distances":        [0, 447, 1060, 1178, 366, 832, 545, 762, 362, 447, 1075, 292]
         },
         {
         "name":             "DKAAR",
@@ -46,14 +46,14 @@
         "delivery_dem":     456,
         "allowed_vc":       [true, true],
         "calling_fee":      [207.81, 529.46],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
-        "pickup_hand":      2,
-        "delivery_hand":    2,
+        "pickup_trans":     50,
+        "delivery_trans":   45,
+        "pickup_hand":      1,
+        "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [447, 0, 776, 819, 348, 456, 577, 406, 139, 432, 796]
+        "distances":        [447, 0, 776, 819, 348, 456, 577, 406, 139, 432, 796, 219]
         },
         {
         "name":             "FIRAU",
@@ -62,14 +62,14 @@
         "delivery_dem":     18,
         "allowed_vc":       [true, true],
         "calling_fee":      [85.5, 180.75],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     44,
+        "delivery_trans":   44,
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [1060, 776, 0, 616, 961, 678, 1190, 608, 782, 1045, 541]
+        "distances":        [1060, 776, 0, 616, 961, 678, 1190, 608, 782, 1045, 541, 832]
         },
         {
         "name":             "RULED",
@@ -78,14 +78,14 @@
         "delivery_dem":     1200,
         "allowed_vc":       [true, true],
         "calling_fee":      [206.37, 234.12],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     48,
+        "delivery_trans":   54,
         "pickup_hand":      2,
-        "delivery_hand":    5,
+        "delivery_hand":    4,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [1178, 819, 616, 0, 1079, 580, 1291, 578, 838, 1163, 113]
+        "distances":        [1178, 819, 616, 0, 1079, 580, 1291, 578, 838, 1163, 113, 950]
         },
         {
         "name":             "NOSVG",
@@ -94,14 +94,14 @@
         "delivery_dem":     65,
         "allowed_vc":       [true, true],
         "calling_fee":      [23.28, 33.78],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     56,
+        "delivery_trans":   48,
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [366, 348, 961, 1079, 0, 733, 278, 663, 263, 111, 976]
+        "distances":        [366, 348, 961, 1079, 0, 733, 278, 663, 263, 111, 976, 142]
         },
         {
         "name":             "RUKGD",
@@ -110,14 +110,14 @@
         "delivery_dem":     7,
         "allowed_vc":       [true, true],
         "calling_fee":      [45.83, 66.08],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     56,
+        "delivery_trans":   39,
         "pickup_hand":      2,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [832, 456, 678, 580, 733, 0, 962, 70, 533, 817, 475]
+        "distances":        [832, 456, 678, 580, 733, 0, 962, 70, 533, 817, 475, 604]
         },
         {
         "name":             "NOAES",
@@ -126,14 +126,14 @@
         "delivery_dem":     10,
         "allowed_vc":       [true, true],
         "calling_fee":      [103.12, 200.62],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     39,
+        "delivery_trans":   51,
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892, 453, 167, 1178]
+        "distances":        [545, 577, 1190, 1291, 278, 962, 0, 892, 453, 167, 1178, 393]
         },
         {
         "name":             "PLGDY",
@@ -142,14 +142,14 @@
         "delivery_dem":     98,
         "allowed_vc":       [true, true],
         "calling_fee":      [99.78, 203.28],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     48,
+        "delivery_trans":   48,
         "pickup_hand":      2,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [762, 406, 608, 578, 663, 70, 892, 0, 463, 747, 514]
+        "distances":        [762, 406, 608, 578, 663, 70, 892, 0, 463, 747, 514, 534]
         },
         {
         "name":             "SEGOT",
@@ -158,14 +158,14 @@
         "delivery_dem":     660,
         "allowed_vc":       [true, true],
         "calling_fee":      [187.67, 197.42],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
-        "pickup_hand":      3,
+        "pickup_trans":     39,
+        "delivery_trans":   54,
+        "pickup_hand":      2,
         "delivery_hand":    3,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [362, 139, 782, 838, 263, 533, 453, 463, 0, 347, 725]
+        "distances":        [362, 139, 782, 838, 263, 533, 453, 463, 0, 347, 725, 134]
         },
         {
         "name":             "NOBGO",
@@ -174,14 +174,14 @@
         "delivery_dem":     17,
         "allowed_vc":       [true, true],
         "calling_fee":      [69.47, 169.47],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     39,
+        "delivery_trans":   54,
         "pickup_hand":      1,
         "delivery_hand":    1,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [447, 432, 1045, 1163, 111, 817, 167, 747, 347, 0, 1060]
+        "distances":        [447, 432, 1045, 1163, 111, 817, 167, 747, 347, 0, 1060, 226]
         },
         {
         "name":             "FIKTK",
@@ -190,14 +190,30 @@
         "delivery_dem":     187,
         "allowed_vc":       [true, true],
         "calling_fee":      [47.87, 86.87],
-        "pickup_trans":     84,
-        "delivery_trans":   84,
+        "pickup_trans":     39,
+        "delivery_trans":   39,
         "pickup_hand":      2,
         "delivery_hand":    2,
         "num_tw":           0,
         "tw_left":          [],
         "tw_right":         [],
-        "distances":        [1075, 796, 541, 113, 976, 475, 1178, 514, 725, 1060, 0]
+        "distances":        [1075, 796, 541, 113, 976, 475, 1178, 514, 725, 1060, 0, 847]
+        },
+        {
+        "name":             "NOKRS",
+        "hub":              false,
+        "pickup_dem":       16,
+        "delivery_dem":     6,
+        "allowed_vc":       [true, true],
+        "calling_fee":      [106.63, 241.63],
+        "pickup_trans":     35,
+        "delivery_trans":   51,
+        "pickup_hand":      1,
+        "delivery_hand":    1,
+        "num_tw":           0,
+        "tw_left":          [],
+        "tw_right":         [],
+        "distances":        [292, 219, 832, 950, 142, 604, 393, 534, 134, 226, 847, 0]
         }
     ]
 }

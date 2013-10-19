@@ -20,6 +20,8 @@ public:
     std::shared_ptr<ColumnPool>     pool;
     NodeQueue                       unexplored_nodes;
     float                           ub;
+    float                           lb;
+    int                             bb_nodes_generated;
     std::shared_ptr<BBNode>         node_attaining_ub;
     BoundType                       node_bound_type;
     

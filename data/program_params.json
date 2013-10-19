@@ -4,7 +4,7 @@
   "lambda_start":                   0.1,
   "lambda_end":                     1,
   "lambda_increment":               0.1,
-  "max_cols_to_solve_mp":           500,
+  "max_cols_to_solve_mp":           10000,
   "gap_to_be_considered_optimal":   0.01,
   "dummy_column_price":             999999
 }
