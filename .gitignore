@@ -15,3 +15,6 @@
 *.dSYM
 main
 .DS_Store
+
+data/problem_data.json
+Makefile

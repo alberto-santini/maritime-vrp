@@ -7,6 +7,7 @@
 BBTree::BBTree() {
     prob = make_shared<Problem>();
     ub = numeric_limits<float>::max();
+    lb = numeric_limits<float>::max();
 
     Column dummy(prob);
     dummy.make_dummy(prob->params.dummy_column_price);
@@ -19,20 +20,25 @@ BBTree::BBTree() {
     
     node_attaining_ub = root_node;
     node_bound_type = BoundType::FROM_LP;
+    bb_nodes_generated = 1;
 }
 
 void BBTree::explore_tree() {
     cout << setw(20) << "# unexplored nodes";
-    cout << setw(20) << "LB at node";
-    cout << setw(20) << "UB";
+    cout << setw(14) << "LB at node";
+    cout << setw(14) << "LB";
+    cout << setw(14) << "UB";
     cout << setw(20) << "Gap at node";
-    cout << setw(20) << "# columns in pool" << endl;
+    cout << setw(20) << "Gap";
+    cout << setw(20) << "# columns in pool";
+    cout << setw(14) << "# BB Nodes" << endl;
     
     while(!unexplored_nodes.empty()) {
         cerr << "Nodes in tree: " << unexplored_nodes.size() << endl;
         
         std::shared_ptr<BBNode> current_node = unexplored_nodes.top();
         unexplored_nodes.pop();
+        lb = current_node->father_lb;
         
         // Solve the master problem to obtain a lower bound
         current_node->solve();
@@ -94,13 +100,17 @@ void BBTree::explore_tree() {
             }
         }
         
-        float gap = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
+        float gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
+        float gap = ((ub - lb) / lb) * 100;
         
         cout << setw(20) << unexplored_nodes.size();
-        cout << setw(20) << current_node->sol_value;
-        cout << setw(20) << ub;
+        cout << setw(14) << current_node->sol_value;
+        cout << setw(14) << lb;
+        cout << setw(14) << ub;
+        cout << setw(19) << setprecision(6) << gap_node << "\%";
         cout << setw(19) << setprecision(6) << gap << "\%";
-        cout << setw(20) << pool->size() << endl;
+        cout << setw(20) << pool->size();
+        cout << setw(14) << bb_nodes_generated << endl;
     }
     
     cout << endl << "*** SOLUTION ***" << endl;
@@ -160,6 +170,7 @@ void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode
                 current_node->sol_value
             )
         );
+        bb_nodes_generated++;
     }
 }
 
@@ -185,12 +196,17 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                     std::shared_ptr<Node> n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
                     if(!n_inner_src->same_row_as(*n_src)) {
                         cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << endl;
-                        VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s;
+                        VisitRuleList unite_rules_u, separate_rules_u, unite_rules_s, separate_rules_s, unite_rules_b, separate_rules_b;
                         unite_rules_u.push_back(make_pair(n_src, n));
+                        separate_rules_u.push_back(make_pair(n_inner_src, n_inner));
+                        unite_rules_s.push_back(make_pair(n_inner_src, n_inner));
                         separate_rules_s.push_back(make_pair(n_src, n));
+                        separate_rules_b.push_back(make_pair(n_src, n));
+                        separate_rules_b.push_back(make_pair(n_inner_src, n_inner));
                         
-                        cerr << "\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << endl;
-                        // Forcing the traversal
+                        cerr << "\t\t\tCreating child node:" << endl;
+                        cerr << "\t\t\t\tForcing the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
                         unexplored_nodes.push(
                             make_shared<BBNode>(
                                 current_node->prob,
@@ -203,8 +219,9 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                             )
                         );
                         
-                        cerr << "\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << endl;
-                        // Forbidding the traversal        
+                        cerr << "\t\t\tCreating child node:" << endl;
+                        cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
                         unexplored_nodes.push(
                             make_shared<BBNode>(
                                 current_node->prob,
@@ -216,6 +233,24 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->sol_value
                             )
                         );
+                                
+                        cerr << "\t\t\tCreating child node:" << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << " for " << n->vessel_class->name << endl;
+                        cerr << "\t\t\t\tForbidding the traversal of " << n_inner_src->port->name << " -> " << n_inner->port->name << " for " << n_inner->vessel_class->name << endl;
+                        // Forbidding the traversal        
+                        unexplored_nodes.push(
+                            make_shared<BBNode>(
+                                current_node->prob,
+                                current_node->local_graphs,
+                                current_node->pool,
+                                current_node->local_pool,
+                                unite_rules_b,
+                                separate_rules_b,
+                                current_node->sol_value
+                            )
+                        );
+                                
+                        bb_nodes_generated += 2;
                                 
                         goto exit_nested_loops;
                     }

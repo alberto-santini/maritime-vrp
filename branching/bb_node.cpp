@@ -64,6 +64,7 @@ void BBNode::solve() {
     cerr << "\tGraphs at this node:" << endl;
     for(const auto& vg : local_graphs) {
         cerr << "\t\tVessel class: " << vg.first->name << endl;
+        cerr << "\t\t\t" << vg.second->name << endl;
         cerr << "\t\t\t" << num_vertices(vg.second->graph) << " vertices" << endl;
         cerr << "\t\t\t" << num_edges(vg.second->graph) << " edges" << endl;
     }
