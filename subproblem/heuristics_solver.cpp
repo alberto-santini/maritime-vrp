@@ -10,7 +10,7 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
     Vertex h2 = g->h2().second;
     struct EdgeWithCost { Edge e; float c; float rc; };
 
-    srand(time(NULL) + 12345654321);
+    srand(12345654321);
 
     for(int i = 0; i < params.theta; i++) {
         Vertex current = h1;
@@ -81,7 +81,7 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
     Vertex h2 = g->h2().second;
     struct EdgeWithCost { Edge e; float c; float rc; };
 
-    srand(time(NULL) + 98765456789);
+    srand(98765456789);
 
     for(int i = 0; i < params.theta; i++) {
         Vertex current = h2;
