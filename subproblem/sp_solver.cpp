@@ -71,12 +71,17 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     cerr << "@";
     
     float lambda = prob->params.lambda_start;
+    std::unordered_map<std::shared_ptr<VesselClass>, int> last_arcs_number;
+    for(const std::shared_ptr<VesselClass>& vc : prob->data.vessel_classes) {
+        last_arcs_number.emplace(vc, num_edges(local_graphs.at(vc)->graph));
+    }    
+    
     while(valid_sols.size() == 0 && lambda < prob->params.lambda_end + numeric_limits<float>::epsilon()) {
         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
             const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
             HeuristicsSolver hsolv(prob->params, g);
-        
-            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda);
+    
+            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda, last_arcs_number);
     
             for(const Solution& s : red_sols) {
                 if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
