@@ -34,14 +34,25 @@ public:
     BGraph                          graph;
     std::shared_ptr<VesselClass>    vessel_class;
     string                          name;
+    vector<std::shared_ptr<Arc>>    ordered_arcs;
+    
+    // In theory the correct data structure for ordered_arcs would be a single-linked
+    // list, i.e. std::forward_list. Computational experiments showed, however, that
+    // contiguity of memory is much more important in modern processors (f.ex. because
+    // of caching reasons) and that std::vector wins hands-down even in applications
+    // with a lot of insert-in-the-middle operations, such as ours.
 
     Graph() {}
     Graph(BGraph graph,
           std::shared_ptr<VesselClass> vessel_class,
-          const string name) : graph(graph), vessel_class(vessel_class), name(name) {}
+          const string name) : graph(graph), vessel_class(vessel_class), name(name),
+                               ordered_arcs(vector<std::shared_ptr<Arc>>(0)) {}
     
     void print(const bool detailed = false) const;
     void print_path(const Path& p, ostream& out = cerr) const;
+    
+    /*  Order the arcs by cost (the most expensive first) and puts them in ordered_arcs */
+    void sort_arcs();
     
     /*  The first item is true if the H1/h2 vertex has been found or false otherwise
         The second item is the vertex (in case it has been found) */
@@ -59,7 +70,7 @@ public:
     void isolate_port(std::shared_ptr<Node> n);
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
-    std::shared_ptr<Graph> reduce_graph(const float lambda) const;
+    std::shared_ptr<Graph> reduce_graph(const float percentage) const;
 
     /*  The highest dual prize among all ports */
     float max_dual_prize() const;

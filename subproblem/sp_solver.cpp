@@ -31,10 +31,10 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     
     cerr << "@";
     
-    for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+    for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
+        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);        
         HeuristicsSolver hsolv(prob->params, g);
-
+        
         vector<Solution> total = hsolv.solve_fast();
                 
         for(const Solution& s : total) {
@@ -70,18 +70,19 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     
     cerr << "@";
     
-    float lambda = prob->params.lambda_start;
-    std::unordered_map<std::shared_ptr<VesselClass>, int> last_arcs_number;
+    float percentage = 0.1;
     for(const std::shared_ptr<VesselClass>& vc : prob->data.vessel_classes) {
-        last_arcs_number.emplace(vc, num_edges(local_graphs.at(vc)->graph));
-    }    
+        local_graphs.at(vc)->sort_arcs();
+    }
     
-    while(valid_sols.size() == 0 && lambda < prob->params.lambda_end + numeric_limits<float>::epsilon()) {
+    cerr << "[";
+    while(valid_sols.size() == 0 && percentage < 1 - numeric_limits<float>::epsilon()) {
+        cerr << (int)(percentage * 10);
         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
             const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
             HeuristicsSolver hsolv(prob->params, g);
-    
-            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(lambda, last_arcs_number);
+            
+            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(percentage);
     
             for(const Solution& s : red_sols) {
                 if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
@@ -97,8 +98,9 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
                 }
             }
         }
-        lambda += prob->params.lambda_inc;
+        percentage += 0.1;
     }
+    cerr << "]";
     
     if(PEDANTIC) {
         cerr << "\t\t\tLabelling on the reduced graph." << endl;
@@ -107,7 +109,7 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     
     if(valid_sols.size() > 0) {
         for(const Solution& s : valid_sols) {
-            Column col(prob, s, "labelling on the " + to_string(lambda - prob->params.lambda_inc) + "-reduced graph");
+            Column col(prob, s, "labelling on the " + to_string(percentage - 0.1) + "-reduced graph");
             node_pool.push_back(col);
             global_pool->push_back(col);
         }
