@@ -11,9 +11,6 @@ class ProgramParams {
 public:
     int     delta;
     int     theta;
-    float   lambda_start;
-    float   lambda_end;
-    float   lambda_inc;
     int     max_cols_to_solve_mp;
     float   gap_to_be_considered_optimal; // This is given in %
     int     dummy_column_price;

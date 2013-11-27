@@ -156,23 +156,10 @@ vector<Solution> HeuristicsSolver::solve_fast() const {
     return total;
 }
 
-vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float lambda, std::unordered_map<std::shared_ptr<VesselClass>, int>& last_arcs_number) const {
+vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float percentage) const {
     vector<Solution> sols;
-    std::shared_ptr<Graph> red = g->reduce_graph(lambda);
+    std::shared_ptr<Graph> red = g->reduce_graph(percentage);
     
-    int arcs_last = last_arcs_number.at(g->vessel_class);
-    int arcs_orig = num_edges(g->graph);
-    if( num_edges(red->graph) < 1.1 * arcs_last &&
-        num_edges(red->graph) > 0.9 * arcs_orig) {
-        
-        // cout << "Edges in reduced: " << num_edges(red->graph);
-        // cout << ", Edges in previous: " << arcs_last;
-        // cout << ", Edges in complete: " << arcs_orig;
-        // cout << " => discarding" << endl;
-        return vector<Solution>();
-    }
-    
-    last_arcs_number[g->vessel_class] = num_edges(red->graph);
     vector<Path> optimal_paths;
     vector<Label> optimal_labels;
     

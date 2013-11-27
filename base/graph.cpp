@@ -38,6 +38,23 @@ void Graph::print_path(const Path& p, ostream& out) const {
     }
 }
 
+void Graph::sort_arcs() {
+    if(ordered_arcs.size() != num_edges(graph)) { 
+        pair<eit, eit> ep;
+        for(ep = edges(graph); ep.first != ep.second; ++ep.first) {
+            ordered_arcs.push_back(graph[*ep.first]);
+        }
+    
+        struct ArcComparer {
+            bool operator()(std::shared_ptr<Arc> a1, std::shared_ptr<Arc> a2) {
+                return (a2->cost - a1->cost > numeric_limits<float>::epsilon());
+            }
+        } arc_comparer;
+    
+        sort(ordered_arcs.begin(), ordered_arcs.end(), arc_comparer);
+    }
+}
+
 pair<bool, Vertex> Graph::h1() const {
     return get_vertex_by_node_type(NodeType::H1);
 }
@@ -180,8 +197,13 @@ void Graph::isolate_port(std::shared_ptr<Node> n) {
     prepare_for_labelling();
 }
 
-std::shared_ptr<Graph> Graph::reduce_graph(const float lambda) const {
-    float cost_limit = lambda * max_dual_prize();
+std::shared_ptr<Graph> Graph::reduce_graph(const float percentage) const {
+    if(ordered_arcs.size() != num_edges(graph)) {
+        throw runtime_error("Trying to reduce a graph whose edges are not sorted");
+    }
+    
+    int limit_index = floor((float) num_edges(graph) * percentage);
+    float cost_limit = ordered_arcs[limit_index]->cost;
     string new_name = name + " reduced for arc cost < " + to_string(cost_limit);
     std::shared_ptr<Graph> dest = make_shared<Graph>(graph, vessel_class, new_name);
     
