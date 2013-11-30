@@ -14,7 +14,7 @@ BBTree::BBTree() {
     pool = make_shared<ColumnPool>();
     pool->push_back(dummy);
 
-    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), numeric_limits<float>::max());
+    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), NO_FATHER_LB);
 
     unexplored_nodes.push(root_node);
     
@@ -98,6 +98,11 @@ void BBTree::explore_tree() {
                     node_bound_type = BoundType::FROM_LP;
                 }
             }
+        }
+        
+        // Used in the first iteration when there is no father node
+        if(abs(lb - NO_FATHER_LB) < numeric_limits<float>::epsilon()) {
+            lb = current_node->sol_value;
         }
         
         float gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
