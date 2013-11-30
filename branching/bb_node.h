@@ -12,6 +12,8 @@
 #include <masterproblem/mp_solver.h>
 #include <subproblem/sp_solver.h>
 
+#define NO_FATHER_LB -999
+
 class BBNode {
 public:
     const std::shared_ptr<const Problem> prob;

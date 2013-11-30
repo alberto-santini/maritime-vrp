@@ -78,26 +78,41 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     cerr << "[";
     while(valid_sols.size() == 0 && percentage < 1 - numeric_limits<float>::epsilon()) {
         cerr << (int)(percentage * 10);
+        std::shared_ptr<vector<Solution>> red_sols = std::make_shared<vector<Solution>>();
+        mutex mtx;
+        vector<thread> threads;
+        
         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
             const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
-            HeuristicsSolver hsolv(prob->params, g);
             
-            vector<Solution> red_sols = hsolv.solve_on_reduced_graph(percentage);
+            threads.push_back(thread(
+                [this, g, &red_sols, percentage, &mtx] () {                    
+                    HeuristicsSolver hsolv(prob->params, g);         
+                    vector<Solution> sols = hsolv.solve_on_reduced_graph(percentage);
     
-            for(const Solution& s : red_sols) {
-                if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
-                    discarded_prc++;
-                } else if(!s.satisfies_capacity_constraints()) {
-                    discarded_infeasible++;
-                } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
-                    discarded_generated++;
-                } else if(solution_in_pool(s, node_pool)) {
-                    discarded_in_pool++;
-                } else {
-                    valid_sols.push_back(s);
+                    lock_guard<mutex> guard(mtx);
+                    red_sols->insert(red_sols->end(), sols.begin(), sols.end());
                 }
-            }
+            ));
         }
+        
+        for(thread& t : threads) {
+            t.join();
+        }
+    
+        for(const Solution& s : *red_sols) {
+            if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+                discarded_prc++;
+            } else if(!s.satisfies_capacity_constraints()) {
+                discarded_infeasible++;
+            } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
+                discarded_generated++;
+            } else if(solution_in_pool(s, node_pool)) {
+                discarded_in_pool++;
+            } else {
+                valid_sols.push_back(s);
+            }
+        }    
         percentage += 0.1;
     }
     cerr << "]";
@@ -120,24 +135,39 @@ int SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_po
     
     cerr << "@";
     
+    std::shared_ptr<vector<Solution>> e_sols = std::make_shared<vector<Solution>>();
+    mutex mtx;
+    vector<thread> threads;
+    
     for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
         const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
-        ExactSolver esolv(g);
-
-        vector<Solution> e_sols = esolv.solve();
         
-        for(const Solution& s : e_sols) {
-            if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
-                discarded_prc++;
-            } else if(!s.satisfies_capacity_constraints()) {
-                discarded_infeasible++;
-            } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
-                discarded_generated++;
-            } else if(solution_in_pool(s, node_pool)) {
-                discarded_in_pool++;
-            } else {
-                valid_sols.push_back(s);
+        threads.push_back(thread(
+            [this, g, &e_sols, &mtx] () {                    
+                ExactSolver esolv(g);
+                vector<Solution> sols = esolv.solve();
+
+                lock_guard<mutex> guard(mtx);
+                e_sols->insert(e_sols->end(), sols.begin(), sols.end());
             }
+        ));
+    }
+    
+    for(thread& t : threads) {
+        t.join();
+    }    
+    
+    for(const Solution& s : *e_sols) {
+        if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+            discarded_prc++;
+        } else if(!s.satisfies_capacity_constraints()) {
+            discarded_infeasible++;
+        } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
+            discarded_generated++;
+        } else if(solution_in_pool(s, node_pool)) {
+            discarded_in_pool++;
+        } else {
+            valid_sols.push_back(s);
         }
     }
 
