@@ -4,7 +4,7 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb, const IsolateRule isolate_rule) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), isolate_rule(isolate_rule) {
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb, const IsolateRule isolate_rule, const bool try_elementary) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), isolate_rule(isolate_rule), try_elementary(try_elementary) {
     sol_value = numeric_limits<float>::max();
     mip_sol_value = numeric_limits<float>::max();
     make_local_graphs();
@@ -105,17 +105,22 @@ void BBNode::solve() {
     bool node_explored = false;
     while(!node_explored) {
         for(auto& vg : local_graphs) {
+            vg.second->graph[graph_bundle].old_port_duals = vg.second->graph[graph_bundle].port_duals;
             vg.second->graph[graph_bundle].port_duals = sol.port_duals;
             vg.second->graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
         }
 
         SPSolver sp_solv(prob, local_graphs);
         int sp_found_columns;
+        ColumnOrigin orig;
         
-        sp_found_columns = sp_solv.solve(local_pool, pool);
+        tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary);
 
         if(sp_found_columns > 0) {
             // If new columns are found, solve the LP again
+            if((orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {
+                try_elementary = false;
+            }
             sol = mp_solv.solve_lp(local_pool);
             cerr << "> " << sol.obj_value << " ";
         } else {

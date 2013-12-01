@@ -41,6 +41,9 @@ public:
     /*  Used to determine if a solution is integral, or with cost < 0 */
     static constexpr float      cplex_epsilon = 0.0000001;
     
+    // Should we still try to run the ESPPRC labelling at this node?
+    bool                        try_elementary;
+    
     BBNode() {}
     BBNode(const std::shared_ptr<const Problem> prob,
            const GraphMap local_graphs,
@@ -49,7 +52,8 @@ public:
            const VisitRuleList unite_rules,
            const VisitRuleList separate_rules,
            const float father_lb,
-           const IsolateRule isolate_rule = IsolateRule());
+           const IsolateRule isolate_rule = IsolateRule(),
+           const bool try_elementary = true);
     
     void solve();
     bool solve_integer(const ColumnPool& feasible_columns);

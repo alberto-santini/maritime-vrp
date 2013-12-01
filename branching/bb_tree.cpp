@@ -257,7 +257,7 @@ void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
     
     for(const Column& c : current_node->local_pool) {
         if(!c.dummy && !c.has_cycles()) {
-            feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination"));
+            feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination", ColumnOrigin::MIP));
         }
     }
     

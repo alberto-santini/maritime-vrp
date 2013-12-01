@@ -4,7 +4,7 @@
 
 #include <column/column.h>
 
-Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by) : prob(prob), created_by(created_by) {
+Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by, const ColumnOrigin origin) : prob(prob), created_by(created_by), origin(origin) {
     const std::shared_ptr<const Graph> g = prob->graphs.at(sol.vessel_class);
     const std::shared_ptr<const Graph> node_g = sol.g;
     
