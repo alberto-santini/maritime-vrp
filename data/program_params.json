@@ -2,6 +2,11 @@
   "delta":                          10,
   "theta":                          100,
   "max_cols_to_solve_mp":           10000,
-  "gap_to_be_considered_optimal":   0.01,
-  "dummy_column_price":             999999
+  "dummy_column_price":             999999,
+  "remove_additional_arcs":         false,
+  "try_elementary_labelling":       false,
+  "try_smart_graph_reduction":      false,
+  "try_reduced_labelling":          true,
+  "smart_min_chance":               0.1,
+  "smart_max_chance":               0.6
 }
