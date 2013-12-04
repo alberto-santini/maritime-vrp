@@ -49,6 +49,7 @@ void Column::make_dummy(const float huge_cost) {
     vc_coeff = vector<float>(prob->data.num_vessel_classes, 0);
     dummy = true;
     created_by = "dummy";
+    origin = ColumnOrigin::NONE;
 }
 
 bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
