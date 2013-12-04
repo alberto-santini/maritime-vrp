@@ -13,7 +13,7 @@ BBTree::BBTree() {
     dummy.make_dummy(prob->params.dummy_column_price);
     pool = make_shared<ColumnPool>();
     pool->push_back(dummy);
-
+    
     std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), NO_FATHER_LB);
 
     unexplored_nodes.push(root_node);

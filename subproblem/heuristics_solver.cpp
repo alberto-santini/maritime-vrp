@@ -202,9 +202,9 @@ vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float perce
     return sols;
 }
 
-vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float percentage) const {
+vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage, const bool smart) const {
     vector<Solution> sols;
-    std::shared_ptr<Graph> red = g->reduce_graph(percentage);
+    std::shared_ptr<Graph> red = smart ? g->smart_reduce_graph(params.smart_min_chance, params.smart_max_chance) : g->reduce_graph(percentage);
     
     vector<Path> optimal_paths;
     vector<Label> optimal_labels;

@@ -42,11 +42,8 @@ public:
     // of caching reasons) and that std::vector wins hands-down even in applications
     // with a lot of insert-in-the-middle operations, such as ours.
 
-    Graph() {}
-    Graph(BGraph graph,
-          std::shared_ptr<VesselClass> vessel_class,
-          const string name) : graph(graph), vessel_class(vessel_class), name(name),
-                               ordered_arcs(vector<std::shared_ptr<Arc>>(0)) {}
+    Graph() : graph(BGraph()), vessel_class(nullptr), name(""), ordered_arcs(vector<std::shared_ptr<Arc>>()) {}
+    Graph(BGraph graph, std::shared_ptr<VesselClass> vessel_class, const string name) : graph(graph), vessel_class(vessel_class), name(name), ordered_arcs(vector<std::shared_ptr<Arc>>()) {}
     
     void print(const bool detailed = false) const;
     void print_path(const Path& p, ostream& out = cerr) const;
@@ -71,9 +68,11 @@ public:
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
     std::shared_ptr<Graph> reduce_graph(const float percentage) const;
+    std::shared_ptr<Graph> smart_reduce_graph(const float min_chance, const float max_chance) const;
 
-    /*  The highest dual prize among all ports */
+    /*  The highest/lowest dual prize among all ports */
     float max_dual_prize() const;
+    float min_dual_prize() const;
 
     /*  The first item is true if the vertex has been found or false otherwise
         The second item is the vertex (in case it has been found) */

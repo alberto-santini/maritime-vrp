@@ -77,97 +77,95 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
     
     /********************** ELEMENTARY LABELLING ON THE REDUCED GRAPH **********************/
     
-    // if(try_elementary) {
-    //     cerr << "@[";
-    //
-    //     while(valid_sols.size() == 0 && percentage < PCT_END_ELEM - numeric_limits<float>::epsilon()) {
-    //         cerr << (int)(percentage * 10);
-    //         std::shared_ptr<vector<Solution>> elem_sols = std::make_shared<vector<Solution>>();
-    //         mutex mtx;
-    //         vector<thread> threads;
-    //     
-    //         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-    //             const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
-    //         
-    //             threads.push_back(thread(
-    //                 [this, g, &elem_sols, percentage, &mtx] () {                    
-    //                     HeuristicsSolver hsolv(prob->params, g);         
-    //                     vector<Solution> sols = hsolv.solve_elem_on_reduced_graph(percentage, prob);
-    // 
-    //                     lock_guard<mutex> guard(mtx);
-    //                     elem_sols->insert(elem_sols->end(), sols.begin(), sols.end());
-    //                 }
-    //             ));
-    //         }
-    //     
-    //         for(thread& t : threads) {
-    //             t.join();
-    //         }
-    // 
-    //         for(const Solution& s : *elem_sols) {
-    //             if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
-    //                 discarded_prc++;
-    //             } else if(!s.satisfies_capacity_constraints()) {
-    //                 discarded_infeasible++;
-    //             } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
-    //                 discarded_generated++;
-    //             } else if(solution_in_pool(s, node_pool)) {
-    //                 discarded_in_pool++;
-    //             } else {
-    //                 valid_sols.push_back(s);
-    //             }
-    //         }    
-    //         percentage += PCT_INCREMENT;
-    //     }
-    //     cerr << "]";
-    // 
-    //     if(PEDANTIC) {
-    //         cerr << "\t\t\tLabelling on the reduced graph." << endl;
-    //         print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-    //     }
-    // 
-    //     if(valid_sols.size() > 0) {
-    //         for(const Solution& s : valid_sols) {
-    //             Column col(prob, s, "ESPPRC", ColumnOrigin::ESPPRC);
-    //             node_pool.push_back(col);
-    //             global_pool->push_back(col);
-    //         }
-    //         return make_pair(valid_sols.size(), ColumnOrigin::ESPPRC);
-    //     } else {
-    //         discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
-    //     }
-    // }
+    if(prob->params.try_elementary_labelling && try_elementary) {
+        cerr << "@[";
     
-    /********************** LABELLING ON THE REDUCED GRAPH **********************/
+        while(valid_sols.size() == 0 && percentage < PCT_END_ELEM - numeric_limits<float>::epsilon()) {
+            cerr << (int)(percentage * 10);
+            std::shared_ptr<vector<Solution>> elem_sols = std::make_shared<vector<Solution>>();
+            mutex mtx;
+            vector<thread> threads;
+        
+            for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+                const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+            
+                threads.push_back(thread(
+                    [this, g, &elem_sols, percentage, &mtx] () {                    
+                        HeuristicsSolver hsolv(prob->params, g);         
+                        vector<Solution> sols = hsolv.solve_elem_on_reduced_graph(percentage, prob);
     
-    cerr << "@[";
+                        lock_guard<mutex> guard(mtx);
+                        elem_sols->insert(elem_sols->end(), sols.begin(), sols.end());
+                    }
+                ));
+            }
+        
+            for(thread& t : threads) {
+                t.join();
+            }
     
-    percentage = PCT_START;
-    while(valid_sols.size() == 0 && percentage < PCT_END - numeric_limits<float>::epsilon()) {
-        cerr << (int)(percentage * 10);
-        std::shared_ptr<vector<Solution>> red_sols = std::make_shared<vector<Solution>>();
+            for(const Solution& s : *elem_sols) {
+                if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+                    discarded_prc++;
+                } else if(!s.satisfies_capacity_constraints()) {
+                    discarded_infeasible++;
+                } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
+                    discarded_generated++;
+                } else if(solution_in_pool(s, node_pool)) {
+                    discarded_in_pool++;
+                } else {
+                    valid_sols.push_back(s);
+                }
+            }    
+            percentage += PCT_INCREMENT;
+        }
+        cerr << "]";
+    
+        if(PEDANTIC) {
+            cerr << "\t\t\tElementary labelling on the reduced graph." << endl;
+            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+        }
+    
+        if(valid_sols.size() > 0) {
+            for(const Solution& s : valid_sols) {
+                Column col(prob, s, "ESPPRC", ColumnOrigin::ESPPRC);
+                node_pool.push_back(col);
+                global_pool->push_back(col);
+            }
+            return make_pair(valid_sols.size(), ColumnOrigin::ESPPRC);
+        } else {
+            discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
+        }
+    }
+    
+    /********************** LABELLING ON THE SMARTLY REDUCED GRAPH **********************/
+    
+    if(prob->params.try_smart_graph_reduction) {
+        cerr << "@";
+    
+        std::shared_ptr<vector<Solution>> sred_sols = std::make_shared<vector<Solution>>();
         mutex mtx;
         vector<thread> threads;
-        
+    
         for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
             const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
-            
+
             threads.push_back(thread(
-                [this, g, &red_sols, percentage, &mtx] () {                    
+                [this, g, &sred_sols, &mtx] () {
                     HeuristicsSolver hsolv(prob->params, g);
-                    vector<Solution> sols = hsolv.solve_on_reduced_graph(percentage);
-    
+                    vector<Solution> sols = hsolv.solve_on_smart_graph();
+            
                     lock_guard<mutex> guard(mtx);
-                    red_sols->insert(red_sols->end(), sols.begin(), sols.end());
+                    sred_sols->insert(sred_sols->end(), sols.begin(), sols.end());
                 }
             ));
         }
-        
+    
         for(thread& t : threads) {
             t.join();
-        }
+        }    
     
-        for(const Solution& s : *red_sols) {
+        for(const Solution& s : *sred_sols) {
             if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints()) {
@@ -179,25 +177,85 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
             } else {
                 valid_sols.push_back(s);
             }
-        }    
-        percentage += PCT_INCREMENT;
-    }
-    cerr << "]";
-    
-    if(PEDANTIC) {
-        cerr << "\t\t\tLabelling on the reduced graph." << endl;
-        print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-    }
-    
-    if(valid_sols.size() > 0) {
-        for(const Solution& s : valid_sols) {
-            Column col(prob, s, "labelling on the " + to_string(percentage - PCT_INCREMENT) + "-reduced graph", ColumnOrigin::SPPRC_RED);
-            node_pool.push_back(col);
-            global_pool->push_back(col);
         }
-        return make_pair(valid_sols.size(), ColumnOrigin::SPPRC_RED);
-    } else {
-        discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
+
+        if(PEDANTIC) {
+            cerr << "\t\t\tLabelling on the smartly reduced graph." << endl;
+            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+        }
+       
+        if(valid_sols.size() > 0) {
+            for(const Solution& s : valid_sols) {
+                Column col(prob, s, "labelling on the smartly reduced graph", ColumnOrigin::SPPRC_SMART);
+                node_pool.push_back(col);
+                global_pool->push_back(col);
+            }
+            return make_pair(valid_sols.size(), ColumnOrigin::SPPRC_SMART);
+        }
+    }
+    
+    /********************** LABELLING ON THE REDUCED GRAPH **********************/
+    
+    if(prob->params.try_reduced_labelling) {
+        cerr << "@[";
+    
+        percentage = PCT_START;
+        while(valid_sols.size() == 0 && percentage < PCT_END - numeric_limits<float>::epsilon()) {
+            cerr << (int)(percentage * 10);
+            std::shared_ptr<vector<Solution>> red_sols = std::make_shared<vector<Solution>>();
+            mutex mtx;
+            vector<thread> threads;
+        
+            for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+                const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+            
+                threads.push_back(thread(
+                    [this, g, &red_sols, percentage, &mtx] () {                    
+                        HeuristicsSolver hsolv(prob->params, g);
+                        vector<Solution> sols = hsolv.solve_on_reduced_graph(percentage);
+    
+                        lock_guard<mutex> guard(mtx);
+                        red_sols->insert(red_sols->end(), sols.begin(), sols.end());
+                    }
+                ));
+            }
+        
+            for(thread& t : threads) {
+                t.join();
+            }
+    
+            for(const Solution& s : *red_sols) {
+                if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+                    discarded_prc++;
+                } else if(!s.satisfies_capacity_constraints()) {
+                    discarded_infeasible++;
+                } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
+                    discarded_generated++;
+                } else if(solution_in_pool(s, node_pool)) {
+                    discarded_in_pool++;
+                } else {
+                    valid_sols.push_back(s);
+                }
+            }    
+            percentage += PCT_INCREMENT;
+        }
+        cerr << "]";
+    
+        if(PEDANTIC) {
+            cerr << "\t\t\tLabelling on the reduced graph." << endl;
+            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
+        }
+    
+        if(valid_sols.size() > 0) {
+            for(const Solution& s : valid_sols) {
+                Column col(prob, s, "labelling on the " + to_string(percentage - PCT_INCREMENT) + "-reduced graph", ColumnOrigin::SPPRC_RED);
+                node_pool.push_back(col);
+                global_pool->push_back(col);
+            }
+            return make_pair(valid_sols.size(), ColumnOrigin::SPPRC_RED);
+        } else {
+            discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
+        }
     }
     
     /********************** LABELLING ON THE COMPLETE GRAPH **********************/

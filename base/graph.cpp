@@ -220,6 +220,31 @@ std::shared_ptr<Graph> Graph::reduce_graph(const float percentage) const {
     return dest;
 }
 
+std::shared_ptr<Graph> Graph::smart_reduce_graph(const float min_chance, const float max_chance) const {
+    string new_name = name + " reduced smartly";
+    std::shared_ptr<Graph> dest = make_shared<Graph>(graph, vessel_class, new_name);
+    float max_prize = max_dual_prize();
+    float min_prize = min_dual_prize();
+    
+    eit ei, ei_end, ei_next;
+    tie(ei, ei_end) = edges(dest->graph);
+    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+        ++ei_next;
+        std::shared_ptr<Node> trgt = graph[target(*ei, graph)];
+        if(trgt->n_type == NodeType::REGULAR_PORT) {
+            float dual_prize = (trgt->pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(trgt->port).first : graph[graph_bundle].port_duals.at(trgt->port).second);
+            float threshold = min_chance + (dual_prize - min_prize) * (max_chance - min_chance) / (max_prize - min_prize);
+            float rnd = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
+            if(rnd > threshold) {
+                remove_edge(*ei, dest->graph);
+            }
+        }
+    }
+    
+    dest->prepare_for_labelling();
+    return dest;
+}
+
 float Graph::max_dual_prize() const {
     float max_prize = 0;
 
@@ -229,6 +254,17 @@ float Graph::max_dual_prize() const {
     }
     
     return max_prize;
+}
+
+float Graph::min_dual_prize() const {
+    float min_prize = numeric_limits<float>::max();
+    
+    for(const auto& pp : graph[graph_bundle].port_duals) {
+        min_prize = min(min_prize, pp.second.first);
+        min_prize = min(min_prize, pp.second.second);
+    }
+    
+    return min_prize;
 }
 
 pair<bool, Vertex> Graph::get_vertex(std::shared_ptr<Port> p, const PickupType pu, const int t) const {
