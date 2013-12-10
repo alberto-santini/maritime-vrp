@@ -156,9 +156,55 @@ vector<Solution> HeuristicsSolver::solve_fast() const {
     return total;
 }
 
-vector<Solution> HeuristicsSolver::solve_on_reduced_graph(const float percentage) const {
+vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float percentage, const std::shared_ptr<const Problem> prob) const {
     vector<Solution> sols;
     std::shared_ptr<Graph> red = g->reduce_graph(percentage);
+    
+    vector<Path> optimal_paths;
+    vector<ElementaryLabel> optimal_labels;
+    
+    NodeIdFunctor nf(red);
+    ArcIdFunctor af(red);
+    
+    std::shared_ptr<VesselClass> vc = red->vessel_class;
+    VisitedPortsFlags pf;
+    
+    for(std::shared_ptr<Port> p : prob->data.ports) {
+        pf.emplace(make_pair(p, PickupType::PICKUP), false);
+        pf.emplace(make_pair(p, PickupType::DELIVERY), false);
+    }
+
+    clock_t cl_start = clock();
+
+    r_c_shortest_paths(
+        red->graph,
+        make_property_map<Vertex>(nf),
+        make_property_map<Edge>(af),
+        red->h1().second,
+        red->h2().second,
+        optimal_paths,
+        optimal_labels,
+        ElementaryLabel(vc->capacity, vc->capacity, 0, pf),
+        LabelExtender(),
+        Dominance(),
+        allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
+        default_r_c_shortest_paths_visitor()
+    );
+        
+    clock_t cl_end = clock();
+    // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
+    
+    for(int i = 0; i < optimal_paths.size(); i++) {
+        Path og_path = g->transfer_path(optimal_paths[i], red);
+        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
+    }
+        
+    return sols;
+}
+
+vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage, const bool smart) const {
+    vector<Solution> sols;
+    std::shared_ptr<Graph> red = smart ? g->smart_reduce_graph(params.smart_min_chance, params.smart_max_chance) : g->reduce_graph(percentage);
     
     vector<Path> optimal_paths;
     vector<Label> optimal_labels;

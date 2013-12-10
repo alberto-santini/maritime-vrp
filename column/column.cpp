@@ -4,7 +4,7 @@
 
 #include <column/column.h>
 
-Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by) : prob(prob), created_by(created_by) {
+Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by, const ColumnOrigin origin) : prob(prob), created_by(created_by), origin(origin) {
     const std::shared_ptr<const Graph> g = prob->graphs.at(sol.vessel_class);
     const std::shared_ptr<const Graph> node_g = sol.g;
     
@@ -49,6 +49,7 @@ void Column::make_dummy(const float huge_cost) {
     vc_coeff = vector<float>(prob->data.num_vessel_classes, 0);
     dummy = true;
     created_by = "dummy";
+    origin = ColumnOrigin::NONE;
 }
 
 bool Column::is_compatible_with_unite_rule(VisitRule vr) const {

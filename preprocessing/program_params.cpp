@@ -11,6 +11,11 @@ ProgramParams::ProgramParams(string data_file_name) {
     delta = pt.get<int>("delta");
     theta = pt.get<int>("theta");
     max_cols_to_solve_mp = pt.get<int>("max_cols_to_solve_mp");
-    gap_to_be_considered_optimal = pt.get<float>("gap_to_be_considered_optimal");
     dummy_column_price = pt.get<int>("dummy_column_price");
+    remove_additional_arcs = pt.get<bool>("remove_additional_arcs");
+    try_elementary_labelling = pt.get<bool>("try_elementary_labelling");
+    try_smart_graph_reduction = pt.get<bool>("try_smart_graph_reduction");
+    try_reduced_labelling = pt.get<bool>("try_reduced_labelling");
+    smart_min_chance = pt.get<float>("smart_min_chance");
+    smart_max_chance = pt.get<float>("smart_max_chance");
 }

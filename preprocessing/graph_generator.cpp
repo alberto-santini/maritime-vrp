@@ -4,7 +4,7 @@
 
 #include <preprocessing/graph_generator.h>
 
-std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class) {
+std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class, const bool remove_additional_arcs) {
     std::shared_ptr<Graph> g = make_shared<Graph>(BGraph(), vessel_class, "Graph for " + vessel_class->name);
     
     /*  Add vertices */
@@ -229,47 +229,49 @@ std::shared_ptr<Graph> GraphGenerator::create_graph(const ProblemData& data, std
         }
     }
     
+    if(remove_additional_arcs) {
     /* Remove arcs based on capacity constraints */
-    // for(const std::shared_ptr<Port> p : data.ports) {
-    //     for(const std::shared_ptr<Port> q : data.ports) {
-    //         if((p->name != q->name) && (p->pickup_demand + q->pickup_demand > vessel_class->capacity)) {
-    //             eit ei, ei_end, ei_next;
-    //             tie(ei, ei_end) = edges(g->graph);
-    //             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-    //                 ++ei_next;
-    //                 std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
-    //                 std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
-    //                 if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::PICKUP && target_n->pu_type == PickupType::PICKUP) {
-    //                     remove_edge(*ei, g->graph);
-    //                 }
-    //             }
-    //         }
-    //         if((p->name != q->name) && (p->delivery_demand + q->delivery_demand > vessel_class->capacity)) {
-    //             eit ei, ei_end, ei_next;
-    //             tie(ei, ei_end) = edges(g->graph);
-    //             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-    //                 ++ei_next;
-    //                 std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
-    //                 std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
-    //                 if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::DELIVERY && target_n->pu_type == PickupType::DELIVERY) {
-    //                     remove_edge(*ei, g->graph);
-    //                 }
-    //             }
-    //         }
-    //         if((p->name != q->name) && (p->pickup_demand + q->delivery_demand > vessel_class->capacity)) {
-    //             eit ei, ei_end, ei_next;
-    //             tie(ei, ei_end) = edges(g->graph);
-    //             for(ei_next = ei; ei != ei_end; ei = ei_next) {
-    //                 ++ei_next;
-    //                 std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
-    //                 std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
-    //                 if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::PICKUP && target_n->pu_type == PickupType::DELIVERY) {
-    //                     remove_edge(*ei, g->graph);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
+        for(const std::shared_ptr<Port> p : data.ports) {
+            for(const std::shared_ptr<Port> q : data.ports) {
+                if((p->name != q->name) && (p->pickup_demand + q->pickup_demand > vessel_class->capacity)) {
+                    eit ei, ei_end, ei_next;
+                    tie(ei, ei_end) = edges(g->graph);
+                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                        ++ei_next;
+                        std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
+                        std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
+                        if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::PICKUP && target_n->pu_type == PickupType::PICKUP) {
+                            remove_edge(*ei, g->graph);
+                        }
+                    }
+                }
+                if((p->name != q->name) && (p->delivery_demand + q->delivery_demand > vessel_class->capacity)) {
+                    eit ei, ei_end, ei_next;
+                    tie(ei, ei_end) = edges(g->graph);
+                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                        ++ei_next;
+                        std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
+                        std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
+                        if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::DELIVERY && target_n->pu_type == PickupType::DELIVERY) {
+                            remove_edge(*ei, g->graph);
+                        }
+                    }
+                }
+                if((p->name != q->name) && (p->pickup_demand + q->delivery_demand > vessel_class->capacity)) {
+                    eit ei, ei_end, ei_next;
+                    tie(ei, ei_end) = edges(g->graph);
+                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                        ++ei_next;
+                        std::shared_ptr<Node> source_n = g->graph[source(*ei, g->graph)];
+                        std::shared_ptr<Node> target_n = g->graph[target(*ei, g->graph)];
+                        if(source_n->port == p && target_n->port == q && source_n->pu_type == PickupType::PICKUP && target_n->pu_type == PickupType::DELIVERY) {
+                            remove_edge(*ei, g->graph);
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     /*  Do some spring cleaning */
     bool clean = false;

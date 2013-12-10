@@ -12,8 +12,13 @@ public:
     int     delta;
     int     theta;
     int     max_cols_to_solve_mp;
-    float   gap_to_be_considered_optimal; // This is given in %
     int     dummy_column_price;
+    bool    remove_additional_arcs;
+    bool    try_elementary_labelling;
+    bool    try_smart_graph_reduction;
+    bool    try_reduced_labelling;
+    float   smart_min_chance;
+    float   smart_max_chance;
     
     ProgramParams(string data_file_name = "data/program_params.json");
 };

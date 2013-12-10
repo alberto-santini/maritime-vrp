@@ -12,7 +12,7 @@
 #include <preprocessing/problem_data.h>
 
 namespace GraphGenerator {
-    std::shared_ptr<Graph> create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class);
+    std::shared_ptr<Graph> create_graph(const ProblemData& data, std::shared_ptr<VesselClass> vessel_class, const bool remove_additional_arcs);
     
     /*  Time at which a vessel arriving at port ("p","pu") at time "arrival_time" can leave that port */
     int final_time(const ProblemData& data, std::shared_ptr<Port> p, const int arrival_time, const PickupType pu);

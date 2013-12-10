@@ -13,7 +13,7 @@ BBTree::BBTree() {
     dummy.make_dummy(prob->params.dummy_column_price);
     pool = make_shared<ColumnPool>();
     pool->push_back(dummy);
-
+    
     std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), NO_FATHER_LB);
 
     unexplored_nodes.push(root_node);
@@ -257,7 +257,7 @@ void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
     
     for(const Column& c : current_node->local_pool) {
         if(!c.dummy && !c.has_cycles()) {
-            feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination"));
+            feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination", ColumnOrigin::MIP));
         }
     }
     
