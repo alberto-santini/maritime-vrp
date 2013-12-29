@@ -54,6 +54,10 @@ using std::endl;
 using std::setw;
 using std::ostream;
 using std::unitbuf;
+using std::fixed;
+// using std::defaultfloat;
+inline std::ostream& defaultfloat(std::ostream& os) { os.unsetf(std::ios_base::floatfield); return os; }
+#include <iomanip>
 using std::setprecision;
 #include <limits>
 using std::numeric_limits;
@@ -84,6 +88,8 @@ using std::thread;
 #include <mutex>
 using std::lock_guard;
 using std::mutex;
+#include <numeric>
+using std::accumulate;
 
 // CPLEX
 #include <ilcplex/ilocplex.h>

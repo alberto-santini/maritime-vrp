@@ -41,8 +41,18 @@ public:
     /*  Used to determine if a solution is integral, or with cost < 0 */
     static constexpr float      cplex_epsilon = 0.0000001;
     
-    // Should we still try to run the ESPPRC labelling at this node?
+    /* Should we still try to run the ESPPRC labelling at this node? */
     bool                        try_elementary;
+    
+    /* Time spent on SP vs MP (avg and total) */
+    vector<double>              all_times_spent_on_sp;
+    double                      avg_time_spent_on_sp;
+    double                      total_time_spent_on_sp;
+    double                      total_time_spent_on_mp;
+    double                      total_time_spent;
+    double                      max_time_spent_by_exact_solver;
+    
+    int                         depth;
     
     BBNode() {}
     BBNode(const std::shared_ptr<const Problem> prob,
@@ -52,8 +62,14 @@ public:
            const VisitRuleList unite_rules,
            const VisitRuleList separate_rules,
            const float father_lb,
+           const int depth = 0,
            const IsolateRule isolate_rule = IsolateRule(),
-           const bool try_elementary = true);
+           const bool try_elementary = true,
+           const double avg_time_spent_on_sp = 0,
+           const double total_time_spent_on_sp = 0,
+           const double total_time_spent_on_mp = 0,
+           const double total_time_spent = 0,
+           const double max_time_spent_by_exact_solver = 0);
     
     void solve();
     bool solve_integer(const ColumnPool& feasible_columns);

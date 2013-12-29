@@ -24,14 +24,20 @@ BBTree::BBTree() {
 }
 
 void BBTree::explore_tree() {
-    cout << setw(20) << "# unexplored nodes";
-    cout << setw(14) << "LB at node";
-    cout << setw(14) << "LB";
-    cout << setw(14) << "UB";
-    cout << setw(20) << "Gap at node";
-    cout << setw(20) << "Gap";
-    cout << setw(20) << "# columns in pool";
-    cout << setw(14) << "# BB Nodes" << endl;
+    cout << setw(8) << "Unexpl"; // Unexplored nodes
+    cout << setw(6) << "All"; // Number of nodes in total
+    cout << setw(12) << "LB*";
+    cout << setw(12) << "LB";
+    cout << setw(12) << "UB";
+    cout << setw(12) << "Gap*";
+    cout << setw(12) << "Gap";
+    cout << setw(6) << "Cols"; // Columns in pool
+    cout << setw(12) << "MP t"; // Time on MP
+    cout << setw(12) << "SP t"; // Time on SP
+    cout << setw(12) << "t"; // Time at node
+    cout << setw(12) << "SP* t"; // Avg time on SP
+    cout << setw(12) << "SP ex"; // Max time on Exact SP
+    cout << setw(6) << "Depth" << endl;
     
     while(!unexplored_nodes.empty()) {
         cerr << "Nodes in tree: " << unexplored_nodes.size() << endl;
@@ -108,14 +114,22 @@ void BBTree::explore_tree() {
         float gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
         float gap = ((ub - lb) / lb) * 100;
         
-        cout << setw(20) << unexplored_nodes.size();
-        cout << setw(14) << current_node->sol_value;
-        cout << setw(14) << lb;
-        cout << setw(14) << ub;
-        cout << setw(19) << setprecision(6) << gap_node << "\%";
-        cout << setw(19) << setprecision(6) << gap << "\%";
-        cout << setw(20) << pool->size();
-        cout << setw(14) << bb_nodes_generated << endl;
+        cout << fixed;
+        cout << setw(8) << unexplored_nodes.size();
+        cout << setw(6) << bb_nodes_generated;
+        cout << setw(12) << setprecision(2) << current_node->sol_value;
+        cout << setw(12) << setprecision(2) << lb;
+        cout << setw(12) << setprecision(2) << ub;
+        cout << setw(11) << setprecision(4) << gap_node << "\%";
+        cout << setw(11) << setprecision(4) << gap << "\%";
+        cout << setw(6) << pool->size();
+        cout << setw(12) << setprecision(4) << current_node->total_time_spent_on_mp;
+        cout << setw(12) << setprecision(4) << current_node->total_time_spent_on_sp;
+        cout << setw(12) << setprecision(4) << current_node->total_time_spent;
+        cout << setw(12) << setprecision(4) << current_node->avg_time_spent_on_sp;
+        cout << setw(12) << setprecision(4) << current_node->max_time_spent_by_exact_solver;
+        cout << setw(6) << current_node->depth << endl;
+        cout << defaultfloat;
     }
     
     cout << endl << "*** SOLUTION ***" << endl;
@@ -172,7 +186,8 @@ void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode
                 current_node->local_pool,
                 unite_rules,
                 separate_rules,
-                current_node->sol_value
+                current_node->sol_value,
+                current_node->depth + 1
             )
         );
         bb_nodes_generated++;
@@ -216,7 +231,8 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->local_pool,
                                 VisitRuleList(),
                                 v_rules,
-                                current_node->sol_value
+                                current_node->sol_value,
+                                current_node->depth + 1
                             )
                         );
                                 
@@ -235,6 +251,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 v_rules,
                                 VisitRuleList(),
                                 current_node->sol_value,
+                                current_node->depth + 1,
                                 i_rule
                             )
                         );

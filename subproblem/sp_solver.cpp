@@ -19,7 +19,7 @@ inline void print_report(const int sols_found, const int discarded_prc, const in
     out << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << endl;
 }
 
-pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, const bool try_elementary) const {
+pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, const bool try_elementary, double& max_time_spent_by_exact_solver) const {
     vector<Solution> valid_sols;
     
     int discarded_prc = 0;
@@ -270,9 +270,10 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
         const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
         
         threads.push_back(thread(
-            [this, g, &e_sols, &mtx] () {                    
+            [this, g, &e_sols, &mtx, &max_time_spent_by_exact_solver] () {                    
                 ExactSolver esolv(g);
-                vector<Solution> sols = esolv.solve();
+                // Writing a double should be atomic on all x86_64 (-malign-double)
+                vector<Solution> sols = esolv.solve(max_time_spent_by_exact_solver);
 
                 lock_guard<mutex> guard(mtx);
                 e_sols->insert(e_sols->end(), sols.begin(), sols.end());

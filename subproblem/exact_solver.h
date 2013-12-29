@@ -16,7 +16,7 @@ public:
     
     ExactSolver(const std::shared_ptr<const Graph> g) : g(g) {}
     
-    vector<Solution> solve() const;
+    vector<Solution> solve(double& time_spent) const;
 };
 
 #endif

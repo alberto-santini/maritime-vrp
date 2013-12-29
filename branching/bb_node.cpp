@@ -4,9 +4,10 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb, const IsolateRule isolate_rule, const bool try_elementary) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), isolate_rule(isolate_rule), try_elementary(try_elementary) {
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, GraphMap local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool local_pool, const VisitRuleList unite_rules, const VisitRuleList separate_rules, const float father_lb, const int depth, const IsolateRule isolate_rule, const bool try_elementary, const double avg_time_spent_on_sp, const double total_time_spent_on_sp, const double total_time_spent_on_mp, const double total_time_spent, const double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), isolate_rule(isolate_rule), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
     sol_value = numeric_limits<float>::max();
     mip_sol_value = numeric_limits<float>::max();
+    all_times_spent_on_sp = vector<double>(0);
     make_local_graphs();
     remove_incompatible_columns();
 }
@@ -86,6 +87,7 @@ void BBNode::remove_incompatible_columns() {
 }
 
 void BBNode::solve() {
+    clock_t node_start = clock();
     cerr << "\tGraphs at this node:" << endl;
     for(const auto& vg : local_graphs) {
         cerr << "\t\tVessel class: " << vg.first->name << endl;
@@ -97,9 +99,14 @@ void BBNode::solve() {
     // Clear any eventual previous solutions
     base_columns = vector<pair<Column, float>>();
     sol_value = 0;
-    
     MPSolver mp_solv(prob);
+    
+    clock_t mp_start = clock();
     MPLinearSolution sol = mp_solv.solve_lp(local_pool);
+    clock_t mp_end = clock();
+    
+    total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
+    
     cerr << unitbuf << "\tMP: " << sol.obj_value << " ";
 
     bool node_explored = false;
@@ -114,14 +121,24 @@ void BBNode::solve() {
         int sp_found_columns;
         ColumnOrigin orig;
         
-        tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary);
+        clock_t sp_start = clock();
+        tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary, max_time_spent_by_exact_solver);
+        clock_t sp_end = clock();
+        
+        total_time_spent_on_sp += (double(sp_end - sp_start) / CLOCKS_PER_SEC);
+        all_times_spent_on_sp.push_back((double(sp_end - sp_start) / CLOCKS_PER_SEC));
 
         if(sp_found_columns > 0) {
             // If new columns are found, solve the LP again
             if((orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {
                 try_elementary = false;
             }
+            clock_t mp_start = clock();
             sol = mp_solv.solve_lp(local_pool);
+            clock_t mp_end = clock();
+            
+            total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
+            
             cerr << "> " << sol.obj_value << " ";
         } else {
             // Otherwise, the exploration is done
@@ -133,10 +150,13 @@ void BBNode::solve() {
                 }
             }
 
+            avg_time_spent_on_sp = std::accumulate(all_times_spent_on_sp.begin(), all_times_spent_on_sp.end(), 0.0) / all_times_spent_on_sp.size();
             node_explored = true;
         }
     }
     cerr << endl;
+    clock_t node_end = clock();
+    total_time_spent = (double(node_end - node_start) / CLOCKS_PER_SEC);
 }
 
 bool BBNode::solve_integer(const ColumnPool& feasible_columns) {

@@ -4,7 +4,7 @@
 
 #include <subproblem/exact_solver.h>
 
-vector<Solution> ExactSolver::solve() const {
+vector<Solution> ExactSolver::solve(double& time_spent) const {
     vector<Solution> sols;
     
     vector<Path> optimal_paths;
@@ -17,7 +17,6 @@ vector<Solution> ExactSolver::solve() const {
     
     clock_t cl_start = clock();
     
-    // Problem here! VVV
     r_c_shortest_paths(
         g->graph,
         make_property_map<Vertex>(nf),
@@ -34,7 +33,10 @@ vector<Solution> ExactSolver::solve() const {
     );
         
     clock_t cl_end = clock();
-    // cout << "Time elapsed (on complete graph): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
+    double time_s = (double(cl_end - cl_start) / CLOCKS_PER_SEC);
+    if(time_s - time_spent > numeric_limits<double>::epsilon()) {
+        time_spent = time_s;
+    }
         
     for(int i = 0; i < optimal_paths.size(); i++) {
         sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));

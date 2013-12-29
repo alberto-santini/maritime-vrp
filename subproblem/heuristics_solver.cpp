@@ -174,7 +174,7 @@ vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float perce
         pf.emplace(make_pair(p, PickupType::DELIVERY), false);
     }
 
-    clock_t cl_start = clock();
+    // clock_t cl_start = clock();
 
     r_c_shortest_paths(
         red->graph,
@@ -191,7 +191,7 @@ vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float perce
         default_r_c_shortest_paths_visitor()
     );
         
-    clock_t cl_end = clock();
+    // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(int i = 0; i < optimal_paths.size(); i++) {
@@ -214,7 +214,7 @@ vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage
     
     std::shared_ptr<VesselClass> vc = red->vessel_class;
 
-    clock_t cl_start = clock();
+    // clock_t cl_start = clock();
 
     r_c_shortest_paths(
         red->graph,
@@ -231,7 +231,7 @@ vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage
         default_r_c_shortest_paths_visitor()
     );
         
-    clock_t cl_end = clock();
+    // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(int i = 0; i < optimal_paths.size(); i++) {
