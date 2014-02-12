@@ -23,7 +23,7 @@ public:
     
     SPSolver(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs) : prob(prob), local_graphs(local_graphs) {}
     
-    /*  Returns true if new columns were added to the pool or false otherwise */
+    /* Returns how many columns were added to the column pool and their origin */
     pair<int, ColumnOrigin> solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, const bool try_elementary, double& time_spent_by_exact_solver) const;
 };
 
