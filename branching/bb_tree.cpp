@@ -234,12 +234,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->sol_value,
                                 current_node->depth + 1
                             )
-                        );
-                                
-                        VisitRuleList unite_rules_2, separate_rules_2;
-                        IsolateRule isolate_rule_2;
-                        unite_rules_2.push_back(make_pair(n_src, n));
-                        isolate_rule_2 = make_pair(n_src, n);
+                        );  
                         
                         cerr << "\t\t\tCreating child node 2" << endl;
                         unexplored_nodes.push(
