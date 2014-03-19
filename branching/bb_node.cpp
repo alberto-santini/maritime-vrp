@@ -86,6 +86,43 @@ void BBNode::remove_incompatible_columns() {
     local_pool = new_local_pool;
 }
 
+vector<int> BBNode::column_coefficients(const Column& col) {
+    int np = prob->data.num_ports;
+    int nv = prob->data.num_vessel_classes;
+    vector<int> column_coeff;
+    
+    for(int i = 1; i < np; i++) {
+        column_coeff.push_back((int)col.port_coeff[i - 1]);
+        column_coeff.push_back((int)col.port_coeff[np - 1 + i - 1]);
+    }
+    for(int i = 0; i < nv; i++) {
+        column_coeff.push_back((int)col.vc_coeff[i]);
+    }
+    
+    return column_coeff;
+}
+
+void BBNode::check_for_duplicate_columns() {
+    ColumnPool::const_iterator iit, oit;
+    for(oit = local_pool.begin(); oit != local_pool.end(); ++oit) {
+        float o_column_cost = oit->obj_coeff;
+        vector<int> o_column_coeff = column_coefficients(*oit);
+        
+        for(iit = oit + 1; iit != local_pool.end(); ++iit) {
+            float i_column_cost = iit->obj_coeff;
+            vector<int> i_column_coeff = column_coefficients(*iit);
+            
+            if(std::equal(o_column_coeff.begin(), o_column_coeff.end(), i_column_coeff.begin())) {
+                if(fabs(o_column_cost - i_column_cost) < std::numeric_limits<float>::epsilon()) {
+                    cerr << ">>> Duplicate column - same cost!" << endl;
+                } else {
+                    cerr << ">>> Duplicate column - different cost!" << endl;
+                }
+            }
+        }
+    }
+}
+
 void BBNode::solve() {
     clock_t node_start = clock();
     cerr << "\tGraphs at this node:" << endl;
@@ -100,6 +137,10 @@ void BBNode::solve() {
     base_columns = vector<pair<Column, float>>();
     sol_value = 0;
     MPSolver mp_solv(prob);
+    
+    if(PEDANTIC) {
+        check_for_duplicate_columns();
+    }
     
     clock_t mp_start = clock();
     MPLinearSolution sol = mp_solv.solve_lp(local_pool);

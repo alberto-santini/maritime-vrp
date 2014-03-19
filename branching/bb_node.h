@@ -86,6 +86,12 @@ private:
     /*  Removes from local_pool those columns that are not compatible
         with unite_rules and separate_rules */
     void remove_incompatible_columns();
+    
+    /*  Test: I want to check if there are columns with the same
+        constraint coefficients and possibly different objective
+        function coefficients */
+    vector<int> column_coefficients(const Column& col);
+    void check_for_duplicate_columns();
 };
 
 class BBNodeCompare {
