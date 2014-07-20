@@ -25,7 +25,7 @@ public:
     std::shared_ptr<BBNode>         node_attaining_ub;
     BoundType                       node_bound_type;
     
-    BBTree();
+    BBTree(string program_params_file_name, string data_file_name);
     void explore_tree();
     
 private:

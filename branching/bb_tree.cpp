@@ -4,8 +4,8 @@
 
 #include <branching/bb_tree.h>
 
-BBTree::BBTree() {
-    prob = make_shared<Problem>();
+BBTree::BBTree(string program_params_file_name, string data_file_name) {
+    prob = make_shared<Problem>(program_params_file_name, data_file_name);
     ub = numeric_limits<float>::max();
     lb = numeric_limits<float>::max();
 

@@ -20,7 +20,7 @@ public:
     ProblemData      data;
     GraphMap         graphs;
     
-    Problem(string params_file = "data/program_params.json", string data_file = "data/problem_data.json");
+    Problem(string params_file, string data_file);
 };
 
 #endif

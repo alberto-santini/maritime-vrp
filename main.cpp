@@ -4,8 +4,13 @@
 
 #include <branching/bb_tree.h>
 
-int main() {
-    BBTree tree = BBTree();
+int main(int argc, char* argv[]) {
+    if(argc != 3) {
+        cout << "Usage: ./feeder <params_file> <data_file>" << endl;
+        return -1;
+    }
+    
+    BBTree tree = BBTree(argv[1], argv[2]);
     tree.explore_tree();
     
     return 0;
