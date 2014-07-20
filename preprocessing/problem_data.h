@@ -25,7 +25,7 @@ public:
     vector<std::shared_ptr<Port>>           ports;
     DistMap                                 distances;
     
-    ProblemData(string data_file_name = "data/problem_data.json");
+    ProblemData(string data_file_name);
 };
 
 #endif
