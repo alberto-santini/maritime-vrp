@@ -47,6 +47,7 @@ IloData MPSolver::solve(const ColumnPool& pool, const bool linear) const {
     model.add(vc_constr);
     
     IloCplex cplex(model);
+    cplex.setParam(IloCplex::Threads, 4);
     cplex.setOut(env.getNullStream());
     
     if(!cplex.solve()) {
