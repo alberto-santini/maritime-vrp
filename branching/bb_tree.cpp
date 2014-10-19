@@ -2,19 +2,24 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <algorithm>
+#include <iostream>
+#include <limits>
+#include <utility>
+
 #include <branching/bb_tree.h>
 
-BBTree::BBTree(string program_params_file_name, string data_file_name) {
-    prob = make_shared<Problem>(program_params_file_name, data_file_name);
-    ub = numeric_limits<float>::max();
-    lb = numeric_limits<float>::max();
+BBTree::BBTree(const std::string& program_params_file_name, const std::string& data_file_name) {
+    prob = std::make_shared<Problem>(program_params_file_name, data_file_name);
+    ub = std::numeric_limits<float>::max();
+    lb = std::numeric_limits<float>::max();
 
     Column dummy(prob);
     dummy.make_dummy(prob->params.dummy_column_price);
-    pool = make_shared<ColumnPool>();
+    pool = std::make_shared<ColumnPool>();
     pool->push_back(dummy);
     
-    std::shared_ptr<BBNode> root_node = make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), NO_FATHER_LB);
+    auto root_node = std::make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), no_father_lb);
 
     unexplored_nodes.push(root_node);
     
@@ -23,42 +28,46 @@ BBTree::BBTree(string program_params_file_name, string data_file_name) {
     bb_nodes_generated = 1;
 }
 
+void BBTree::print_header() const {
+    std::cout << std::setw(8) << "Unexpl"; // Unexplored nodes
+    std::cout << std::setw(6) << "All"; // Number of nodes in total
+    std::cout << std::setw(12) << "LB*";
+    std::cout << std::setw(12) << "LB";
+    std::cout << std::setw(12) << "UB";
+    std::cout << std::setw(12) << "Gap*";
+    std::cout << std::setw(12) << "Gap";
+    std::cout << std::setw(6) << "Cols"; // Columns in pool
+    std::cout << std::setw(12) << "MP t"; // Time on MP
+    std::cout << std::setw(12) << "SP t"; // Time on SP
+    std::cout << std::setw(12) << "t"; // Time at node
+    std::cout << std::setw(12) << "SP* t"; // Avg time on SP
+    std::cout << std::setw(12) << "SP ex"; // Max time on Exact SP
+    std::cout << std::setw(6) << "Depth" << std::endl;
+}
+
 void BBTree::explore_tree() {
-    cout << setw(8) << "Unexpl"; // Unexplored nodes
-    cout << setw(6) << "All"; // Number of nodes in total
-    cout << setw(12) << "LB*";
-    cout << setw(12) << "LB";
-    cout << setw(12) << "UB";
-    cout << setw(12) << "Gap*";
-    cout << setw(12) << "Gap";
-    cout << setw(6) << "Cols"; // Columns in pool
-    cout << setw(12) << "MP t"; // Time on MP
-    cout << setw(12) << "SP t"; // Time on SP
-    cout << setw(12) << "t"; // Time at node
-    cout << setw(12) << "SP* t"; // Avg time on SP
-    cout << setw(12) << "SP ex"; // Max time on Exact SP
-    cout << setw(6) << "Depth" << endl;
+    print_header();
     
     while(!unexplored_nodes.empty()) {
-        cerr << "Nodes in tree: " << unexplored_nodes.size() << endl;
+        std::cerr << "Nodes in tree: " << unexplored_nodes.size() << std::endl;
         
-        std::shared_ptr<BBNode> current_node = unexplored_nodes.top();
+        auto current_node = unexplored_nodes.top();
         unexplored_nodes.pop();
         lb = current_node->father_lb;
         
         // Solve the master problem to obtain a lower bound
         current_node->solve();
-        cerr << "\tNode LB: " << current_node->sol_value << endl;
+        std::cerr << "\tNode LB: " << current_node->sol_value << std::endl;
         
         if(!current_node->is_feasible()) {
             // Prune by infeasibility
-            cerr << "\t\tPruned by infeasibility" << endl;
+            std::cerr << "\t\tPruned by infeasibility" << std::endl;
             continue;
         }
         
         if(current_node->sol_value >= ub) {
             // Prune by sub-optimality
-            cerr << "\t\tPruned by sub-optimality (UB = " << ub << ")" << endl;
+            std::cerr << "\t\tPruned by sub-optimality (UB = " << ub << ")" << std::endl;
             continue;
         }
         
@@ -66,8 +75,8 @@ void BBTree::explore_tree() {
         Cycles cycles;
         for(const auto& cc : current_node->base_columns) {
             if(!cc.first.dummy) {
-                std::shared_ptr<const Graph> g = cc.first.sol.g;
-                Path cycle = Cycle::shortest_cycle(cc.first.sol.path, g);
+                auto g = cc.first.sol.g;
+                auto cycle = Cycle::shortest_cycle(cc.first.sol.path, g);
                 if(!cycle.empty()) {
                     cycles.push_back(make_pair(cycle, g));
                 }
@@ -77,7 +86,7 @@ void BBTree::explore_tree() {
         if(cycles.size() > 0) {
             // Solution contains cycles
             try_to_obtain_ub(current_node);
-            cerr << "\tBranching on cycles" << endl;
+            std::cerr << "\tBranching on cycles" << std::endl;
             branch_on_cycles(cycles, current_node);
         } else {
             // Check if the solution is feasible (i.e. integer vs fractional)
@@ -92,13 +101,13 @@ void BBTree::explore_tree() {
             if(fractional) {
                 // Solution is fractional
                 try_to_obtain_ub(current_node);
-                cerr << "\tBranching on fractional" << endl;
+                std::cerr << "\tBranching on fractional" << std::endl;
                 branch_on_fractional(current_node);
             } else {
                 // Solution integer
-                cerr << "\tSolution actually integer" << endl;
+                std::cerr << "\tSolution actually integer" << std::endl;
                 if(ub - current_node->sol_value > BBNode::cplex_epsilon) {
-                    cerr << "\t\tAnd improving the UB" << endl;
+                    std::cerr << "\t\tAnd improving the UB" << std::endl;
                     ub = current_node->sol_value;
                     node_attaining_ub = current_node;
                     node_bound_type = BoundType::FROM_LP;
@@ -107,79 +116,85 @@ void BBTree::explore_tree() {
         }
         
         // Used in the first iteration when there is no father node
-        if(abs(lb - NO_FATHER_LB) < numeric_limits<float>::epsilon()) {
+        if(abs(lb - no_father_lb) < std::numeric_limits<float>::epsilon()) {
             lb = current_node->sol_value;
         }
         
-        float gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
-        float gap = ((ub - lb) / lb) * 100;
+        auto gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
+        auto gap = ((ub - lb) / lb) * 100;
         
-        cout << fixed;
-        cout << setw(8) << unexplored_nodes.size();
-        cout << setw(6) << bb_nodes_generated;
-        cout << setw(12) << setprecision(2) << current_node->sol_value;
-        cout << setw(12) << setprecision(2) << lb;
-        cout << setw(12) << setprecision(2) << ub;
-        cout << setw(11) << setprecision(4) << gap_node << "\%";
-        cout << setw(11) << setprecision(4) << gap << "\%";
-        cout << setw(6) << pool->size();
-        cout << setw(12) << setprecision(4) << current_node->total_time_spent_on_mp;
-        cout << setw(12) << setprecision(4) << current_node->total_time_spent_on_sp;
-        cout << setw(12) << setprecision(4) << current_node->total_time_spent;
-        cout << setw(12) << setprecision(4) << current_node->avg_time_spent_on_sp;
-        cout << setw(12) << setprecision(4) << current_node->max_time_spent_by_exact_solver;
-        cout << setw(6) << current_node->depth << endl;
-        cout << defaultfloat;
+        print_row(*current_node, gap_node, gap);
     }
     
-    cout << endl << "*** SOLUTION ***" << endl;
+    std::cout << std::endl << "*** SOLUTION ***" << std::endl;
     if(node_bound_type == BoundType::FROM_LP) {
         // UB was attained as LP solution
-        cout << "*** OBTAINED FROM LP ***" << endl;
+        std::cout << "*** OBTAINED FROM LP ***" << std::endl;
         for(const auto& cc : node_attaining_ub->base_columns) {
-            cout << cc.first << " selected with coefficient " << cc.second << endl;
-            cc.first.sol.g->print_path(cc.first.sol.path, cout);
+            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
+            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
         }
     } else {
         // UB was attained as MIP solution
-        cout << "*** OBTAINED FROM MIP ***" << endl;
+        std::cout << "*** OBTAINED FROM MIP ***" << std::endl;
         for(const auto& cc : node_attaining_ub->mip_base_columns) {
-            cout << cc.first << " selected with coefficient " << cc.second << endl;
-            cc.first.sol.g->print_path(cc.first.sol.path, cout);
+            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
+            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
         }
     }
 }
 
-void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode> current_node) {    
-    Cycles::const_iterator shortest = min_element(cycles.begin(), cycles.end(),
-        [] (const pair<Path, const std::shared_ptr<const Graph>>& c1, const pair<Path, const std::shared_ptr<const Graph>>& c2) {
+// LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
+inline std::ostream& defaultfloat(std::ostream& os) { os.unsetf(std::ios_base::floatfield); return os; }
+
+void BBTree::print_row(const BBNode& current_node, float gap, float gap_node) const {
+    std::cout << std::fixed;
+    std::cout << std::setw(8) << unexplored_nodes.size();
+    std::cout << std::setw(6) << bb_nodes_generated;
+    std::cout << std::setw(12) << std::setprecision(2) << current_node.sol_value;
+    std::cout << std::setw(12) << std::setprecision(2) << lb;
+    std::cout << std::setw(12) << std::setprecision(2) << ub;
+    std::cout << std::setw(11) << std::setprecision(4) << gap_node << "\%";
+    std::cout << std::setw(11) << std::setprecision(4) << gap << "\%";
+    std::cout << std::setw(6) << pool->size();
+    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent_on_mp;
+    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent_on_sp;
+    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent;
+    std::cout << std::setw(12) << std::setprecision(4) << current_node.avg_time_spent_on_sp;
+    std::cout << std::setw(12) << std::setprecision(4) << current_node.max_time_spent_by_exact_solver;
+    std::cout << std::setw(6) << current_node.depth << std::endl;
+    defaultfloat(std::cout);
+}
+
+void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> current_node) {    
+    auto shortest = std::min_element(cycles.begin(), cycles.end(),
+        [] (const auto& c1, const auto& c2) {
             return(c1.first.size() < c2.first.size());
         });
 
-    const std::shared_ptr<const Graph> g = shortest->second;    
-    Path::const_iterator fix_forb, fix_impo;
+    const auto g = shortest->second;    
     VisitRuleList unite_rules, separate_rules;
 
-    cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc " << g->vessel_class->name << ": ";
-    Cycle::print_cycle(shortest->first, g, cerr);
+    std::cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc " << g->vessel_class->name << ": ";
+    Cycle::print_cycle(shortest->first, g, std::cerr);
 
-    for(fix_forb = shortest->first.begin(); fix_forb != shortest->first.end(); ++fix_forb) {
-        cerr << "\t\t\tCreating child node:" << endl;
+    for(auto fix_forb = shortest->first.begin(); fix_forb != shortest->first.end(); ++fix_forb) {
+        std::cerr << "\t\t\tCreating child node:" << std::endl;
         
-        for(fix_impo = shortest->first.begin(); fix_impo != fix_forb; ++fix_impo) {
-            std::shared_ptr<Node> n_source_impo = g->graph[source(*fix_impo, g->graph)];
-            std::shared_ptr<Node> n_target_impo = g->graph[target(*fix_impo, g->graph)];
-            cerr << "\t\t\t\tForcing the traversal of " << n_source_impo->port->name << " -> " << n_target_impo->port->name << endl;
-            unite_rules.push_back(make_pair(n_source_impo, n_target_impo));
+        for(auto fix_impo = shortest->first.begin(); fix_impo != fix_forb; ++fix_impo) {
+            auto n_source_impo = g->graph[source(*fix_impo, g->graph)];
+            auto n_target_impo = g->graph[target(*fix_impo, g->graph)];
+            std::cerr << "\t\t\t\tForcing the traversal of " << n_source_impo->port->name << " -> " << n_target_impo->port->name << std::endl;
+            unite_rules.push_back(std::make_pair(n_source_impo, n_target_impo));
         }
         
-        std::shared_ptr<Node> n_source_forb = g->graph[source(*fix_forb, g->graph)];
-        std::shared_ptr<Node> n_target_forb = g->graph[target(*fix_forb, g->graph)];
-        cerr << "\t\t\t\tForbidding the traversal of " << n_source_forb->port->name << " -> " << n_target_forb->port->name << endl;
-        separate_rules.push_back(make_pair(n_source_forb, n_target_forb));
+        auto n_source_forb = g->graph[source(*fix_forb, g->graph)];
+        auto n_target_forb = g->graph[target(*fix_forb, g->graph)];
+        std::cerr << "\t\t\t\tForbidding the traversal of " << n_source_forb->port->name << " -> " << n_target_forb->port->name << std::endl;
+        separate_rules.push_back(std::make_pair(n_source_forb, n_target_forb));
         
         unexplored_nodes.push(
-            make_shared<BBNode>(
+            std::make_shared<BBNode>(
                 current_node->prob,
                 current_node->local_graphs,
                 current_node->pool,
@@ -196,35 +211,35 @@ void BBTree::branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode
 
 void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
     // Detect the most fractional column
-    auto cc_it = max_element(current_node->base_columns.begin(), current_node->base_columns.end(),
-        [] (const pair<Column, float>& cc1, const pair<Column, float>& cc2) {
+    auto cc_it = std::max_element(current_node->base_columns.begin(), current_node->base_columns.end(),
+        [] (const auto& cc1, const auto& cc2) {
             return (fabs(cc1.second - 0.5) > fabs(cc2.second - 0.5));
         });
     
-    for(const Edge& e : cc_it->first.sol.path) {
-        const std::shared_ptr<const Graph> g = cc_it->first.sol.g;
-        std::shared_ptr<Node> n = g->graph[target(e, g->graph)];
+    for(const auto& e : cc_it->first.sol.path) {
+        const auto g = cc_it->first.sol.g;
+        auto n = g->graph[target(e, g->graph)];
         if(n->n_type != NodeType::REGULAR_PORT) {
             continue;
         }
         for(const auto& cc : current_node->base_columns) {
-            for(const Edge& e_inner : cc.first.sol.path) {
-                const std::shared_ptr<const Graph> g_inner = cc.first.sol.g;
-                std::shared_ptr<Node> n_inner = g_inner->graph[target(e_inner, g_inner->graph)];
+            for(const auto& e_inner : cc.first.sol.path) {
+                const auto g_inner = cc.first.sol.g;
+                auto n_inner = g_inner->graph[target(e_inner, g_inner->graph)];
                 if(n_inner->same_row_as(*n)) {
-                    std::shared_ptr<Node> n_src = g->graph[source(e, g->graph)];
-                    std::shared_ptr<Node> n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
+                    auto n_src = g->graph[source(e, g->graph)];
+                    auto n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
                     if(!n_inner_src->same_row_as(*n_src)) {
-                        cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << endl;
+                        std::cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << std::endl;
                         
                         VisitRuleList v_rules;
                         IsolateRule i_rule;
                         v_rules.push_back(make_pair(n_src, n));
                         i_rule = make_pair(n_src, n);
                         
-                        cerr << "\t\t\tCreating child node 1" << endl;
+                        std::cerr << "\t\t\tCreating child node 1:" << std::endl;
                         unexplored_nodes.push(
-                            make_shared<BBNode>(
+                            std::make_shared<BBNode>(
                                 current_node->prob,
                                 current_node->local_graphs,
                                 current_node->pool,
@@ -236,9 +251,9 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                             )
                         );  
                         
-                        cerr << "\t\t\tCreating child node 2" << endl;
+                        std::cerr << "\t\t\tCreating child node 2:" << std::endl;
                         unexplored_nodes.push(
-                            make_shared<BBNode>(
+                            std::make_shared<BBNode>(
                                 current_node->prob,
                                 current_node->local_graphs,
                                 current_node->pool,
@@ -267,7 +282,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
 void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
     ColumnPool feasible_columns;
     
-    for(const Column& c : current_node->local_pool) {
+    for(const auto& c : current_node->local_pool) {
         if(!c.dummy && !c.has_cycles()) {
             feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination", ColumnOrigin::MIP));
         }
@@ -275,20 +290,20 @@ void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
     
     if(feasible_columns.size() <= prob->params.max_cols_to_solve_mp) {
         if(current_node->solve_integer(feasible_columns)) {
-            cerr << "\tNode UB: " << current_node->mip_sol_value << endl;
+            std::cerr << "\tNode UB: " << current_node->mip_sol_value << std::endl;
             if(ub - current_node->mip_sol_value > BBNode::cplex_epsilon) {
-                cerr << "\t\tImproving the UB" << endl;
+                std::cerr << "\t\tImproving the UB" << std::endl;
                 ub = current_node->mip_sol_value;
                 node_attaining_ub = current_node;
                 node_bound_type = BoundType::FROM_MIP;
-                for(const auto&cc : node_attaining_ub->mip_base_columns) {
-                    cerr << "\t\t\t " << cc.first << " with coeff " << cc.second << endl;
+                for(const auto& cc : node_attaining_ub->mip_base_columns) {
+                    std::cerr << "\t\t\t " << cc.first << " with coeff " << cc.second << std::endl;
                 }
             }
         } else {
-            cerr << "\tMIP infeasible" << endl;
+            std::cerr << "\tMIP infeasible" << std::endl;
         }
     } else {
-        cerr << "\tToo many columns to solve MIP" << endl;
+        std::cerr << "\tToo many columns to solve MIP" << std::endl;
     }
 }

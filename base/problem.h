@@ -5,10 +5,12 @@
 #ifndef PROBLEM_H
 #define PROBLEM_H
 
-#include <base/base.h>
+#include <memory>
+#include <string>
+#include <unordered_map>
+
 #include <base/graph.h>
 #include <base/vessel_class.h>
-#include <preprocessing/graph_generator.h>
 #include <preprocessing/problem_data.h>
 #include <preprocessing/program_params.h>
 
@@ -20,7 +22,7 @@ public:
     ProblemData      data;
     GraphMap         graphs;
     
-    Problem(string params_file, string data_file);
+    Problem(const std::string& params_file, const std::string& data_file);
 };
 
 #endif

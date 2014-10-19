@@ -5,7 +5,10 @@
 #ifndef ID_MAPS_H
 #define ID_MAPS_H
 
-#include <base/base.h>
+#include <memory>
+
+#include <boost/utility/result_of.hpp>
+
 #include <base/graph.h>
 
 class NodeIdFunctor {
@@ -14,9 +17,9 @@ class NodeIdFunctor {
 public:
     typedef int result_type;
   
-    NodeIdFunctor(const std::shared_ptr<const Graph> g) : g(g) {}
+    NodeIdFunctor(std::shared_ptr<const Graph> g) : g(g) {}
   
-    result_type operator()(const Vertex v) const {
+    result_type operator()(const Vertex& v) const {
         return g->graph[v]->boost_vertex_id;
     }
 };
@@ -27,9 +30,9 @@ class ArcIdFunctor {
 public:
     typedef int result_type;
   
-    ArcIdFunctor(const std::shared_ptr<const Graph> g) : g(g) {}
+    ArcIdFunctor(std::shared_ptr<const Graph> g) : g(g) {}
   
-    result_type operator()(const Edge e) const {
+    result_type operator()(const Edge& e) const {
         return g->graph[e]->boost_edge_id;
     }
 };

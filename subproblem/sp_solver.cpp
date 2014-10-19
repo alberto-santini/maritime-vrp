@@ -2,45 +2,49 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <iostream>
+#include <limits>
+#include <mutex>
+#include <string>
+#include <thread>
+
 #include <subproblem/sp_solver.h>
 
-inline bool solution_in_pool(const Solution& s, const ColumnPool& pool) {
+bool SPSolver::solution_in_pool(const Solution& s, const ColumnPool& pool) const {
     return (find_if(pool.begin(), pool.end(),
     [&s] (const Column& c) {
         return (s == c.sol);
     }) != pool.end());
 }
 
-inline void print_report(const int sols_found, const int discarded_prc, const int discarded_infeasible, const int discarded_generated, const int discarded_in_pool, ostream& out = cerr) {
-    out << "\t\t\t\tWe found " << sols_found << " new columns." << endl;
-    out << "\t\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << endl;
-    out << "\t\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << endl;
-    out << "\t\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << endl;
-    out << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << endl;
+void SPSolver::print_report(int sols_found, int discarded_prc, int discarded_infeasible, int discarded_generated, int discarded_in_pool, std::ostream& out) const {
+    out << "\t\t\t\tWe found " << sols_found << " new columns." << std::endl;
+    out << "\t\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << std::endl;
+    out << "\t\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << std::endl;
+    out << "\t\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << std::endl;
+    out << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << std::endl;
 }
 
-pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, const bool try_elementary, double& max_time_spent_by_exact_solver) const {
-    vector<Solution> valid_sols;
+std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, bool try_elementary, double& max_time_spent_by_exact_solver) const {
+    std::vector<Solution> valid_sols;
     
-    int discarded_prc = 0;
-    int discarded_infeasible = 0;
-    int discarded_generated = 0;
-    int discarded_in_pool = 0;
-    
-    vector<std::shared_ptr<VesselClass>>::const_iterator vcit;
-    
+    auto discarded_prc = 0;
+    auto discarded_infeasible = 0;
+    auto discarded_generated = 0;
+    auto discarded_in_pool = 0;
+        
     /********************** FAST HEURISTICS **********************/
     
-    cerr << "@";
+    std::cerr << "@";
     
-    for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
-        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);        
-        HeuristicsSolver hsolv(prob->params, g);
+    for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
+        auto g = local_graphs.at(*vcit);        
+        HeuristicsSolver hsolv(prob, g);
         
-        vector<Solution> total = hsolv.solve_fast();
+        auto total = hsolv.solve_fast();
                 
-        for(const Solution& s : total) {
-            if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+        for(const auto& s : total) {
+            if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints()) {
                 discarded_infeasible++;
@@ -55,57 +59,57 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
     }
     
     if(PEDANTIC) {
-        cerr << "\t\t\tFast heuristics." << endl;
+        std::cerr << "\t\t\tFast heuristics." << std::endl;
         print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     }
     
     if(valid_sols.size() > 0) {
-        for(const Solution& s : valid_sols) {
+        for(const auto& s : valid_sols) {
             Column col(prob, s, "fast heuristic", ColumnOrigin::FAST_H);
             node_pool.push_back(col);
             global_pool->push_back(col);
         }
-        return make_pair(valid_sols.size(), ColumnOrigin::FAST_H);
+        return std::make_pair(valid_sols.size(), ColumnOrigin::FAST_H);
     } else {
         discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
     }
     
-    float percentage = PCT_START;
-    for(const std::shared_ptr<VesselClass>& vc : prob->data.vessel_classes) {
+    auto percentage = pct_start;
+    for(const auto& vc : prob->data.vessel_classes) {
         local_graphs.at(vc)->sort_arcs();
     }
     
     /********************** ELEMENTARY LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_elementary_labelling && try_elementary) {
-        cerr << "@[";
+        std::cerr << "@[";
     
-        while(valid_sols.size() == 0 && percentage < PCT_END_ELEM - numeric_limits<float>::epsilon()) {
-            cerr << (int)(percentage * 10);
-            std::shared_ptr<vector<Solution>> elem_sols = std::make_shared<vector<Solution>>();
-            mutex mtx;
-            vector<thread> threads;
+        while(valid_sols.size() == 0 && percentage < pct_end_elem - std::numeric_limits<float>::epsilon()) {
+            std::cerr << (int)(percentage * 10);
+            auto elem_sols = std::make_shared<std::vector<Solution>>();
+            std::mutex mtx;
+            std::vector<std::thread> threads;
         
-            for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-                const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+            for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+                auto g = local_graphs.at(*vcit);
             
-                threads.push_back(thread(
+                threads.push_back(std::thread(
                     [this, g, &elem_sols, percentage, &mtx] () {                    
-                        HeuristicsSolver hsolv(prob->params, g);         
-                        vector<Solution> sols = hsolv.solve_elem_on_reduced_graph(percentage, prob);
+                        HeuristicsSolver hsolv(prob, g);
+                        auto sols = hsolv.solve_elem_on_reduced_graph(percentage);
     
-                        lock_guard<mutex> guard(mtx);
+                        std::lock_guard<std::mutex> guard(mtx);
                         elem_sols->insert(elem_sols->end(), sols.begin(), sols.end());
                     }
                 ));
             }
         
-            for(thread& t : threads) {
+            for(auto& t : threads) {
                 t.join();
             }
     
-            for(const Solution& s : *elem_sols) {
-                if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+            for(const auto& s : *elem_sols) {
+                if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
                     discarded_prc++;
                 } else if(!s.satisfies_capacity_constraints()) {
                     discarded_infeasible++;
@@ -117,22 +121,22 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
                     valid_sols.push_back(s);
                 }
             }    
-            percentage += PCT_INCREMENT;
+            percentage += pct_increment;
         }
-        cerr << "]";
+        std::cerr << "]";
     
         if(PEDANTIC) {
-            cerr << "\t\t\tElementary labelling on the reduced graph." << endl;
+            std::cerr << "\t\t\tElementary labelling on the reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
     
         if(valid_sols.size() > 0) {
-            for(const Solution& s : valid_sols) {
+            for(const auto& s : valid_sols) {
                 Column col(prob, s, "ESPPRC", ColumnOrigin::ESPPRC);
                 node_pool.push_back(col);
                 global_pool->push_back(col);
             }
-            return make_pair(valid_sols.size(), ColumnOrigin::ESPPRC);
+            return std::make_pair(valid_sols.size(), ColumnOrigin::ESPPRC);
         } else {
             discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
         }
@@ -141,32 +145,32 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
     /********************** LABELLING ON THE SMARTLY REDUCED GRAPH **********************/
     
     if(prob->params.try_smart_graph_reduction) {
-        cerr << "@";
+        std::cerr << "@";
     
-        std::shared_ptr<vector<Solution>> sred_sols = std::make_shared<vector<Solution>>();
-        mutex mtx;
-        vector<thread> threads;
+        auto sred_sols = std::make_shared<std::vector<Solution>>();
+        std::mutex mtx;
+        std::vector<std::thread> threads;
     
-        for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-            const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+        for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+            auto g = local_graphs.at(*vcit);
 
-            threads.push_back(thread(
+            threads.push_back(std::thread(
                 [this, g, &sred_sols, &mtx] () {
-                    HeuristicsSolver hsolv(prob->params, g);
-                    vector<Solution> sols = hsolv.solve_on_smart_graph();
+                    HeuristicsSolver hsolv(prob, g);
+                    auto sols = hsolv.solve_on_smart_graph();
             
-                    lock_guard<mutex> guard(mtx);
+                    std::lock_guard<std::mutex> guard(mtx);
                     sred_sols->insert(sred_sols->end(), sols.begin(), sols.end());
                 }
             ));
         }
     
-        for(thread& t : threads) {
+        for(auto& t : threads) {
             t.join();
         }    
     
-        for(const Solution& s : *sred_sols) {
-            if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+        for(const auto& s : *sred_sols) {
+            if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints()) {
                 discarded_infeasible++;
@@ -180,52 +184,52 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
         }
 
         if(PEDANTIC) {
-            cerr << "\t\t\tLabelling on the smartly reduced graph." << endl;
+            std::cerr << "\t\t\tLabelling on the smartly reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
        
         if(valid_sols.size() > 0) {
-            for(const Solution& s : valid_sols) {
+            for(const auto& s : valid_sols) {
                 Column col(prob, s, "labelling on the smartly reduced graph", ColumnOrigin::SPPRC_SMART);
                 node_pool.push_back(col);
                 global_pool->push_back(col);
             }
-            return make_pair(valid_sols.size(), ColumnOrigin::SPPRC_SMART);
+            return std::make_pair(valid_sols.size(), ColumnOrigin::SPPRC_SMART);
         }
     }
     
     /********************** LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_reduced_labelling) {
-        cerr << "@[";
+        std::cerr << "@[";
     
-        percentage = PCT_START;
-        while(valid_sols.size() == 0 && percentage < PCT_END - numeric_limits<float>::epsilon()) {
-            cerr << (int)(percentage * 10);
-            std::shared_ptr<vector<Solution>> red_sols = std::make_shared<vector<Solution>>();
-            mutex mtx;
-            vector<thread> threads;
+        percentage = pct_start;
+        while(valid_sols.size() == 0 && percentage < pct_end - std::numeric_limits<float>::epsilon()) {
+            std::cerr << (int)(percentage * 10);
+            auto red_sols = std::make_shared<std::vector<Solution>>();
+            std::mutex mtx;
+            std::vector<std::thread> threads;
         
-            for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-                const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+            for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+                auto g = local_graphs.at(*vcit);
             
-                threads.push_back(thread(
+                threads.push_back(std::thread(
                     [this, g, &red_sols, percentage, &mtx] () {                    
-                        HeuristicsSolver hsolv(prob->params, g);
-                        vector<Solution> sols = hsolv.solve_on_reduced_graph(percentage);
+                        HeuristicsSolver hsolv(prob, g);
+                        auto sols = hsolv.solve_on_reduced_graph(percentage);
     
-                        lock_guard<mutex> guard(mtx);
+                        std::lock_guard<std::mutex> guard(mtx);
                         red_sols->insert(red_sols->end(), sols.begin(), sols.end());
                     }
                 ));
             }
         
-            for(thread& t : threads) {
+            for(auto& t : threads) {
                 t.join();
             }
     
-            for(const Solution& s : *red_sols) {
-                if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+            for(const auto& s : *red_sols) {
+                if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
                     discarded_prc++;
                 } else if(!s.satisfies_capacity_constraints()) {
                     discarded_infeasible++;
@@ -237,22 +241,22 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
                     valid_sols.push_back(s);
                 }
             }    
-            percentage += PCT_INCREMENT;
+            percentage += pct_increment;
         }
-        cerr << "]";
+        std::cerr << "]";
     
         if(PEDANTIC) {
-            cerr << "\t\t\tLabelling on the reduced graph." << endl;
+            std::cerr << "\t\t\tLabelling on the reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
     
         if(valid_sols.size() > 0) {
-            for(const Solution& s : valid_sols) {
-                Column col(prob, s, "labelling on the " + to_string(percentage - PCT_INCREMENT) + "-reduced graph", ColumnOrigin::SPPRC_RED);
+            for(const auto& s : valid_sols) {
+                Column col(prob, s, "labelling on the " + std::to_string(percentage - pct_increment) + "-reduced graph", ColumnOrigin::SPPRC_RED);
                 node_pool.push_back(col);
                 global_pool->push_back(col);
             }
-            return make_pair(valid_sols.size(), ColumnOrigin::SPPRC_RED);
+            return std::make_pair(valid_sols.size(), ColumnOrigin::SPPRC_RED);
         } else {
             discarded_prc = 0; discarded_infeasible = 0; discarded_generated = 0; discarded_in_pool = 0;
         }
@@ -260,33 +264,33 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
     
     /********************** LABELLING ON THE COMPLETE GRAPH **********************/
     
-    cerr << "@";
+    std::cerr << "@";
     
-    std::shared_ptr<vector<Solution>> e_sols = std::make_shared<vector<Solution>>();
-    mutex mtx;
-    vector<thread> threads;
+    auto e_sols = std::make_shared<std::vector<Solution>>();
+    std::mutex mtx;
+    std::vector<std::thread> threads;
     
-    for(vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-        const std::shared_ptr<Graph> g = local_graphs.at(*vcit);
+    for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+        auto g = local_graphs.at(*vcit);
         
-        threads.push_back(thread(
+        threads.push_back(std::thread(
             [this, g, &e_sols, &mtx, &max_time_spent_by_exact_solver] () {                    
                 ExactSolver esolv(g);
                 // Writing a double should be atomic on all x86_64 (-malign-double)
-                vector<Solution> sols = esolv.solve(max_time_spent_by_exact_solver);
+                auto sols = esolv.solve(max_time_spent_by_exact_solver);
 
-                lock_guard<mutex> guard(mtx);
+                std::lock_guard<std::mutex> guard(mtx);
                 e_sols->insert(e_sols->end(), sols.begin(), sols.end());
             }
         ));
     }
     
-    for(thread& t : threads) {
+    for(auto& t : threads) {
         t.join();
     }    
     
-    for(const Solution& s : *e_sols) {
-        if(s.reduced_cost > -numeric_limits<float>::epsilon()) {
+    for(const auto& s : *e_sols) {
+        if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
             discarded_prc++;
         } else if(!s.satisfies_capacity_constraints()) {
             discarded_infeasible++;
@@ -300,18 +304,18 @@ pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<C
     }
 
     if(PEDANTIC) {
-        cerr << "\t\t\tLabelling on the complete graph." << endl;
+        std::cerr << "\t\t\tLabelling on the complete graph." << std::endl;
         print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     }
        
     if(valid_sols.size() > 0) {
-        for(const Solution& s : valid_sols) {
+        for(const auto& s : valid_sols) {
             Column col(prob, s, "labelling on the complete graph", ColumnOrigin::SPPRC);
             node_pool.push_back(col);
             global_pool->push_back(col);
         }
-        return make_pair(valid_sols.size(), ColumnOrigin::SPPRC);
+        return std::make_pair(valid_sols.size(), ColumnOrigin::SPPRC);
     }
     
-    return make_pair(0, ColumnOrigin::NONE);
+    return std::make_pair(0, ColumnOrigin::NONE);
 }

@@ -2,9 +2,13 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+using namespace boost::property_tree;
+
 #include <preprocessing/program_params.h>
 
-ProgramParams::ProgramParams(string data_file_name) {
+ProgramParams::ProgramParams(const std::string& data_file_name) {
     ptree pt;
     read_json(data_file_name, pt);
     

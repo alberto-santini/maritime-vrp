@@ -20,12 +20,12 @@ bool Node::operator==(const Node& other) const {
     return (same_row_as(other) && other.time_step == time_step);
 }
 
-ostream& operator<<(ostream& out, const PickupType& pu) {
+std::ostream& operator<<(std::ostream& out, PickupType pu) {
     out << (pu == PickupType::PICKUP ? "pu" : "de");
     return out;
 }
 
-ostream& operator<<(ostream& out, const Node& n) {
+std::ostream& operator<<(std::ostream& out, const Node& n) {
     out << "[" << n.port->name << ", " << n.pu_type << ", " << n.time_step;
     out << ", dem: " << (n.pu_type == PickupType::PICKUP ? n.pu_demand() : n.de_demand());
     out << "]";

@@ -5,10 +5,11 @@
 #ifndef COLUMN_POOL_H
 #define COLUMN_POOL_H
 
-#include <base/base.h>
+#include <vector>
+
 #include <column/column.h>
 
 /*  This might be temporary */
-typedef vector<Column> ColumnPool;
+typedef std::vector<Column> ColumnPool;
 
 #endif

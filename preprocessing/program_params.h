@@ -5,7 +5,7 @@
 #ifndef PROGRAM_PARAMS_H
 #define PROGRAM_PARAMS_H
 
-#include <base/base.h>
+#include <string>
 
 class ProgramParams {
 public:
@@ -20,7 +20,7 @@ public:
     float   smart_min_chance;
     float   smart_max_chance;
     
-    ProgramParams(string data_file_name = "data/program_params.json");
+    ProgramParams(const std::string& data_file_name = "data/program_params.json");
 };
 
 #endif

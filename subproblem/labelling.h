@@ -5,7 +5,12 @@
 #ifndef LABELLING_H
 #define LABELLING_H
 
-#include <base/base.h>
+#include <memory>
+#include <unordered_map>
+#include <utility>
+
+#include <boost/functional/hash.hpp>
+
 #include <base/graph.h>
 #include <base/vessel_class.h>
 #include <subproblem/id_maps.h>
@@ -16,23 +21,23 @@ public:
     int             q_deliverable;
     float           cost;
     
-    Label(const int qp,
-          const int qd,
-          const float c = 0) : q_pickupable(qp), q_deliverable(qd), cost(c) {}
+    Label(int qp,
+          int qd,
+          float c = 0) : q_pickupable(qp), q_deliverable(qd), cost(c) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;
 };
 
 typedef std::unordered_map<
-    pair<std::shared_ptr<Port>, PickupType>, bool,
-    boost::hash<pair<std::shared_ptr<Port>,PickupType>>> VisitedPortsFlags;
+    std::pair<std::shared_ptr<Port>, PickupType>, bool,
+    boost::hash<std::pair<std::shared_ptr<Port>,PickupType>>> VisitedPortsFlags;
 
 class ElementaryLabel : public Label {
 public:
     VisitedPortsFlags visited_ports;
     
-    ElementaryLabel(const int qp, const int qd, const float c, const VisitedPortsFlags vp) : Label(qp, qd, c), visited_ports(vp) {}
+    ElementaryLabel(int qp, int qd, float c, const VisitedPortsFlags& vp) : Label(qp, qd, c), visited_ports(vp) {}
     
     bool operator==(const ElementaryLabel& other) const;
     bool operator<(const ElementaryLabel& other) const;
@@ -40,8 +45,8 @@ public:
 
 class LabelExtender {
 public:
-    bool operator()(const BGraph& graph, Label& new_label, const Label& label, Edge e) const;
-    bool operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, Edge e) const;
+    bool operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const;
+    bool operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const;
 };
 
 class Dominance {

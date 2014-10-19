@@ -2,14 +2,15 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <limits>
+
 #include <column/solution.h>
 
 bool Solution::satisfies_capacity_constraints() const {
-    int qty_delivered = 0;
+    auto qty_delivered = 0;
     
-    Path::const_reverse_iterator pit;
-    for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g->graph[target(*pit, g->graph)];
+    for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
+        auto n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             qty_delivered += n.de_demand();
         }
@@ -19,10 +20,10 @@ bool Solution::satisfies_capacity_constraints() const {
         return false;
     }
     
-    int used_capacity = qty_delivered;
+    auto used_capacity = qty_delivered;
     
-    for(pit = path.rbegin(); pit != path.rend(); ++pit) {
-        Node n = *g->graph[target(*pit, g->graph)];
+    for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
+        auto n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             used_capacity -= n.de_demand();
         }
@@ -44,7 +45,7 @@ bool Solution::operator==(const Solution& other) const {
     if(other.path.size() != path.size()) {
         return false;
     }
-    if(fabs(cost - other.cost) > numeric_limits<float>::epsilon()) {
+    if(fabs(cost - other.cost) > std::numeric_limits<float>::epsilon()) {
         return false;
     }
     for(int i = 0; i < path.size(); i++) {

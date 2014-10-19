@@ -5,14 +5,14 @@
 #ifndef MP_INTEGER_SOLUTION
 #define MP_INTEGER_SOLUTION
 
-#include <base/base.h>
+#include <vector>
 
 class MPIntegerSolution {
 public:
-    float           obj_value;
-    vector<float>   variables;
+    float                obj_value;
+    std::vector<float>   variables;
     
-    MPIntegerSolution(const float obj_value, const vector<float> variables) : obj_value(obj_value), variables(variables) {}
+    MPIntegerSolution(float obj_value, const std::vector<float>& variables) : obj_value(obj_value), variables(variables) {}
 };
 
 #endif

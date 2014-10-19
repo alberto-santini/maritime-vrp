@@ -2,33 +2,38 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <algorithm>
+#include <list>
+#include <vector>
+
+#include <boost/graph/r_c_shortest_paths.hpp>
+
 #include <subproblem/heuristics_solver.h>
 
-vector<Solution> HeuristicsSolver::solve_fast_forward() const {
-    vector<Solution> sols;
-    Vertex h1 = g->h1().second;
-    Vertex h2 = g->h2().second;
+std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
+    std::vector<Solution> sols;
+    auto h1 = g->h1().second;
+    auto h2 = g->h2().second;
     struct EdgeWithCost { Edge e; float c; float rc; };
 
     srand(12345);
 
-    for(int i = 0; i < params.theta; i++) {
-        Vertex current = h1;
+    for(auto i = 0; i < prob->params.theta; i++) {
+        auto current = h1;
         Path path;
-        float tot_c = 0, tot_rc = 0;
-        bool done = false;
+        auto tot_c = 0.0f, tot_rc = 0.0f;
+        auto done = false;
                 
         while(current != h2) {
-            vector<EdgeWithCost> out_e;
+            std::vector<EdgeWithCost> out_e;
                         
-            pair<oeit, oeit> ep;
-            for(ep = out_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
-                Node n_dest = *g->graph[target(*ep.first, g->graph)];
-                float dual = g->dual_of(n_dest);
+            for(auto ep = out_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
+                auto n_dest = *g->graph[target(*ep.first, g->graph)];
+                auto dual = g->dual_of(n_dest);
                 EdgeWithCost ewc = { *ep.first, g->graph[*ep.first]->cost, g->graph[*ep.first]->cost - dual };
                 
-                bool closes_cycle = false;
-                for(const Edge& e : path) {
+                auto closes_cycle = false;
+                for(const auto& e : path) {
                     if(n_dest.n_type == NodeType::REGULAR_PORT && n_dest.port == g->graph[source(e, g->graph)]->port) {
                         closes_cycle = true;
                         break;
@@ -44,13 +49,13 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
                 break;
             }
             
-            sort(out_e.begin(), out_e.end(),
-            [this] (const EdgeWithCost& ewc1, const EdgeWithCost& ewc2) {
+            std::sort(out_e.begin(), out_e.end(),
+            [this] (const auto& ewc1, const auto& ewc2) {
                 return (ewc1.rc > ewc2.rc);
             });
             
-            int rnd_idx = rand() % (min(params.delta, (int)out_e.size()));
-            EdgeWithCost chosen = out_e[rnd_idx];
+            auto rnd_idx = (int) (rand() % (std::min(prob->params.delta, (int)out_e.size())));
+            auto chosen = out_e[rnd_idx];
 
             path.insert(path.begin(), chosen.e);
             tot_c += chosen.c;
@@ -75,31 +80,30 @@ vector<Solution> HeuristicsSolver::solve_fast_forward() const {
     return sols;
 }
 
-vector<Solution> HeuristicsSolver::solve_fast_backward() const {
-    vector<Solution> sols;
-    Vertex h1 = g->h1().second;
-    Vertex h2 = g->h2().second;
+std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
+    std::vector<Solution> sols;
+    auto h1 = g->h1().second;
+    auto h2 = g->h2().second;
     struct EdgeWithCost { Edge e; float c; float rc; };
 
     srand(98765);
 
-    for(int i = 0; i < params.theta; i++) {
-        Vertex current = h2;
+    for(int i = 0; i < prob->params.theta; i++) {
+        auto current = h2;
         Path path;
-        float tot_c = 0, tot_rc = 0;
-        bool done = false;
+        auto tot_c = 0.0f, tot_rc = 0.0f;
+        auto done = false;
         
         while(current != h1) {
-            vector<EdgeWithCost> in_e;
+            std::vector<EdgeWithCost> in_e;
             
-            pair<ieit, ieit> ep;
-            for(ep = in_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
-                Node n_orig = *g->graph[source(*ep.first, g->graph)];
-                float dual = g->dual_of(n_orig);
+            for(auto ep = in_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
+                auto n_orig = *g->graph[source(*ep.first, g->graph)];
+                auto dual = g->dual_of(n_orig);
                 EdgeWithCost ewc = { *ep.first, g->graph[*ep.first]->cost, g->graph[*ep.first]->cost - dual };
                 
-                bool closes_cycle = false;
-                for(const Edge& e : path) {
+                auto closes_cycle = false;
+                for(const auto& e : path) {
                     if(n_orig.n_type == NodeType::REGULAR_PORT && n_orig.port == g->graph[target(e, g->graph)]->port) {
                         closes_cycle = true;
                         break;
@@ -115,13 +119,13 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
                 break;
             }
             
-            sort(in_e.begin(), in_e.end(),
-            [this] (const EdgeWithCost& ewc1, const EdgeWithCost& ewc2) {
+            std::sort(in_e.begin(), in_e.end(),
+            [this] (const auto& ewc1, const auto& ewc2) {
                 return (ewc1.rc > ewc2.rc);
             });
             
-            int rnd_idx = rand() % (min(params.delta, (int)in_e.size()));
-            EdgeWithCost chosen = in_e[rnd_idx];
+            auto rnd_idx = (int) (rand() % (std::min(prob->params.delta, (int)in_e.size())));
+            auto chosen = in_e[rnd_idx];
             
             path.push_back(chosen.e);
             tot_c += chosen.c;
@@ -146,30 +150,30 @@ vector<Solution> HeuristicsSolver::solve_fast_backward() const {
     return sols;
 }
 
-vector<Solution> HeuristicsSolver::solve_fast() const {
-    vector<Solution> fast_fwd_sols = solve_fast_forward();
-    vector<Solution> fast_bwd_sols = solve_fast_backward();
+std::vector<Solution> HeuristicsSolver::solve_fast() const {
+    std::vector<Solution> fast_fwd_sols = solve_fast_forward();
+    std::vector<Solution> fast_bwd_sols = solve_fast_backward();
     
-    vector<Solution> total = fast_fwd_sols;
+    std::vector<Solution> total = fast_fwd_sols;
     total.insert(total.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
     
     return total;
 }
 
-vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float percentage, const std::shared_ptr<const Problem> prob) const {
-    vector<Solution> sols;
-    std::shared_ptr<Graph> red = g->reduce_graph(percentage);
+std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float percentage) const {
+    std::vector<Solution> sols;
+    auto red = g->reduce_graph(percentage);
     
-    vector<Path> optimal_paths;
-    vector<ElementaryLabel> optimal_labels;
+    std::vector<Path> optimal_paths;
+    std::vector<ElementaryLabel> optimal_labels;
     
     NodeIdFunctor nf(red);
     ArcIdFunctor af(red);
     
-    std::shared_ptr<VesselClass> vc = red->vessel_class;
+    auto vc = red->vessel_class;
     VisitedPortsFlags pf;
     
-    for(std::shared_ptr<Port> p : prob->data.ports) {
+    for(auto p : prob->data.ports) {
         pf.emplace(make_pair(p, PickupType::PICKUP), false);
         pf.emplace(make_pair(p, PickupType::DELIVERY), false);
     }
@@ -187,32 +191,32 @@ vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float perce
         ElementaryLabel(vc->capacity, vc->capacity, 0, pf),
         LabelExtender(),
         Dominance(),
-        allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
+        std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
         default_r_c_shortest_paths_visitor()
     );
         
     // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
-    for(int i = 0; i < optimal_paths.size(); i++) {
-        Path og_path = g->transfer_path(optimal_paths[i], red);
+    for(auto i = 0; i < optimal_paths.size(); i++) {
+        auto og_path = g->transfer_path(optimal_paths[i], *red);
         sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
     }
         
     return sols;
 }
 
-vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage, const bool smart) const {
-    vector<Solution> sols;
-    std::shared_ptr<Graph> red = smart ? g->smart_reduce_graph(params.smart_min_chance, params.smart_max_chance) : g->reduce_graph(percentage);
+std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage, const bool smart) const {
+    std::vector<Solution> sols;
+    auto red = smart ? g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance) : g->reduce_graph(percentage);
     
-    vector<Path> optimal_paths;
-    vector<Label> optimal_labels;
+    std::vector<Path> optimal_paths;
+    std::vector<Label> optimal_labels;
     
     NodeIdFunctor nf(red);
     ArcIdFunctor af(red);
     
-    std::shared_ptr<VesselClass> vc = red->vessel_class;
+    auto vc = red->vessel_class;
 
     // clock_t cl_start = clock();
 
@@ -227,15 +231,15 @@ vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage
         Label(vc->capacity, vc->capacity, 0),
         LabelExtender(),
         Dominance(),
-        allocator<r_c_shortest_paths_label<BGraph, Label>>(),
+        std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
         default_r_c_shortest_paths_visitor()
     );
         
     // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
-    for(int i = 0; i < optimal_paths.size(); i++) {
-        Path og_path = g->transfer_path(optimal_paths[i], red);
+    for(auto i = 0; i < optimal_paths.size(); i++) {
+        auto og_path = g->transfer_path(optimal_paths[i], *red);
         sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
     }
         

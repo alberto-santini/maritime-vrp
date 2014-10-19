@@ -2,9 +2,16 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <stdexcept>
+
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+using namespace boost::property_tree;
+
 #include <preprocessing/problem_data.h>
 
-ProblemData::ProblemData(const string data_file_name) {
+ProblemData::ProblemData(const std::string& data_file_name) {
     ptree pt;
     read_json(data_file_name, pt);
     
@@ -12,18 +19,18 @@ ProblemData::ProblemData(const string data_file_name) {
     num_times = pt.get<int>("num_times");
     num_vessel_classes = pt.get<int>("num_vessel_classes");
     
-    vector<vector<float>> _distances;
+    std::vector<std::vector<float>> _distances;
     
     BOOST_FOREACH(const ptree::value_type& child, pt.get_child("vessel_classes")) {
-        string name = child.second.get<string>("name");
-        int num_vessels = child.second.get<int>("num_vessels");
-        int num_speeds = child.second.get<int>("num_speeds");
-        int capacity = child.second.get<int>("capacity");
-        float base_cost = child.second.get<float>("base_cost");
+        auto name = child.second.get<std::string>("name");
+        auto num_vessels = child.second.get<int>("num_vessels");
+        auto num_speeds = child.second.get<int>("num_speeds");
+        auto capacity = child.second.get<int>("capacity");
+        auto base_cost = child.second.get<float>("base_cost");
         SpeedCostMap bunker_cost;
         
-        vector<float> speeds;
-        vector<float> costs;
+        std::vector<float> speeds;
+        std::vector<float> costs;
         
         BOOST_FOREACH(const ptree::value_type& s_child, child.second.get_child("speeds")) {
             speeds.push_back(s_child.second.get<float>(""));
@@ -34,37 +41,37 @@ ProblemData::ProblemData(const string data_file_name) {
         }
         
         if(speeds.size() != num_speeds || costs.size() != num_speeds) {
-            throw runtime_error("Declared more/less speeds than described");
+            throw std::runtime_error("Declared more/less speeds than described");
         }
         
-        for(unsigned int i = 0; i < num_speeds; i++) bunker_cost.emplace(speeds[i], costs[i]);
+        for(auto i = 0; i < num_speeds; i++) bunker_cost.emplace(speeds[i], costs[i]);
         
-        std::shared_ptr<VesselClass> vessel_class = make_shared<VesselClass>(name, capacity, num_vessels, base_cost, bunker_cost);
+        auto vessel_class = std::make_shared<VesselClass>(name, capacity, num_vessels, base_cost, bunker_cost);
         vessel_classes.push_back(vessel_class);
     }
     
     if(vessel_classes.size() != num_vessel_classes) {
-        throw runtime_error("Declared more/less vessel classes than described");
+        throw std::runtime_error("Declared more/less vessel classes than described");
     }
     
     BOOST_FOREACH(const ptree::value_type& child, pt.get_child("ports")) {
-        string name = child.second.get<string>("name");
-        bool hub = child.second.get<bool>("hub");
-        int pickup_demand = child.second.get<int>("pickup_dem");
-        int delivery_demand = child.second.get<int>("delivery_dem");
-        int pickup_transit = child.second.get<int>("pickup_trans");
-        int delivery_transit = child.second.get<int>("delivery_trans");
-        int pickup_handling = child.second.get<int>("pickup_hand");
+        auto name = child.second.get<std::string>("name");
+        auto hub = child.second.get<bool>("hub");
+        auto pickup_demand = child.second.get<int>("pickup_dem");
+        auto delivery_demand = child.second.get<int>("delivery_dem");
+        auto pickup_transit = child.second.get<int>("pickup_trans");
+        auto delivery_transit = child.second.get<int>("delivery_trans");
+        auto pickup_handling = child.second.get<int>("pickup_hand");
         int delivery_handling = child.second.get<int>("delivery_hand");
-        int num_tw = child.second.get<int>("num_tw");
-        vector<int> tw_left;
-        vector<int> tw_right;
-        vector<float> p_distances;
+        auto num_tw = child.second.get<int>("num_tw");
+        std::vector<int> tw_left;
+        std::vector<int> tw_right;
+        std::vector<float> p_distances;
         AllowedVcMap allowed;
         FeeVcMap fee;
         ClosingTimeWindows tw;
         
-        int n = 0;
+        auto n = 0;
         BOOST_FOREACH(const ptree::value_type& a_child, child.second.get_child("allowed_vc")) {
             allowed.emplace(vessel_classes[n++], a_child.second.get<bool>(""));
         }
@@ -79,7 +86,7 @@ ProblemData::ProblemData(const string data_file_name) {
         }
         
         if(tw_left.size() != num_tw) {
-            throw runtime_error("Declared more/less [left] time windows than described");
+            throw std::runtime_error("Declared more/less [left] time windows than described");
         }
         
         BOOST_FOREACH(const ptree::value_type& r_child, child.second.get_child("tw_right")) {
@@ -87,11 +94,11 @@ ProblemData::ProblemData(const string data_file_name) {
         }
         
         if(tw_left.size() != num_tw) {
-            throw runtime_error("Declared more/less [right] time windows than described");
+            throw std::runtime_error("Declared more/less [right] time windows than described");
         }
         
-        for(unsigned int i = 0; i < num_tw; i++) {
-            tw.push_back(make_pair(tw_left[i], tw_right[i]));
+        for(auto i = 0; i < num_tw; i++) {
+            tw.push_back(std::make_pair(tw_left[i], tw_right[i]));
         }
         
         BOOST_FOREACH(const ptree::value_type& d_child, child.second.get_child("distances")) {
@@ -99,23 +106,23 @@ ProblemData::ProblemData(const string data_file_name) {
         }
         
         if(p_distances.size() != num_ports) {
-            throw runtime_error("Declared more/less distances than ports");
+            throw std::runtime_error("Declared more/less distances than ports");
         }
         
         _distances.push_back(p_distances);
         
-        std::shared_ptr<Port> p = make_shared<Port>(name, pickup_demand, delivery_demand, pickup_transit, delivery_transit, pickup_handling, delivery_handling, hub, allowed, fee, tw);
+        auto p = std::make_shared<Port>(name, pickup_demand, delivery_demand, pickup_transit, delivery_transit, pickup_handling, delivery_handling, hub, allowed, fee, tw);
         
         ports.push_back(p);
     }
     
     if(ports.size() != num_ports) {
-        throw runtime_error("Declared more/less ports than described");
+        throw std::runtime_error("Declared more/less ports than described");
     }
     
-    for(unsigned int i = 0; i < num_ports; i++) {
-        for(unsigned int j = 0; j < num_ports; j++) {
-            distances.emplace(make_pair(ports[i], ports[j]), _distances[i][j]);
+    for(auto i = 0; i < num_ports; i++) {
+        for(auto j = 0; j < num_ports; j++) {
+            distances.emplace(std::make_pair(ports[i], ports[j]), _distances[i][j]);
         }
     }
 }

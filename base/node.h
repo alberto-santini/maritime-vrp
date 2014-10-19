@@ -5,7 +5,9 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <base/base.h>
+#include <iostream>
+#include <memory>
+
 #include <base/vessel_class.h>
 #include <base/port.h>
 
@@ -23,9 +25,9 @@ public:
     
     Node() {}
     Node(std::shared_ptr<Port> port,
-         const PickupType pu_type,
-         const NodeType n_type,
-         const int time_step,
+         PickupType pu_type,
+         NodeType n_type,
+         int time_step,
          std::shared_ptr<VesselClass> vessel_class) : port(port), pu_type(pu_type), n_type(n_type), time_step(time_step), vessel_class(vessel_class) {
         boost_vertex_id = 0;
     }
@@ -37,7 +39,7 @@ public:
     bool operator!=(const Node& other) const { return !(*this == other); }
 };
 
-ostream& operator<<(ostream& out, const PickupType& pu);
-ostream& operator<<(ostream& out, const Node& n);
+std::ostream& operator<<(std::ostream& out, PickupType pu);
+std::ostream& operator<<(std::ostream& out, const Node& n);
  
 #endif

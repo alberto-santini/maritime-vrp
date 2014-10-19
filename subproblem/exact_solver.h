@@ -5,10 +5,11 @@
 #ifndef EXACT_SOLVER_H
 #define EXACT_SOLVER_H
 
-#include <base/base.h>
+#include <memory>
+#include <vector>
+
 #include <base/graph.h>
 #include <column/solution.h>
-#include <subproblem/labelling.h>
 
 class ExactSolver {
 public:
@@ -16,7 +17,7 @@ public:
     
     ExactSolver(const std::shared_ptr<const Graph> g) : g(g) {}
     
-    vector<Solution> solve(double& time_spent) const;
+    std::vector<Solution> solve(double& time_spent) const;
 };
 
 #endif

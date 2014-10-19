@@ -5,27 +5,33 @@
 #ifndef PROBLEM_DATA_H
 #define PROBLEM_DATA_H
 
-#include <base/base.h>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/functional/hash.hpp>
+
 #include <base/port.h>
 #include <base/vessel_class.h>
 
 /*  The third template parameter to unordered_map is the hash function to be used
     STL doesn't provide one for pair<>, so we use the one from boost */
 typedef std::unordered_map<
-            pair<std::shared_ptr<Port>, std::shared_ptr<Port>>, float,
-            boost::hash<pair<std::shared_ptr<Port>,std::shared_ptr<Port>>>
+            std::pair<std::shared_ptr<Port>, std::shared_ptr<Port>>, float,
+            boost::hash<std::pair<std::shared_ptr<Port>,std::shared_ptr<Port>>>
         > DistMap;
 
 class ProblemData {
 public:
-    int                                     num_ports;
-    int                                     num_times;
-    int                                     num_vessel_classes;
-    vector<std::shared_ptr<VesselClass>>    vessel_classes;
-    vector<std::shared_ptr<Port>>           ports;
-    DistMap                                 distances;
+    int                                         num_ports;
+    int                                         num_times;
+    int                                         num_vessel_classes;
+    std::vector<std::shared_ptr<VesselClass>>   vessel_classes;
+    std::vector<std::shared_ptr<Port>>          ports;
+    DistMap                                     distances;
     
-    ProblemData(string data_file_name);
+    ProblemData(const std::string& data_file_name);
 };
 
 #endif

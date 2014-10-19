@@ -5,7 +5,12 @@
 #ifndef MP_SOLVER_H
 #define MP_SOLVER_H
 
-#include <base/base.h>
+#include <cstring>
+#include <memory>
+#include <utility>
+
+#include <ilcplex/ilocplex.h>
+
 #include <base/problem.h>
 #include <column/column_pool.h>
 #include <masterproblem/mp_linear_solution.h>
@@ -17,13 +22,13 @@ class MPSolver {
 public:
     const std::shared_ptr<const Problem> prob;
 
-    MPSolver(const std::shared_ptr<const Problem> prob) : prob(prob) {}
+    MPSolver(std::shared_ptr<const Problem> prob) : prob(prob) {}
     
     MPLinearSolution solve_lp(const ColumnPool& pool) const;
     MPIntegerSolution solve_mip(const ColumnPool& pool) const;
     
 private:
-    IloData solve(const ColumnPool& pool, const bool linear) const;
+    IloData solve(const ColumnPool& pool, bool linear) const;
 };
 
 #endif

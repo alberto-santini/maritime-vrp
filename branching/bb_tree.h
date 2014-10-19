@@ -5,13 +5,17 @@
 #ifndef BB_TREE_H
 #define BB_TREE_H
 
-#include <base/base.h>
+#include <memory>
+#include <queue>
+#include <string>
+#include <vector>
+
 #include <base/problem.h>
 #include <branching/cycle.h>
 #include <branching/bb_node.h>
 #include <column/column_pool.h>
 
-typedef priority_queue<std::shared_ptr<BBNode>, vector<std::shared_ptr<BBNode>>, BBNodeCompare> NodeQueue;
+typedef std::priority_queue<std::shared_ptr<BBNode>, std::vector<std::shared_ptr<BBNode>>, BBNodeCompare> NodeQueue;
 enum class BoundType { FROM_LP, FROM_MIP };
 
 class BBTree {
@@ -25,13 +29,15 @@ public:
     std::shared_ptr<BBNode>         node_attaining_ub;
     BoundType                       node_bound_type;
     
-    BBTree(string program_params_file_name, string data_file_name);
+    BBTree(const std::string& program_params_file_name, const std::string& data_file_name);
     void explore_tree();
     
 private:
-    void branch_on_cycles(const Cycles& cycles, const std::shared_ptr<BBNode> current_node);
-    void branch_on_fractional(const std::shared_ptr<BBNode> current_node);
-    void try_to_obtain_ub(const std::shared_ptr<BBNode> current_node);
+    void branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> current_node);
+    void branch_on_fractional(std::shared_ptr<BBNode> current_node);
+    void try_to_obtain_ub(std::shared_ptr<BBNode> current_node);
+    void print_header() const;
+    void print_row(const BBNode& current_node, float gap, float gap_node) const;
 };
 
 #endif

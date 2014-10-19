@@ -5,16 +5,17 @@
 #ifndef SP_SOLVER_H
 #define SP_SOLVER_H
 
-#include <base/base.h>
+#include <utility>
+
 #include <base/problem.h>
 #include <column/column_pool.h>
 #include <subproblem/heuristics_solver.h>
 #include <subproblem/exact_solver.h>
 
-#define PCT_START 0.1
-#define PCT_END_ELEM 0.6
-#define PCT_END 1
-#define PCT_INCREMENT 0.1
+static constexpr double pct_start = 0.1;
+static constexpr double pct_end_elem = 0.6;
+static constexpr double pct_end = 1.0;
+static constexpr double pct_increment = 0.1;
 
 class SPSolver {
 public:
@@ -24,7 +25,11 @@ public:
     SPSolver(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs) : prob(prob), local_graphs(local_graphs) {}
     
     /* Returns how many columns were added to the column pool and their origin */
-    pair<int, ColumnOrigin> solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, const bool try_elementary, double& time_spent_by_exact_solver) const;
+    std::pair<int, ColumnOrigin> solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, bool try_elementary, double& time_spent_by_exact_solver) const;
+    
+private:
+    bool solution_in_pool(const Solution& s, const ColumnPool& pool) const;
+    void print_report(int sols_found, int discarded_prc, int discarded_infeasible, int discarded_generated, int discarded_in_pool, std::ostream& out = std::cerr) const;
 };
 
 #endif

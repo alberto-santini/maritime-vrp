@@ -5,10 +5,10 @@
 #ifndef KNAPSACK_H
 #define KNAPSACK_H
 
-#include <base/base.h>
+#include <vector>
 
 namespace Knapsack {
-    int solve(const vector<int> demands, const int capacity);
+    int solve(const std::vector<int>& demands, int capacity);
 }
 
 #endif

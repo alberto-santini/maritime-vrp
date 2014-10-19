@@ -2,37 +2,41 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <iomanip>
+#include <iostream>
+#include <limits>
+
 #include <column/column.h>
 
-Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, const string created_by, const ColumnOrigin origin) : prob(prob), created_by(created_by), origin(origin) {
-    const std::shared_ptr<const Graph> g = prob->graphs.at(sol.vessel_class);
-    const std::shared_ptr<const Graph> node_g = sol.g;
+Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const std::string& created_by, ColumnOrigin origin) : prob(prob), created_by(created_by), origin(origin) {
+    auto g = prob->graphs.at(sol.vessel_class);
+    auto node_g = sol.g;
     
-    Path global_p = g->transfer_path(sol.path, node_g);
+    Path global_p = g->transfer_path(sol.path, *node_g);
     Solution global_sol(global_p, sol.cost, sol.reduced_cost, sol.vessel_class, g);
     
     obj_coeff = global_sol.cost;    
     
-    int np = prob->data.num_ports;
-    int nv = prob->data.num_vessel_classes;
+    auto np = prob->data.num_ports;
+    auto nv = prob->data.num_vessel_classes;
     
     /*  "np - 1" to remove the hub;
         "2 *" to create one coefficient for (port, pu) and one for (port, de) */
-    port_coeff = vector<float>(2 * (np - 1), 0);
-    for(const Edge& e : sol.path) {
+    port_coeff = std::vector<float>(2 * (np - 1), 0);
+    for(const auto& e : sol.path) {
         Node n = *g->graph[target(e, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT) {
-            for(int i = 1; i < np; i++) {
+            for(auto i = 1; i < np; i++) {
                 if(n.port == prob->data.ports[i]) {
-                    int constr_index = (n.pu_type == PickupType::PICKUP ? (i - 1) : (np - 1 + i - 1));
+                    auto constr_index = (n.pu_type == PickupType::PICKUP ? (i - 1) : (np - 1 + i - 1));
                     port_coeff[constr_index]++;
                 }
             }
         }
     }
     
-    vc_coeff = vector<float>(nv, 0);
-    for(int i = 0; i < nv; i++) {
+    vc_coeff = std::vector<float>(nv, 0);
+    for(auto i = 0; i < nv; i++) {
         if(global_sol.vessel_class == prob->data.vessel_classes[i]) {
             vc_coeff[i] = 1;
         }
@@ -42,26 +46,26 @@ Column::Column(const std::shared_ptr<const Problem> prob, const Solution sol, co
     dummy = false;
 }
 
-void Column::make_dummy(const float huge_cost) {
+void Column::make_dummy(float huge_cost) {
     sol = Solution();
     obj_coeff = huge_cost;
-    port_coeff = vector<float>(2 * (prob->data.num_ports - 1), 1);
-    vc_coeff = vector<float>(prob->data.num_vessel_classes, 0);
+    port_coeff = std::vector<float>(2 * (prob->data.num_ports - 1), 1);
+    vc_coeff = std::vector<float>(prob->data.num_vessel_classes, 0);
     dummy = true;
     created_by = "dummy";
     origin = ColumnOrigin::NONE;
 }
 
-bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
+bool Column::is_compatible_with_unite_rule(const VisitRule& vr) const {
     if(dummy) {
         return true;
     }
     
-    const std::shared_ptr<const Graph> g = sol.g;
+    auto g = sol.g;
     
-    for(const Edge& e : sol.path) {
-        Node orig = *g->graph[source(e, g->graph)];
-        Node dest = *g->graph[target(e, g->graph)];
+    for(const auto& e : sol.path) {
+        auto orig = *g->graph[source(e, g->graph)];
+        auto dest = *g->graph[target(e, g->graph)];
     
         /*  If orig~vr.first and !dest~vr.second OR
                !orig~vr.first and dest~vr.second
@@ -74,16 +78,16 @@ bool Column::is_compatible_with_unite_rule(VisitRule vr) const {
     return true;
 }
 
-bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
+bool Column::is_compatible_with_separate_rule(const VisitRule& vr) const {
     if(dummy) {
         return true;
     }
     
-    const std::shared_ptr<const Graph> g = sol.g;
+    auto g = sol.g;
     
-    for(const Edge& e : sol.path) {
-        Node orig = *g->graph[source(e, g->graph)];
-        Node dest = *g->graph[target(e, g->graph)];
+    for(const auto& e : sol.path) {
+        auto orig = *g->graph[source(e, g->graph)];
+        auto dest = *g->graph[target(e, g->graph)];
         
         /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
         if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {
@@ -95,24 +99,30 @@ bool Column::is_compatible_with_separate_rule(VisitRule vr) const {
 }
 
 bool Column::has_cycles() const {
-    for(const float& coeff : port_coeff) {
-        if(coeff > 1 + numeric_limits<float>::epsilon()) {
+    for(auto coeff : port_coeff) {
+        if(coeff > 1 + std::numeric_limits<float>::epsilon()) {
             return true;
         }
     }
     return false;
 }
 
-ostream& operator<<(ostream& out, const Column& c) {
-    out << setw(6) << c.obj_coeff << " | ";
-    int hs = c.port_coeff.size() / 2;
-    for(int i = 0; i < hs; i++) {
+std::ostream& operator<<(std::ostream& out, const Column& c) {
+    out << std::setw(6) << c.obj_coeff << " | ";
+    
+    auto hs = (int)(c.port_coeff.size() / 2);
+    
+    for(auto i = 0; i < hs; i++) {
         out << c.port_coeff[i] << " " << c.port_coeff[hs + i] << "\t";
     }
+    
     out << "| ";
-    for(int i = 0; i < c.vc_coeff.size(); i++) {
+    
+    for(auto i = 0; i < c.vc_coeff.size(); i++) {
         out << c.vc_coeff[i] << " ";
     }
+    
     out << "by " << c.created_by << " ";
+    
     return out;
 }

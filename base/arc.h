@@ -11,7 +11,7 @@ public:
     int     boost_edge_id;
     
     Arc() {}
-    Arc(const float cost) : cost(cost) { boost_edge_id = 0; }
+    Arc(float cost) : cost(cost) { boost_edge_id = 0; }
 };
 
 #endif

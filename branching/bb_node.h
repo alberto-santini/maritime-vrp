@@ -5,14 +5,17 @@
 #ifndef BB_NODE_H
 #define BB_NODE_H
 
-#include <base/base.h>
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include <base/problem.h>
 #include <branching/cycle.h>
 #include <column/column_pool.h>
 #include <masterproblem/mp_solver.h>
 #include <subproblem/sp_solver.h>
 
-#define NO_FATHER_LB -999
+static constexpr int no_father_lb = -999;
 
 class BBNode {
 public:
@@ -27,9 +30,9 @@ public:
     IsolateRule                 isolate_rule;
     
     /*  The optimal columns selected by the LP solver with the coefficient */
-    vector<pair<Column, float>> base_columns;
+    std::vector<std::pair<Column, float>> base_columns;
     /*  The optimal columns selected by the MIP solver with the coefficient */
-    vector<pair<Column, float>> mip_base_columns;
+    std::vector<std::pair<Column, float>> mip_base_columns;
     
     /*  LP Solution */
     float                       sol_value;
@@ -45,7 +48,7 @@ public:
     bool                        try_elementary;
     
     /* Time spent on SP vs MP (avg and total) */
-    vector<double>              all_times_spent_on_sp;
+    std::vector<double>         all_times_spent_on_sp;
     double                      avg_time_spent_on_sp;
     double                      total_time_spent_on_sp;
     double                      total_time_spent_on_mp;
@@ -56,20 +59,20 @@ public:
     
     BBNode() {}
     BBNode(const std::shared_ptr<const Problem> prob,
-           const GraphMap local_graphs,
+           const GraphMap& local_graphs,
            const std::shared_ptr<ColumnPool> pool,
-           const ColumnPool local_pool,
-           const VisitRuleList unite_rules,
-           const VisitRuleList separate_rules,
-           const float father_lb,
-           const int depth = 0,
-           const IsolateRule isolate_rule = IsolateRule(),
-           const bool try_elementary = true,
-           const double avg_time_spent_on_sp = 0,
-           const double total_time_spent_on_sp = 0,
-           const double total_time_spent_on_mp = 0,
-           const double total_time_spent = 0,
-           const double max_time_spent_by_exact_solver = 0);
+           const ColumnPool& local_pool,
+           const VisitRuleList& unite_rules,
+           const VisitRuleList& separate_rules,
+           float father_lb,
+           int depth = 0,
+           const IsolateRule& isolate_rule = IsolateRule(),
+           bool try_elementary = true,
+           double avg_time_spent_on_sp = 0,
+           double total_time_spent_on_sp = 0,
+           double total_time_spent_on_mp = 0,
+           double total_time_spent = 0,
+           double max_time_spent_by_exact_solver = 0);
     
     void solve();
     bool solve_integer(const ColumnPool& feasible_columns);
@@ -90,13 +93,13 @@ private:
     /*  Test: I want to check if there are columns with the same
         constraint coefficients and possibly different objective
         function coefficients */
-    vector<int> column_coefficients(const Column& col);
+    std::vector<int> column_coefficients(const Column& col);
     void check_for_duplicate_columns();
 };
 
 class BBNodeCompare {
 public:
-    bool operator()(const std::shared_ptr<BBNode>& n1, const std::shared_ptr<BBNode>& n2) const {
+    bool operator()(const auto& n1, const auto& n2) const {
         return (n1->father_lb > n2->father_lb);
     }
 };
