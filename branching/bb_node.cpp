@@ -151,7 +151,7 @@ void BBNode::solve() {
     
     total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
     
-    std::cerr << std::unitbuf << "\tMP: " << sol.obj_value << " ";
+    std::cerr << std::unitbuf << "\tMP: " << sol.obj_value << std::endl;
 
     auto node_explored = false;
     while(!node_explored) {
@@ -183,7 +183,7 @@ void BBNode::solve() {
             
             total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
             
-            std::cerr << "> " << sol.obj_value << " ";
+            std::cerr << "\tMP: " << sol.obj_value << std::endl;
         } else {
             // Otherwise, the exploration is done
             sol_value = sol.obj_value;

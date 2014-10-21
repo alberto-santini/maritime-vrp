@@ -18,11 +18,11 @@ bool SPSolver::solution_in_pool(const Solution& s, const ColumnPool& pool) const
 }
 
 void SPSolver::print_report(int sols_found, int discarded_prc, int discarded_infeasible, int discarded_generated, int discarded_in_pool, std::ostream& out) const {
-    out << "\t\t\t\tWe found " << sols_found << " new columns." << std::endl;
-    out << "\t\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << std::endl;
-    out << "\t\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << std::endl;
-    out << "\t\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << std::endl;
-    out << "\t\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << std::endl;
+    out << "\t\t\tWe found " << sols_found << " new columns." << std::endl;
+    out << "\t\t\t\t" << discarded_prc << " columns were discarded because they have positive reduced cost." << std::endl;
+    out << "\t\t\t\t" << discarded_infeasible << " columns were discarded because they're infeasible wrt capacity constraints." << std::endl;
+    out << "\t\t\t\t" << discarded_generated << " columns were discarded because they had already been generated in this iteration." << std::endl;
+    out << "\t\t\t\t" << discarded_in_pool << " columns were discarded because they were already in the columns pool." << std::endl;
 }
 
 std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, bool try_elementary, double& max_time_spent_by_exact_solver) const {
@@ -35,7 +35,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         
     /********************** FAST HEURISTICS **********************/
     
-    std::cerr << "@";
+    std::cerr << "\t\tFast heuristic" << std::endl;
     
     for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
         auto g = local_graphs.at(*vcit);        
@@ -59,7 +59,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     }
     
     if(PEDANTIC) {
-        std::cerr << "\t\t\tFast heuristics." << std::endl;
         print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     }
     
@@ -82,10 +81,10 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** ELEMENTARY LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_elementary_labelling && try_elementary) {
-        std::cerr << "@[";
-    
+        std::cerr << "\t\tElementary labelling"  << std::endl;
+        
         while(valid_sols.size() == 0 && percentage < pct_end_elem - std::numeric_limits<float>::epsilon()) {
-            std::cerr << (int)(percentage * 10);
+            std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl;
             auto elem_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
             std::vector<std::thread> threads;
@@ -123,10 +122,8 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             }    
             percentage += pct_increment;
         }
-        std::cerr << "]";
     
         if(PEDANTIC) {
-            std::cerr << "\t\t\tElementary labelling on the reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
     
@@ -145,8 +142,8 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** LABELLING ON THE SMARTLY REDUCED GRAPH **********************/
     
     if(prob->params.try_smart_graph_reduction) {
-        std::cerr << "@";
-    
+        std::cerr << "\t\tLabelling on the smartly reduced graph" << std::endl;
+        
         auto sred_sols = std::make_shared<std::vector<Solution>>();
         std::mutex mtx;
         std::vector<std::thread> threads;
@@ -184,7 +181,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         }
 
         if(PEDANTIC) {
-            std::cerr << "\t\t\tLabelling on the smartly reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
        
@@ -201,11 +197,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_reduced_labelling) {
-        std::cerr << "@[";
-    
+        std::cerr << "\t\tLabelling on the reduced graph" << std::endl;
         percentage = pct_start;
+        
         while(valid_sols.size() == 0 && percentage < pct_end - std::numeric_limits<float>::epsilon()) {
-            std::cerr << (int)(percentage * 10);
+            std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl;
             auto red_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
             std::vector<std::thread> threads;
@@ -243,10 +239,8 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             }    
             percentage += pct_increment;
         }
-        std::cerr << "]";
     
         if(PEDANTIC) {
-            std::cerr << "\t\t\tLabelling on the reduced graph." << std::endl;
             print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
         }
     
@@ -264,7 +258,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     
     /********************** LABELLING ON THE COMPLETE GRAPH **********************/
     
-    std::cerr << "@";
+    std::cerr << "\t\tLabelling on the complete graph" << std::endl;
     
     auto e_sols = std::make_shared<std::vector<Solution>>();
     std::mutex mtx;
@@ -304,7 +298,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     }
 
     if(PEDANTIC) {
-        std::cerr << "\t\t\tLabelling on the complete graph." << std::endl;
         print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
     }
        

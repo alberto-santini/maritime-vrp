@@ -234,7 +234,7 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float perce
         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
         default_r_c_shortest_paths_visitor()
     );
-        
+    
     // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
