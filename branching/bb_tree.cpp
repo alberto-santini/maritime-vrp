@@ -29,20 +29,46 @@ BBTree::BBTree(const std::string& program_params_file_name, const std::string& d
 }
 
 void BBTree::print_header() const {
-    std::cout << std::setw(8) << "Unexpl"; // Unexplored nodes
-    std::cout << std::setw(6) << "All"; // Number of nodes in total
-    std::cout << std::setw(12) << "LB*";
-    std::cout << std::setw(12) << "LB";
-    std::cout << std::setw(12) << "UB";
-    std::cout << std::setw(12) << "Gap*";
-    std::cout << std::setw(12) << "Gap";
-    std::cout << std::setw(6) << "Cols"; // Columns in pool
-    std::cout << std::setw(12) << "MP t"; // Time on MP
-    std::cout << std::setw(12) << "SP t"; // Time on SP
-    std::cout << std::setw(12) << "t"; // Time at node
-    std::cout << std::setw(12) << "SP* t"; // Avg time on SP
-    std::cout << std::setw(12) << "SP ex"; // Max time on Exact SP
-    std::cout << std::setw(6) << "Depth" << std::endl;
+	std::cout << std::setw(22) << "BB Nodes |";
+	std::cout << std::setw(28) << "Lower Bound |";
+	std::cout << std::setw(16) << "Upper Bound |";
+	std::cout << std::setw(28) << "Gap |";
+	std::cout << std::setw(10) << "|";
+	std::cout << std::setw(66) << "Total time |";
+	std::cout << std::setw(22) << "|";
+	std::cout << std::setw(26) << "|";
+    std::cout << std::setw(8) << "|" << std::endl;
+	
+    std::cout << std::setw(12) << "Unexplored  "; // Unexplored nodes
+    std::cout << std::setw(10) << "Total |"; // Number of nodes in total
+	
+    std::cout << std::setw(14) << "LB at node  ";
+    std::cout << std::setw(14) << "LB best |";
+	
+    std::cout << std::setw(16) << "UB best |";
+	
+    std::cout << std::setw(14) << "Gap at node  ";
+    std::cout << std::setw(14) << "Gap best |";
+	
+    std::cout << std::setw(10) << "Columns |";
+	
+    std::cout << std::setw(22) << "Time spent on MP  "; // Time on MP
+    std::cout << std::setw(22) << "Time spent on SP  "; // Time on SP
+    std::cout << std::setw(22) << "Time spent at node |"; // Time at node
+
+    std::cout << std::setw(22) << "Average time on SP |"; // Avg time on SP
+    std::cout << std::setw(26) << "Max time on SP (exact) |"; // Max time on Exact SP
+	
+	std::cout << std::setw(8) << "Depth |" << std::endl;
+	
+	std::cout << 	"-----------*---------*" <<
+					"-------------*-------------*" <<
+					"---------------*" <<
+					"-------------*-------------*" <<
+					"---------*" <<
+					"---------------------*---------------------*---------------------*" <<
+					"---------------------*-------------------------*" <<
+					"-------*" << std::endl;
 }
 
 void BBTree::explore_tree() {
@@ -149,20 +175,20 @@ inline std::ostream& defaultfloat(std::ostream& os) { os.unsetf(std::ios_base::f
 
 void BBTree::print_row(const BBNode& current_node, float gap, float gap_node) const {
     std::cout << std::fixed;
-    std::cout << std::setw(8) << unexplored_nodes.size();
-    std::cout << std::setw(6) << bb_nodes_generated;
-    std::cout << std::setw(12) << std::setprecision(2) << current_node.sol_value;
-    std::cout << std::setw(12) << std::setprecision(2) << lb;
-    std::cout << std::setw(12) << std::setprecision(2) << ub;
-    std::cout << std::setw(11) << std::setprecision(4) << gap_node << "\%";
-    std::cout << std::setw(11) << std::setprecision(4) << gap << "\%";
-    std::cout << std::setw(6) << pool->size();
-    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent_on_mp;
-    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent_on_sp;
-    std::cout << std::setw(12) << std::setprecision(4) << current_node.total_time_spent;
-    std::cout << std::setw(12) << std::setprecision(4) << current_node.avg_time_spent_on_sp;
-    std::cout << std::setw(12) << std::setprecision(4) << current_node.max_time_spent_by_exact_solver;
-    std::cout << std::setw(6) << current_node.depth << std::endl;
+    std::cout << std::setw(10) << unexplored_nodes.size() << "  ";
+    std::cout << std::setw(8) << bb_nodes_generated << "  ";
+    std::cout << std::setw(12) << std::setprecision(2) << current_node.sol_value << "  ";
+    std::cout << std::setw(12) << std::setprecision(2) << lb << "  ";
+    std::cout << std::setw(14) << std::setprecision(2) << ub << "  ";
+    std::cout << std::setw(11) << std::setprecision(4) << gap_node << "\%  ";
+    std::cout << std::setw(11) << std::setprecision(4) << gap << "\%  ";
+    std::cout << std::setw(8) << pool->size() << "  ";
+    std::cout << std::setw(20) << std::setprecision(4) << current_node.total_time_spent_on_mp << "  ";
+    std::cout << std::setw(20) << std::setprecision(4) << current_node.total_time_spent_on_sp << "  ";
+    std::cout << std::setw(20) << std::setprecision(4) << current_node.total_time_spent << "  ";
+    std::cout << std::setw(20) << std::setprecision(4) << current_node.avg_time_spent_on_sp << "  ";
+    std::cout << std::setw(24) << std::setprecision(4) << current_node.max_time_spent_by_exact_solver << "  ";
+    std::cout << std::setw(6) << current_node.depth << "  " << std::endl;
     defaultfloat(std::cout);
 }
 
