@@ -3,7 +3,6 @@
   "theta":                          100,
   "max_cols_to_solve_mp":           99999,
   "dummy_column_price":             999999,
-  "remove_additional_arcs":         true,
   "try_elementary_labelling":       true,
   "try_smart_graph_reduction":      true,
   "try_reduced_labelling":          false,

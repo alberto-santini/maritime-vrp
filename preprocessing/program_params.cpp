@@ -16,7 +16,6 @@ ProgramParams::ProgramParams(const std::string& data_file_name) {
     theta = pt.get<int>("theta");
     max_cols_to_solve_mp = pt.get<int>("max_cols_to_solve_mp");
     dummy_column_price = pt.get<int>("dummy_column_price");
-    remove_additional_arcs = pt.get<bool>("remove_additional_arcs");
     try_elementary_labelling = pt.get<bool>("try_elementary_labelling");
     try_smart_graph_reduction = pt.get<bool>("try_smart_graph_reduction");
     try_reduced_labelling = pt.get<bool>("try_reduced_labelling");
