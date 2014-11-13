@@ -35,7 +35,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         
     /********************** FAST HEURISTICS **********************/
     
-    std::cerr << "\t\tFast heuristic" << std::endl;
+    if(PEDANTIC) { std::cerr << "\t\tFast heuristic" << std::endl; }
     
     for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
         auto g = local_graphs.at(*vcit);        
@@ -81,10 +81,10 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** ELEMENTARY LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_elementary_labelling && try_elementary) {
-        std::cerr << "\t\tElementary labelling"  << std::endl;
+        if(PEDANTIC) { std::cerr << "\t\tElementary labelling"  << std::endl; }
         
         while(valid_sols.size() == 0 && percentage < pct_end_elem - std::numeric_limits<float>::epsilon()) {
-            std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl;
+            if(PEDANTIC) { std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl; }
             auto elem_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
             std::vector<std::thread> threads;
@@ -142,7 +142,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** LABELLING ON THE SMARTLY REDUCED GRAPH **********************/
     
     if(prob->params.try_smart_graph_reduction) {
-        std::cerr << "\t\tLabelling on the smartly reduced graph" << std::endl;
+        if(PEDANTIC) { std::cerr << "\t\tLabelling on the smartly reduced graph" << std::endl; }
         
         auto sred_sols = std::make_shared<std::vector<Solution>>();
         std::mutex mtx;
@@ -197,11 +197,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     /********************** LABELLING ON THE REDUCED GRAPH **********************/
     
     if(prob->params.try_reduced_labelling) {
-        std::cerr << "\t\tLabelling on the reduced graph" << std::endl;
+        if(PEDANTIC) { std::cerr << "\t\tLabelling on the reduced graph" << std::endl; }
         percentage = pct_start;
         
         while(valid_sols.size() == 0 && percentage < pct_end - std::numeric_limits<float>::epsilon()) {
-            std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl;
+            if(PEDANTIC) { std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl; }
             auto red_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
             std::vector<std::thread> threads;
@@ -258,7 +258,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     
     /********************** LABELLING ON THE COMPLETE GRAPH **********************/
     
-    std::cerr << "\t\tLabelling on the complete graph" << std::endl;
+    if(PEDANTIC) { std::cerr << "\t\tLabelling on the complete graph" << std::endl; }
     
     auto e_sols = std::make_shared<std::vector<Solution>>();
     std::mutex mtx;
