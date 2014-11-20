@@ -19,5 +19,10 @@ main
 data/problem_data.json
 data/waf-*
 data/blt-*
+data/baltic*
+
+*.ii
+*.s
+
 feeder
 Makefile
