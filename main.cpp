@@ -7,6 +7,8 @@
 #include <branching/bb_tree.h>
 
 int main(int argc, char* argv[]) {
+    srand(12345);
+    
     if(argc != 3) {
         std::cout << "Usage: ./feeder <params_file> <data_file>" << std::endl;
         return -1;
