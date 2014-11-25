@@ -9,8 +9,10 @@
 
 Problem::Problem(const std::string& params_file, const std::string& data_file) : params(params_file), data(data_file), graphs() {
     for(auto vessel_class : data.vessel_classes) {
-        auto g = GraphGenerator::create_graph(data, vessel_class, params.remove_additional_arcs);
+        auto g = GraphGenerator::create_graph(data, params, vessel_class);
+        
         std::cerr << "Graph for " << vessel_class->name << ": " << num_vertices(g->graph) << " vertices and " << num_edges(g->graph) << " edges" << std::endl;
+        
         graphs.emplace(vessel_class, g);
     }
 }

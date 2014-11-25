@@ -16,8 +16,9 @@ public:
     bool    try_elementary_labelling;
     bool    try_smart_graph_reduction;
     bool    try_reduced_labelling;
-    float   smart_min_chance;
-    float   smart_max_chance;
+    bool    use_stop_arcs;
+    double  smart_min_chance;
+    double  smart_max_chance;
     
     ProgramParams(const std::string& data_file_name = "data/program_params.json");
 };
