@@ -146,8 +146,8 @@ void BBTree::explore_tree() {
             lb = current_node->sol_value;
         }
         
-        auto gap_node = ((ub - current_node->sol_value) / current_node->sol_value) * 100;
-        auto gap = ((ub - lb) / lb) * 100;
+        auto gap_node = ((ub - current_node->sol_value) / ub) * 100;
+        auto gap = ((ub - lb) / ub) * 100;
         
         print_row(*current_node, gap_node, gap);
     }
@@ -173,13 +173,19 @@ void BBTree::explore_tree() {
 // LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
 inline std::ostream& defaultfloat(std::ostream& os) { os.unsetf(std::ios_base::floatfield); return os; }
 
-void BBTree::print_row(const BBNode& current_node, float gap, float gap_node) const {
+void BBTree::print_row(const BBNode& current_node, double gap_node, double gap) const {
+    auto print_ub = (ub < std::numeric_limits<double>::max() - 100);
+    
     std::cout << std::fixed;
     std::cout << std::setw(10) << unexplored_nodes.size() << "  ";
     std::cout << std::setw(8) << bb_nodes_generated << "  ";
     std::cout << std::setw(12) << std::setprecision(2) << current_node.sol_value << "  ";
     std::cout << std::setw(12) << std::setprecision(2) << lb << "  ";
-    std::cout << std::setw(14) << std::setprecision(2) << ub << "  ";
+    if(print_ub) {
+        std::cout << std::setw(14) << std::setprecision(2) << ub << "  ";
+    } else {
+        std::cout << std::setw(14) << "inf" << "  ";
+    }
     std::cout << std::setw(11) << std::setprecision(4) << gap_node << "\%  ";
     std::cout << std::setw(11) << std::setprecision(4) << gap << "\%  ";
     std::cout << std::setw(8) << pool->size() << "  ";
