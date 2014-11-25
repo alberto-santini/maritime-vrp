@@ -23,8 +23,8 @@ public:
     std::shared_ptr<const Problem>  prob;
     std::shared_ptr<ColumnPool>     pool;
     NodeQueue                       unexplored_nodes;
-    float                           ub;
-    float                           lb;
+    double                          ub;
+    double                          lb;
     int                             bb_nodes_generated;
     std::shared_ptr<BBNode>         node_attaining_ub;
     BoundType                       node_bound_type;
@@ -37,7 +37,7 @@ private:
     void branch_on_fractional(std::shared_ptr<BBNode> current_node);
     void try_to_obtain_ub(std::shared_ptr<BBNode> current_node);
     void print_header() const;
-    void print_row(const BBNode& current_node, float gap, float gap_node) const;
+    void print_row(const BBNode& current_node, double gap, double gap_node) const;
 };
 
 #endif

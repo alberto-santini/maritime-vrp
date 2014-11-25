@@ -11,16 +11,14 @@
 #include <subproblem/heuristics_solver.h>
 
 std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
-    std::vector<Solution> sols;
+    auto sols = std::vector<Solution>();
     auto h1 = g->h1().second;
     auto h2 = g->h2().second;
-    struct EdgeWithCost { Edge e; float c; float rc; };
-
-    srand(12345);
+    struct EdgeWithCost { Edge e; double c; double rc; };
 
     for(auto i = 0; i < prob->params.theta; i++) {
         auto current = h1;
-        Path path;
+        auto path = Path();
         auto tot_c = 0.0f, tot_rc = 0.0f;
         auto done = false;
                 
@@ -84,9 +82,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
     std::vector<Solution> sols;
     auto h1 = g->h1().second;
     auto h2 = g->h2().second;
-    struct EdgeWithCost { Edge e; float c; float rc; };
-
-    srand(98765);
+    struct EdgeWithCost { Edge e; double c; double rc; };
 
     for(int i = 0; i < prob->params.theta; i++) {
         auto current = h2;
@@ -160,7 +156,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast() const {
     return total;
 }
 
-std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float percentage) const {
+std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double percentage) const {
     std::vector<Solution> sols;
     auto red = g->reduce_graph(percentage);
     
@@ -206,7 +202,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const float 
     return sols;
 }
 
-std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const float percentage, const bool smart) const {
+std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double percentage, const bool smart) const {
     std::vector<Solution> sols;
     auto red = smart ? g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance) : g->reduce_graph(percentage);
     

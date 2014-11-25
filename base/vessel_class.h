@@ -8,18 +8,18 @@
 #include <string>
 #include <unordered_map>
 
-typedef std::unordered_map<float, float> SpeedCostMap;
+typedef std::unordered_map<double, double> SpeedCostMap;
 
 class VesselClass {
 public:
     std::string     name;
     int             capacity;
     int             num_vessels;
-    float           base_cost;
+    double          base_cost;
     SpeedCostMap    bunker_cost;
-    float           top_speed;
+    double          top_speed;
     
-    VesselClass(const std::string& name, int capacity, int num_vessels, float base_cost, const SpeedCostMap& bunker_cost);
+    VesselClass(const std::string& name, int capacity, int num_vessels, double base_cost, const SpeedCostMap& bunker_cost);
 };
 
 #endif

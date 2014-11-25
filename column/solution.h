@@ -13,15 +13,15 @@
 class Solution {
 public:
     Path                            path;
-    float                           cost;
-    float                           reduced_cost;
+    double                          cost;
+    double                          reduced_cost;
     std::shared_ptr<VesselClass>    vessel_class;
     std::shared_ptr<const Graph>    g;
     
     Solution() {}
     Solution(const Path& path, 
-             float cost,
-             float reduced_cost,
+             double cost,
+             double reduced_cost,
              std::shared_ptr<VesselClass> vessel_class,
              std::shared_ptr<const Graph> g) : path(path), cost(cost), reduced_cost(reduced_cost), vessel_class(vessel_class), g(g) {}
     

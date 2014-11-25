@@ -18,7 +18,7 @@
 /*  The third template parameter to unordered_map is the hash function to be used
     STL doesn't provide one for pair<>, so we use the one from boost */
 typedef std::unordered_map<
-            std::pair<std::shared_ptr<Port>, std::shared_ptr<Port>>, float,
+            std::pair<std::shared_ptr<Port>, std::shared_ptr<Port>>, double,
             boost::hash<std::pair<std::shared_ptr<Port>,std::shared_ptr<Port>>>
         > DistMap;
 

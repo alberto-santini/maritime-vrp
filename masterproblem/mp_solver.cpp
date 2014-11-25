@@ -77,7 +77,7 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     
     cplex.getDuals(values, port_constr);
     
-    PortDuals port_duals;
+    auto port_duals = PortDuals();
     for(auto i = 1; i <= (values.getSize() / 2); i++) {
         std::shared_ptr<Port> p = prob->data.ports[i];
         port_duals.emplace(p, std::make_pair(values[i - 1], values[np - 1 + i - 1]));
@@ -85,14 +85,15 @@ MPLinearSolution MPSolver::solve_lp(const ColumnPool& pool) const {
     
     cplex.getDuals(values, vc_constr);
     
-    VcDuals vc_duals;
+    auto vc_duals = VcDuals();
     for(auto i = 0; i < values.getSize(); i++) {
         std::shared_ptr<VesselClass> vc = prob->data.vessel_classes[i];
         vc_duals.emplace(vc, values[i]);
     }
     
     cplex.getValues(values, var);
-    std::vector<float> variables;
+    
+    auto variables = std::vector<double>();
     for(auto i = 0; i < values.getSize(); i++) {
         variables.push_back(values[i]);
     }
@@ -119,7 +120,8 @@ MPIntegerSolution MPSolver::solve_mip(const ColumnPool& pool) const {
     IloNumArray values(env);
     
     cplex.getValues(values, var);
-    std::vector<float> variables;
+    
+    auto variables = std::vector<double>();
     for(auto i = 0; i < values.getSize(); i++) {
         variables.push_back(values[i]);
     }

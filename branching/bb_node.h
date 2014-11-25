@@ -30,19 +30,19 @@ public:
     IsolateRule                 isolate_rule;
     
     /*  The optimal columns selected by the LP solver with the coefficient */
-    std::vector<std::pair<Column, float>> base_columns;
+    std::vector<std::pair<Column, double>> base_columns;
     /*  The optimal columns selected by the MIP solver with the coefficient */
-    std::vector<std::pair<Column, float>> mip_base_columns;
+    std::vector<std::pair<Column, double>> mip_base_columns;
     
     /*  LP Solution */
-    float                       sol_value;
+    double                      sol_value;
     /*  MIP Solution */
-    float                       mip_sol_value;
+    double                      mip_sol_value;
     /*  LB of father node, used to determine the most promising nodes in the queue */
-    float                       father_lb;
+    double                      father_lb;
     
     /*  Used to determine if a solution is integral, or with cost < 0 */
-    static constexpr float      cplex_epsilon = 0.0000001;
+    static constexpr double     cplex_epsilon = 0.0000001;
     
     /* Should we still try to run the ESPPRC labelling at this node? */
     bool                        try_elementary;
@@ -64,7 +64,7 @@ public:
            const ColumnPool& local_pool,
            const VisitRuleList& unite_rules,
            const VisitRuleList& separate_rules,
-           float father_lb,
+           double father_lb,
            int depth = 0,
            const IsolateRule& isolate_rule = IsolateRule(),
            bool try_elementary = true,

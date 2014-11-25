@@ -14,7 +14,7 @@
 #include <base/vessel_class.h>
 
 typedef std::unordered_map<std::shared_ptr<VesselClass>, bool> AllowedVcMap;
-typedef std::unordered_map<std::shared_ptr<VesselClass>, float> FeeVcMap;
+typedef std::unordered_map<std::shared_ptr<VesselClass>, double> FeeVcMap;
 typedef std::vector<std::pair<int, int>> ClosingTimeWindows;
 
 class Port {

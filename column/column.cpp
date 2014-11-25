@@ -22,7 +22,7 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
     
     /*  "np - 1" to remove the hub;
         "2 *" to create one coefficient for (port, pu) and one for (port, de) */
-    port_coeff = std::vector<float>(2 * (np - 1), 0);
+    port_coeff = std::vector<double>(2 * (np - 1), 0);
     for(const auto& e : sol.path) {
         Node n = *g->graph[target(e, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT) {
@@ -35,7 +35,7 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
         }
     }
     
-    vc_coeff = std::vector<float>(nv, 0);
+    vc_coeff = std::vector<double>(nv, 0);
     for(auto i = 0; i < nv; i++) {
         if(global_sol.vessel_class == prob->data.vessel_classes[i]) {
             vc_coeff[i] = 1;
@@ -46,11 +46,11 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
     dummy = false;
 }
 
-void Column::make_dummy(float huge_cost) {
+void Column::make_dummy(double huge_cost) {
     sol = Solution();
     obj_coeff = huge_cost;
-    port_coeff = std::vector<float>(2 * (prob->data.num_ports - 1), 1);
-    vc_coeff = std::vector<float>(prob->data.num_vessel_classes, 0);
+    port_coeff = std::vector<double>(2 * (prob->data.num_ports - 1), 1);
+    vc_coeff = std::vector<double>(prob->data.num_vessel_classes, 0);
     dummy = true;
     created_by = "dummy";
     origin = ColumnOrigin::NONE;
@@ -100,7 +100,7 @@ bool Column::is_compatible_with_separate_rule(const VisitRule& vr) const {
 
 bool Column::has_cycles() const {
     for(auto coeff : port_coeff) {
-        if(coeff > 1 + std::numeric_limits<float>::epsilon()) {
+        if(coeff > 1 + std::numeric_limits<double>::epsilon()) {
             return true;
         }
     }

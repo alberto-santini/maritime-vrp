@@ -8,9 +8,9 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool& local_pool, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules, float father_lb, int depth, const IsolateRule& isolate_rule, bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp, double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), isolate_rule(isolate_rule), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
-    sol_value = std::numeric_limits<float>::max();
-    mip_sol_value = std::numeric_limits<float>::max();
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool& local_pool, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules, double father_lb, int depth, const IsolateRule& isolate_rule, bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp, double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), isolate_rule(isolate_rule), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
+    sol_value = std::numeric_limits<double>::max();
+    mip_sol_value = std::numeric_limits<double>::max();
     all_times_spent_on_sp = std::vector<double>(0);
     make_local_graphs();
     remove_incompatible_columns();
@@ -116,7 +116,7 @@ void BBNode::check_for_duplicate_columns() {
             auto i_column_coeff = column_coefficients(*iit);
             
             if(std::equal(o_column_coeff.begin(), o_column_coeff.end(), i_column_coeff.begin())) {
-                if(fabs(o_column_cost - i_column_cost) < std::numeric_limits<float>::epsilon()) {
+                if(fabs(o_column_cost - i_column_cost) < std::numeric_limits<double>::epsilon()) {
                     std::cerr << ">>> Duplicate column - same cost!" << std::endl;
                 } else {
                     std::cerr << ">>> Duplicate column - different cost!" << std::endl;
@@ -137,9 +137,9 @@ void BBNode::solve() {
     }
     
     // Clear any eventual previous solutions
-    base_columns = std::vector<std::pair<Column, float>>();
+    base_columns = std::vector<std::pair<Column, double>>();
     sol_value = 0;
-    MPSolver mp_solv(prob);
+    auto mp_solv = MPSolver(prob);
     
     if(PEDANTIC) {
         check_for_duplicate_columns();
@@ -161,9 +161,20 @@ void BBNode::solve() {
             vg.second->graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
         }
 
-        SPSolver sp_solv(prob, local_graphs);
-        int sp_found_columns;
-        ColumnOrigin orig;
+        auto sp_solv = SPSolver(prob, local_graphs);
+        auto sp_found_columns = 0;
+        auto orig = ColumnOrigin::NONE;
+        
+        // if(PEDANTIC) {
+        //     std::cerr << "\t\tPort duals before solving SP:" << std::endl;
+        //     for(const auto& pd : sol.port_duals) {
+        //         std::cerr << "\t\t\t" << pd.first->name << "; pu: " << pd.second.first << ", de: " << pd.second.second << std::endl;
+        //     }
+        //     std::cerr << "\t\tVC duals before solving SP:" << std::endl;
+        //     for(const auto& vd : sol.vc_duals) {
+        //         std::cerr << "\t\t\t" << vd.first->name << ": " << vd.second << std::endl;
+        //     }
+        // }
         
         auto sp_start = clock();
         tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary, max_time_spent_by_exact_solver);
@@ -205,7 +216,7 @@ void BBNode::solve() {
 
 bool BBNode::solve_integer(const ColumnPool& feasible_columns) {
     // Clear any eventual previous solutions
-    mip_base_columns = std::vector<std::pair<Column, float>>();
+    mip_base_columns = std::vector<std::pair<Column, double>>();
     mip_sol_value = 0;
     
     MPSolver mp_solv(prob);

@@ -48,7 +48,7 @@ void Graph::sort_arcs() {
     
         struct ArcComparer {
             bool operator()(std::shared_ptr<Arc> a1, std::shared_ptr<Arc> a2) {
-                return (a2->cost - a1->cost > std::numeric_limits<float>::epsilon());
+                return (a2->cost - a1->cost > std::numeric_limits<double>::epsilon());
             }
         } arc_comparer;
     
@@ -184,12 +184,12 @@ void Graph::isolate_port(const Node& n) {
     prepare_for_labelling();
 }
 
-std::shared_ptr<Graph> Graph::reduce_graph(float percentage) const {
+std::shared_ptr<Graph> Graph::reduce_graph(double percentage) const {
     if(ordered_arcs.size() != num_edges(graph)) {
         throw std::runtime_error("Trying to reduce a graph whose edges are not sorted");
     }
     
-    auto limit_index = (int) (floor((float) num_edges(graph) * percentage));
+    auto limit_index = (int) (floor((double) num_edges(graph) * percentage));
     auto cost_limit = ordered_arcs[limit_index]->cost;
     auto new_name = name + " reduced for arc cost < " + std::to_string(cost_limit);
     auto dest = std::make_shared<Graph>(graph, vessel_class, new_name);
@@ -198,7 +198,7 @@ std::shared_ptr<Graph> Graph::reduce_graph(float percentage) const {
     std::tie(ei, ei_end) = edges(dest->graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        if(dest->graph[*ei]->cost > cost_limit - std::numeric_limits<float>::epsilon()) {
+        if(dest->graph[*ei]->cost > cost_limit - std::numeric_limits<double>::epsilon()) {
             remove_edge(*ei, dest->graph);
         }
     }
@@ -207,7 +207,7 @@ std::shared_ptr<Graph> Graph::reduce_graph(float percentage) const {
     return dest;
 }
 
-std::shared_ptr<Graph> Graph::smart_reduce_graph(float min_chance, float max_chance) const {
+std::shared_ptr<Graph> Graph::smart_reduce_graph(double min_chance, double max_chance) const {
     auto new_name = name + " reduced smartly";
     auto dest = std::make_shared<Graph>(graph, vessel_class, new_name);
     auto max_prize = max_dual_prize();
@@ -221,7 +221,7 @@ std::shared_ptr<Graph> Graph::smart_reduce_graph(float min_chance, float max_cha
         if(trgt->n_type == NodeType::REGULAR_PORT) {
             auto dual_prize = (trgt->pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(trgt->port).first : graph[graph_bundle].port_duals.at(trgt->port).second);
             auto threshold = min_chance + (dual_prize - min_prize) * (max_chance - min_chance) / (max_prize - min_prize);
-            auto rnd = static_cast<float> (rand()) / static_cast<float> (RAND_MAX);
+            auto rnd = static_cast<double> (rand()) / static_cast<double> (RAND_MAX);
             if(rnd > threshold) {
                 remove_edge(*ei, dest->graph);
             }
@@ -232,8 +232,8 @@ std::shared_ptr<Graph> Graph::smart_reduce_graph(float min_chance, float max_cha
     return dest;
 }
 
-float Graph::max_dual_prize() const {
-    float max_prize = 0;
+double Graph::max_dual_prize() const {
+    double max_prize = 0;
 
     for(const auto& pp : graph[graph_bundle].port_duals) {
         max_prize = std::max(max_prize, pp.second.first);
@@ -243,8 +243,8 @@ float Graph::max_dual_prize() const {
     return max_prize;
 }
 
-float Graph::min_dual_prize() const {
-    auto min_prize = std::numeric_limits<float>::max();
+double Graph::min_dual_prize() const {
+    auto min_prize = std::numeric_limits<double>::max();
     
     for(const auto& pp : graph[graph_bundle].port_duals) {
         min_prize = std::min(min_prize, pp.second.first);
@@ -265,7 +265,7 @@ std::pair<bool, Vertex> Graph::get_vertex(const Port& p, PickupType pu, int t) c
     return std::make_pair(false, Vertex());
 }
 
-float Graph::calculate_cost(const Path& p) const {
+double Graph::calculate_cost(const Path& p) const {
     auto cost = 0.0f;
     
     for(const auto& e : p) {
@@ -275,7 +275,7 @@ float Graph::calculate_cost(const Path& p) const {
     return cost;
 }
 
-float Graph::dual_of(const Node& n) const {
+double Graph::dual_of(const Node& n) const {
     if(n.n_type == NodeType::REGULAR_PORT) {
         if(n.pu_type == PickupType::PICKUP) {
             return graph[graph_bundle].port_duals.at(n.port).first;

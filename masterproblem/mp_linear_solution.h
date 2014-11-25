@@ -11,12 +11,12 @@
 
 class MPLinearSolution {
 public:
-    float               obj_value;
+    double              obj_value;
     PortDuals           port_duals;
     VcDuals             vc_duals;
-    std::vector<float>  variables;
+    std::vector<double>  variables;
     
-    MPLinearSolution(float obj_value, const PortDuals& port_duals, const VcDuals& vc_duals, const std::vector<float>& variables) : obj_value(obj_value), port_duals(port_duals), vc_duals(vc_duals), variables(variables) {}
+    MPLinearSolution(double obj_value, const PortDuals& port_duals, const VcDuals& vc_duals, const std::vector<double>& variables) : obj_value(obj_value), port_duals(port_duals), vc_duals(vc_duals), variables(variables) {}
 };
 
 #endif

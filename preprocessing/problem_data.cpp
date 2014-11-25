@@ -19,25 +19,25 @@ ProblemData::ProblemData(const std::string& data_file_name) {
     num_times = pt.get<int>("num_times");
     num_vessel_classes = pt.get<int>("num_vessel_classes");
     
-    std::vector<std::vector<float>> _distances;
+    std::vector<std::vector<double>> _distances;
     
     BOOST_FOREACH(const ptree::value_type& child, pt.get_child("vessel_classes")) {
         auto name = child.second.get<std::string>("name");
         auto num_vessels = child.second.get<int>("num_vessels");
         auto num_speeds = child.second.get<int>("num_speeds");
         auto capacity = child.second.get<int>("capacity");
-        auto base_cost = child.second.get<float>("base_cost");
+        auto base_cost = child.second.get<double>("base_cost");
         SpeedCostMap bunker_cost;
         
-        std::vector<float> speeds;
-        std::vector<float> costs;
+        std::vector<double> speeds;
+        std::vector<double> costs;
         
         BOOST_FOREACH(const ptree::value_type& s_child, child.second.get_child("speeds")) {
-            speeds.push_back(s_child.second.get<float>(""));
+            speeds.push_back(s_child.second.get<double>(""));
         }
         
         BOOST_FOREACH(const ptree::value_type& c_child, child.second.get_child("speeds_cost")) {
-            costs.push_back(c_child.second.get<float>(""));
+            costs.push_back(c_child.second.get<double>(""));
         }
         
         if(speeds.size() != num_speeds || costs.size() != num_speeds) {
@@ -66,7 +66,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         auto num_tw = child.second.get<int>("num_tw");
         std::vector<int> tw_left;
         std::vector<int> tw_right;
-        std::vector<float> p_distances;
+        std::vector<double> p_distances;
         AllowedVcMap allowed;
         FeeVcMap fee;
         ClosingTimeWindows tw;
@@ -78,7 +78,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         
         n = 0;
         BOOST_FOREACH(const ptree::value_type& f_child, child.second.get_child("calling_fee")) {
-            fee.emplace(vessel_classes[n++], f_child.second.get<float>(""));
+            fee.emplace(vessel_classes[n++], f_child.second.get<double>(""));
         }
         
         BOOST_FOREACH(const ptree::value_type& l_child, child.second.get_child("tw_left")) {
@@ -102,7 +102,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         }
         
         BOOST_FOREACH(const ptree::value_type& d_child, child.second.get_child("distances")) {
-            p_distances.push_back(d_child.second.get<float>(""));
+            p_distances.push_back(d_child.second.get<double>(""));
         }
         
         if(p_distances.size() != num_ports) {

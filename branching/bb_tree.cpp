@@ -11,8 +11,8 @@
 
 BBTree::BBTree(const std::string& program_params_file_name, const std::string& data_file_name) {
     prob = std::make_shared<Problem>(program_params_file_name, data_file_name);
-    ub = std::numeric_limits<float>::max();
-    lb = std::numeric_limits<float>::max();
+    ub = std::numeric_limits<double>::max();
+    lb = std::numeric_limits<double>::max();
 
     Column dummy(prob);
     dummy.make_dummy(prob->params.dummy_column_price);
@@ -142,7 +142,7 @@ void BBTree::explore_tree() {
         }
         
         // Used in the first iteration when there is no father node
-        if(abs(lb - no_father_lb) < std::numeric_limits<float>::epsilon()) {
+        if(abs(lb - no_father_lb) < std::numeric_limits<double>::epsilon()) {
             lb = current_node->sol_value;
         }
         

@@ -45,7 +45,7 @@ bool Solution::operator==(const Solution& other) const {
     if(other.path.size() != path.size()) {
         return false;
     }
-    if(fabs(cost - other.cost) > std::numeric_limits<float>::epsilon()) {
+    if(fabs(cost - other.cost) > std::numeric_limits<double>::epsilon()) {
         return false;
     }
     for(int i = 0; i < path.size(); i++) {

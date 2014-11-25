@@ -7,11 +7,11 @@
 
 class Arc {
 public:
-    float   cost;
+    double  cost;
     int     boost_edge_id;
     
     Arc() {}
-    Arc(float cost) : cost(cost) { boost_edge_id = 0; }
+    Arc(double cost) : cost(cost) { boost_edge_id = 0; }
 };
 
 #endif

@@ -69,22 +69,22 @@ public:
     void isolate_port(const Node& n);
     
     /*  Creates the reduced graphs, where edges with high cost are removed */
-    std::shared_ptr<Graph> reduce_graph(float percentage) const;
-    std::shared_ptr<Graph> smart_reduce_graph(float min_chance, float max_chance) const;
+    std::shared_ptr<Graph> reduce_graph(double percentage) const;
+    std::shared_ptr<Graph> smart_reduce_graph(double min_chance, double max_chance) const;
 
     /*  The highest/lowest dual prize among all ports */
-    float max_dual_prize() const;
-    float min_dual_prize() const;
+    double max_dual_prize() const;
+    double min_dual_prize() const;
 
     /*  The first item is true if the vertex has been found or false otherwise
         The second item is the vertex (in case it has been found) */
     std::pair<bool, Vertex> get_vertex(const Port& p, PickupType pu, int t) const;
     
     /*  Calculates the cost of a path as the sum of the cost of the edges */
-    float calculate_cost(const Path& p) const;
+    double calculate_cost(const Path& p) const;
     
     /*  Gets the correct dual value */
-    float dual_of(const Node& n) const;
+    double dual_of(const Node& n) const;
     
     /*  Transfers a path fro a subgraph to the current graph. Typically the subgraph
         is the reduced graph of the current graph. */

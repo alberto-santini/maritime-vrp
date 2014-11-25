@@ -9,10 +9,10 @@
 
 class MPIntegerSolution {
 public:
-    float                obj_value;
-    std::vector<float>   variables;
+    double               obj_value;
+    std::vector<double>   variables;
     
-    MPIntegerSolution(float obj_value, const std::vector<float>& variables) : obj_value(obj_value), variables(variables) {}
+    MPIntegerSolution(double obj_value, const std::vector<double>& variables) : obj_value(obj_value), variables(variables) {}
 };
 
 #endif

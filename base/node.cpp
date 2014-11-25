@@ -4,11 +4,11 @@
 
 #include <base/node.h>
 
-float Node::pu_demand() const {
+double Node::pu_demand() const {
     return (pu_type == PickupType::PICKUP ? port->pickup_demand : 0);
 }
 
-float Node::de_demand() const {
+double Node::de_demand() const {
     return (pu_type == PickupType::DELIVERY ? port->delivery_demand : 0);
 }
 

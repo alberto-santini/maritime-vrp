@@ -38,13 +38,17 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     if(PEDANTIC) { std::cerr << "\t\tFast heuristic" << std::endl; }
     
     for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
-        auto g = local_graphs.at(*vcit);        
+        auto g = local_graphs.at(*vcit);
         HeuristicsSolver hsolv(prob, g);
         
         auto total = hsolv.solve_fast();
                 
         for(const auto& s : total) {
-            if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
+            if(s.reduced_cost > -std::numeric_limits<double>::epsilon()) {
+                // if(PEDANTIC) {
+                    // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                    // g->print_path(s.path);
+                // }
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints()) {
                 discarded_infeasible++;
@@ -53,6 +57,9 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             } else if(solution_in_pool(s, node_pool)) {
                 discarded_in_pool++;
             } else {
+                // if(PEDANTIC) {
+                    // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+                // }
                 valid_sols.push_back(s);
             }
         }
@@ -83,7 +90,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     if(prob->params.try_elementary_labelling && try_elementary) {
         if(PEDANTIC) { std::cerr << "\t\tElementary labelling"  << std::endl; }
         
-        while(valid_sols.size() == 0 && percentage < pct_end_elem - std::numeric_limits<float>::epsilon()) {
+        while(valid_sols.size() == 0 && percentage < pct_end_elem - std::numeric_limits<double>::epsilon()) {
             if(PEDANTIC) { std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl; }
             auto elem_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
@@ -108,7 +115,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             }
     
             for(const auto& s : *elem_sols) {
-                if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
+                if(s.reduced_cost > -std::numeric_limits<double>::epsilon()) {
+                    // if(PEDANTIC) {
+                        // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                        // s.g->print_path(s.path);
+                    // }
                     discarded_prc++;
                 } else if(!s.satisfies_capacity_constraints()) {
                     discarded_infeasible++;
@@ -117,6 +128,9 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                 } else if(solution_in_pool(s, node_pool)) {
                     discarded_in_pool++;
                 } else {
+                    // if(PEDANTIC) {
+                        // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+                    // }
                     valid_sols.push_back(s);
                 }
             }    
@@ -167,7 +181,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         }    
     
         for(const auto& s : *sred_sols) {
-            if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
+            if(s.reduced_cost > -std::numeric_limits<double>::epsilon()) {
+                // if(PEDANTIC) {
+                    // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                    // s.g->print_path(s.path);
+                // }
                 discarded_prc++;
             } else if(!s.satisfies_capacity_constraints()) {
                 discarded_infeasible++;
@@ -176,6 +194,9 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             } else if(solution_in_pool(s, node_pool)) {
                 discarded_in_pool++;
             } else {
+                // if(PEDANTIC) {
+                    // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+                // }
                 valid_sols.push_back(s);
             }
         }
@@ -200,7 +221,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         if(PEDANTIC) { std::cerr << "\t\tLabelling on the reduced graph" << std::endl; }
         percentage = pct_start;
         
-        while(valid_sols.size() == 0 && percentage < pct_end - std::numeric_limits<float>::epsilon()) {
+        while(valid_sols.size() == 0 && percentage < pct_end - std::numeric_limits<double>::epsilon()) {
             if(PEDANTIC) { std::cerr << "\t\t\t" << (int)(percentage * 100) << "%" << std::endl; }
             auto red_sols = std::make_shared<std::vector<Solution>>();
             std::mutex mtx;
@@ -225,7 +246,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             }
     
             for(const auto& s : *red_sols) {
-                if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
+                if(s.reduced_cost > -std::numeric_limits<double>::epsilon()) {
+                    // if(PEDANTIC) {
+                        // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                        // s.g->print_path(s.path);
+                    // }
                     discarded_prc++;
                 } else if(!s.satisfies_capacity_constraints()) {
                     discarded_infeasible++;
@@ -234,6 +259,9 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                 } else if(solution_in_pool(s, node_pool)) {
                     discarded_in_pool++;
                 } else {
+                    // if(PEDANTIC) {
+                        // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+                    // }
                     valid_sols.push_back(s);
                 }
             }    
@@ -284,7 +312,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     }    
     
     for(const auto& s : *e_sols) {
-        if(s.reduced_cost > -std::numeric_limits<float>::epsilon()) {
+        if(s.reduced_cost > -std::numeric_limits<double>::epsilon()) {
+            // if(PEDANTIC) {
+                // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                // s.g->print_path(s.path);
+            // }
             discarded_prc++;
         } else if(!s.satisfies_capacity_constraints()) {
             discarded_infeasible++;
@@ -293,6 +325,9 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         } else if(solution_in_pool(s, node_pool)) {
             discarded_in_pool++;
         } else {
+            // if(PEDANTIC) {
+                // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+            // }
             valid_sols.push_back(s);
         }
     }

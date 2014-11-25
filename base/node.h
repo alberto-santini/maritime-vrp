@@ -32,8 +32,8 @@ public:
         boost_vertex_id = 0;
     }
     
-    float pu_demand() const;
-    float de_demand() const;
+    double pu_demand() const;
+    double de_demand() const;
     bool same_row_as(const Node& other) const;
     bool operator==(const Node& other) const;
     bool operator!=(const Node& other) const { return !(*this == other); }
