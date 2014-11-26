@@ -13,6 +13,7 @@ public:
     int     theta;
     int     max_cols_to_solve_mp;
     int     dummy_column_price;
+    int     cplex_cores;
     bool    try_elementary_labelling;
     bool    try_smart_graph_reduction;
     bool    try_reduced_labelling;
