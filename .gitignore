@@ -16,11 +16,6 @@
 main
 .DS_Store
 
-data/problem_data.json
-data/waf-*
-data/blt-*
-data/baltic*
-
 *.ii
 *.s
 
