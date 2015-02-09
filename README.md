@@ -15,3 +15,8 @@ It is a solver for a quite particular case of maritime VRP with:
 * Heterogeneous fleet
 * Multiple sailing speeds (and costs)
 * Maximum transit times
+
+License
+-------
+
+This software is distributed under the GNU General Public License v3, as detailed in `LICENSE.txt`.
