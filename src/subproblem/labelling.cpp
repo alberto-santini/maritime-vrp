@@ -85,32 +85,23 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
 }
 
 bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const {
-    auto n_orig = *graph[source(e, graph)];
     auto n_dest = *graph[target(e, graph)];
     
-    if(n_dest.same_row_as(n_orig)) {
-        new_label.q_pickupable = label.q_pickupable;
-        new_label.q_deliverable = label.q_deliverable;
-        new_label.cost = label.cost + graph[e]->cost;
-        new_label.visited_ports = label.visited_ports;
-        
-        return true;
-    } else {
-        new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
-        new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
-        
-        auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
+    new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
+    new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
-        new_label.cost = label.cost + graph[e]->cost - dual;
-        new_label.visited_ports = label.visited_ports;
+    auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
+
+    new_label.cost = label.cost + graph[e]->cost - dual;
+    new_label.visited_ports = label.visited_ports;
+
+    auto dest_pp = std::make_pair(n_dest.port, n_dest.pu_type);
+    new_label.visited_ports[dest_pp] = true;
     
-        auto dest_pp = std::make_pair(n_dest.port, n_dest.pu_type);
-        new_label.visited_ports[dest_pp] = true;
-        
-        auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
-                     label.q_deliverable >= n_dest.de_demand() &&
-                     !label.visited_ports.at(dest_pp));
-    
-        return ext;
-    }
+    auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
+                 label.q_deliverable >= n_dest.de_demand() &&
+                 !label.visited_ports.at(dest_pp));
+
+    return ext;
+
 }
