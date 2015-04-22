@@ -199,7 +199,7 @@ void BBNode::solve() {
             // Otherwise, the exploration is done
             sol_value = sol.obj_value;
 
-            for(auto i = 0; i < sol.variables.size(); i++) {
+            for(auto i = 0u; i < sol.variables.size(); i++) {
                 if(sol.variables[i] > BBNode::cplex_epsilon) {
                     base_columns.push_back(std::make_pair(local_pool[i], sol.variables[i]));
                 }
@@ -225,7 +225,7 @@ bool BBNode::solve_integer(const ColumnPool& feasible_columns) {
         auto sol = mp_solv.solve_mip(feasible_columns);
         mip_sol_value = sol.obj_value;
 
-        for(auto i = 0; i < sol.variables.size(); i++) {
+        for(auto i = 0u; i < sol.variables.size(); i++) {
             if(sol.variables[i] > BBNode::cplex_epsilon) {
                 mip_base_columns.push_back(std::make_pair(feasible_columns[i], sol.variables[i]));
             }

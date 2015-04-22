@@ -59,7 +59,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
-            if(path.size() > g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1) {
+            if(path.size() > (unsigned int) (g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1)) {
                 break;
             }
             
@@ -127,7 +127,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
-            if(path.size() > g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1) {
+            if(path.size() > (unsigned int)(g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1)) {
                 break;
             }
             
@@ -194,7 +194,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double
     // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
-    for(auto i = 0; i < optimal_paths.size(); i++) {
+    for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
         sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
     }
@@ -234,7 +234,7 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double perc
     // clock_t cl_end = clock();
     // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
-    for(auto i = 0; i < optimal_paths.size(); i++) {
+    for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
         sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
     }

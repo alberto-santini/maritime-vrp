@@ -48,7 +48,7 @@ bool Solution::operator==(const Solution& other) const {
     if(fabs(cost - other.cost) > std::numeric_limits<double>::epsilon()) {
         return false;
     }
-    for(int i = 0; i < path.size(); i++) {
+    for(auto i = 0u; i < path.size(); i++) {
         if(*other.g->graph[source(other.path[i], other.g->graph)] != *g->graph[source(path[i], g->graph)]) {
             return false;
         }

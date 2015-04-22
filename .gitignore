@@ -19,5 +19,4 @@ main
 *.ii
 *.s
 
-feeder
-Makefile
+build/**

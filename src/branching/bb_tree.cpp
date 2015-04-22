@@ -320,7 +320,7 @@ void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
         }
     }
     
-    if(feasible_columns.size() <= prob->params.max_cols_to_solve_mp) {
+    if(feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp) {
         if(current_node->solve_integer(feasible_columns)) {
             std::cerr << "\tNode UB: " << current_node->mip_sol_value << std::endl;
             if(ub - current_node->mip_sol_value > BBNode::cplex_epsilon) {

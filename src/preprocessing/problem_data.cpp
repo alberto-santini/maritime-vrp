@@ -40,7 +40,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
             costs.push_back(c_child.second.get<double>(""));
         }
         
-        if(speeds.size() != num_speeds || costs.size() != num_speeds) {
+        if(speeds.size() != (unsigned int)num_speeds || costs.size() != (unsigned int)num_speeds) {
             throw std::runtime_error("Declared more/less speeds than described");
         }
         
@@ -50,7 +50,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         vessel_classes.push_back(vessel_class);
     }
     
-    if(vessel_classes.size() != num_vessel_classes) {
+    if(vessel_classes.size() != (unsigned int)num_vessel_classes) {
         throw std::runtime_error("Declared more/less vessel classes than described");
     }
     
@@ -85,7 +85,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
             tw_left.push_back(l_child.second.get<int>(""));
         }
         
-        if(tw_left.size() != num_tw) {
+        if(tw_left.size() != (unsigned int)num_tw) {
             throw std::runtime_error("Declared more/less [left] time windows than described");
         }
         
@@ -93,7 +93,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
             tw_right.push_back(r_child.second.get<int>(""));
         }
         
-        if(tw_left.size() != num_tw) {
+        if(tw_left.size() != (unsigned int)num_tw) {
             throw std::runtime_error("Declared more/less [right] time windows than described");
         }
         
@@ -105,7 +105,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
             p_distances.push_back(d_child.second.get<double>(""));
         }
         
-        if(p_distances.size() != num_ports) {
+        if(p_distances.size() != (unsigned int)num_ports) {
             throw std::runtime_error("Declared more/less distances than ports");
         }
         
@@ -116,7 +116,7 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         ports.push_back(p);
     }
     
-    if(ports.size() != num_ports) {
+    if(ports.size() != (unsigned int)num_ports) {
         throw std::runtime_error("Declared more/less ports than described");
     }
     

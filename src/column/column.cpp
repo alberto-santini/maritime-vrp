@@ -118,7 +118,7 @@ std::ostream& operator<<(std::ostream& out, const Column& c) {
     
     out << "| ";
     
-    for(auto i = 0; i < c.vc_coeff.size(); i++) {
+    for(auto i = 0u; i < c.vc_coeff.size(); i++) {
         out << c.vc_coeff[i] << " ";
     }
     

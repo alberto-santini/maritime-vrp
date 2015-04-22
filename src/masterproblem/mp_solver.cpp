@@ -110,9 +110,7 @@ MPIntegerSolution MPSolver::solve_mip(const ColumnPool& pool) const {
     IloRangeArray port_constr;
     IloRangeArray vc_constr;
     IloCplex cplex;
-    
-    auto np = prob->data.num_ports;
-    
+        
     std::tie(env, var, port_constr, vc_constr, cplex) = solve(pool, false);
     
     auto obj_value = cplex.getObjValue();

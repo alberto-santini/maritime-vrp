@@ -13,7 +13,7 @@ Path Cycle::shortest_cycle(const Path& route, std::shared_ptr<const Graph> g) {
     
     std::vector<Path> cycles;
     auto num_cycles = 0;
-    auto shortest_cycle_length = std::numeric_limits<int>::max();
+    auto shortest_cycle_length = std::numeric_limits<unsigned int>::max();
     auto shortest_cycle_idx = 0;
     
     cycles.push_back(Path());
@@ -26,7 +26,7 @@ Path Cycle::shortest_cycle(const Path& route, std::shared_ptr<const Graph> g) {
         auto current_port = current_node.port;
         auto current_pu = current_node.pu_type;
         
-        for(auto k = 0; k < cycles[num_cycles].size(); k++) {
+        for(auto k = 0u; k < cycles[num_cycles].size(); k++) {
             auto cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
             auto cycle_port = cycle_node.port;
             auto cycle_pu = cycle_node.pu_type;

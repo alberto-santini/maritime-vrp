@@ -24,10 +24,9 @@ public:
     
     const std::shared_ptr<ColumnPool> pool;
     ColumnPool                  local_pool;
-
+    
     VisitRuleList               unite_rules;
     VisitRuleList               separate_rules;
-    IsolateRule                 isolate_rule;
     
     /*  The optimal columns selected by the LP solver with the coefficient */
     std::vector<std::pair<Column, double>> base_columns;
@@ -40,6 +39,11 @@ public:
     double                      mip_sol_value;
     /*  LB of father node, used to determine the most promising nodes in the queue */
     double                      father_lb;
+    
+    /* Depth in the BB tree */
+    int                         depth;
+    
+    IsolateRule                 isolate_rule;
     
     /*  Used to determine if a solution is integral, or with cost < 0 */
     static constexpr double     cplex_epsilon = 0.0000001;
@@ -54,8 +58,6 @@ public:
     double                      total_time_spent_on_mp;
     double                      total_time_spent;
     double                      max_time_spent_by_exact_solver;
-    
-    int                         depth;
     
     BBNode() {}
     BBNode(const std::shared_ptr<const Problem> prob,

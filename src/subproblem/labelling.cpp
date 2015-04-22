@@ -93,6 +93,8 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
         new_label.q_deliverable = label.q_deliverable;
         new_label.cost = label.cost + graph[e]->cost;
         new_label.visited_ports = label.visited_ports;
+        
+        return true;
     } else {
         new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
         new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());

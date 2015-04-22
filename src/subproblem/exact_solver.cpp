@@ -44,7 +44,7 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) const {
         time_spent = time_s;
     }
         
-    for(auto i = 0; i < optimal_paths.size(); i++) {
+    for(auto i = 0u; i < optimal_paths.size(); i++) {
         sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
     }
     

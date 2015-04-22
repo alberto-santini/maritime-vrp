@@ -36,7 +36,7 @@ namespace GraphGenerator {
         }
     
         /*  Add hub-to-port edges */
-        for(std::shared_ptr<Port> p : data.ports) {
+        for(auto p : data.ports) {
             if(p->hub) {
                 continue;
             }
@@ -56,12 +56,17 @@ namespace GraphGenerator {
             
                 auto final_time_pu = final_time(data, *p, arrival_time, PickupType::PICKUP);
                         
-                if( (final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
-                    (final_time_pu >= data.num_times - 1 - p->pickup_transit)) {
-                
-                    auto cost_pu = distance * u_cost + vessel_class->base_cost * (final_time_pu - 0) + p->fee[vessel_class];
-                
-                    create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g, cost_pu);
+                if(final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
+                    if(final_time_pu >= data.num_times - 1 - p->pickup_transit) {
+                        // Normal arc: arrives at a time when it's allowed
+                        auto cost_pu = distance * u_cost + vessel_class->base_cost * (final_time_pu - 0) + p->fee[vessel_class];
+                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g, cost_pu);
+                    } else {
+                        // Travel + wait arc: arrives at a time when it's not allowed
+                        auto overall_final_time = data.num_times - 1 - p->pickup_transit;
+                        auto cost_pu = distance * u_cost + vessel_class->base_cost * (p->pickup_transit - 0) + p->fee[vessel_class];
+                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, overall_final_time, g, cost_pu);
+                    }
                 }
             
                 auto final_time_de = final_time(data, *p, arrival_time, PickupType::DELIVERY);
@@ -75,26 +80,18 @@ namespace GraphGenerator {
                 }
             }
         }
-            
-        /*  Add port-to-hub edges */
-        for(std::shared_ptr<Port> p : data.ports) {
-            if(p->hub) {
-                continue;
-            }
         
-            if(!p->allowed[vessel_class]) {
+        /*  Add port-to-hub edges */
+        for(auto p : data.ports) {
+            if(p->hub || !p->allowed[vessel_class]) {
                 continue;
             }
-
-            for(const auto& sc : vessel_class->bunker_cost) {
-                auto distance = data.distances.at(std::make_pair(p, n_h2.port));
-                auto speed = sc.first, u_cost = sc.second;
-                auto departure_time = data.num_times - 1 - (int) ceil(distance / speed);
-                        
-                if(departure_time < 0) {
-                    continue;
-                }
-                        
+            
+            auto pickup_departure_time = std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit);
+            auto delivery_departure_time = std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit);
+            
+            // For pickup nodes:
+            for(auto departure_time = pickup_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
                 auto falls_in_tw = false;
                 for(const auto& tw : p->closing_time_windows) {
                     if(departure_time > tw.first && departure_time <= tw.second) {
@@ -106,23 +103,58 @@ namespace GraphGenerator {
                 if(falls_in_tw) {
                     continue;
                 }
-                        
-                auto cost = distance * u_cost + vessel_class->base_cost * ceil(distance / speed);
-            
-                if(departure_time >= earliest_arrival(data, p, n_h1.port, *vessel_class)) {
-                    if(departure_time >= data.num_times - 1 - p->pickup_transit) {
-                        create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
-                    }
                 
-                    if(departure_time <= p->delivery_transit) {
-                        create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                for(const auto& sc : vessel_class->bunker_cost) {
+                    auto distance = data.distances.at(std::make_pair(p, n_h2.port));
+                    auto speed = sc.first, u_cost = sc.second;
+                    auto arrival_time = departure_time + (int) ceil(distance / speed);
+                    
+                    if(arrival_time >= data.num_times) {
+                        continue;
                     }
+                    
+                    // Thew following works the same for:
+                    // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
+                    // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
+                    auto cost = distance * u_cost + vessel_class->base_cost * (data.num_times - 1 - departure_time);
+                    create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                }
+            }
+            
+            // For delivery nodes:
+            for(auto departure_time = delivery_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
+                auto falls_in_tw = false;
+                for(const auto& tw : p->closing_time_windows) {
+                    if(departure_time > tw.first && departure_time <= tw.second) {
+                        falls_in_tw = true;
+                        break;
+                    }
+                }
+            
+                if(falls_in_tw) {
+                    continue;
+                }
+                
+                for(const auto& sc : vessel_class->bunker_cost) {
+                    auto distance = data.distances.at(std::make_pair(p, n_h2.port));
+                    auto speed = sc.first, u_cost = sc.second;
+                    auto arrival_time = departure_time + (int) ceil(distance / speed);
+                    
+                    if(arrival_time >= data.num_times) {
+                        continue;
+                    }
+                    
+                    // Thew following works the same for:
+                    // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
+                    // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
+                    auto cost = distance * u_cost + vessel_class->base_cost * (data.num_times - 1 - departure_time);
+                    create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
                 }
             }
         }
                 
         /*  Add port-to-port edges */
-        for(std::shared_ptr<Port> p : data.ports) {
+        for(auto p : data.ports) {
             if(p->hub) {
                 continue;
             }
@@ -152,7 +184,7 @@ namespace GraphGenerator {
                         continue;
                     }
                 
-                    for(std::shared_ptr<Port> q : data.ports) {
+                    for(auto q : data.ports) {
                         if(p == q) {
                             if(params.use_stop_arcs && t < data.num_times - 2) {
                                 create_edge(*p, pu, t, *p, pu, t+1, g, vessel_class->base_cost);
@@ -237,6 +269,32 @@ namespace GraphGenerator {
                     clear_vertex(*vi, g->graph);
                     remove_vertex(*vi, g->graph);
                     clean = false;
+                }
+            }
+        }
+        
+        vit vi, vi_end;
+        for(std::tie(vi, vi_end) = vertices(g->graph); vi != vi_end; ++vi) {
+            oeit ei, ei_end, ei_next;
+            std::tie(ei, ei_end) = out_edges(*vi, g->graph);
+            
+            std::unordered_map<Vertex, Edge> best_edges;
+            for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                ++ei_next;
+                
+                auto destination = target(*ei, g->graph);
+                auto cost = g->graph[*ei]->cost;
+                
+                if(best_edges.find(destination) == best_edges.end()) {
+                    best_edges.emplace(destination, *ei);
+                } else {
+                    if(g->graph[best_edges[destination]]->cost > cost) {
+                        auto old_edge = best_edges[destination];
+                        best_edges[destination] = *ei;
+                        remove_edge(old_edge, g->graph);
+                    } else {
+                        remove_edge(*ei, g->graph);
+                    }
                 }
             }
         }
