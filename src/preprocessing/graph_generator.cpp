@@ -87,8 +87,8 @@ namespace GraphGenerator {
                 continue;
             }
             
-            auto pickup_departure_time = std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit);
-            auto delivery_departure_time = std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit);
+            auto pickup_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit), 1);
+            auto delivery_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit), 1);
             
             assert(pickup_departure_time >= 1);
             assert(delivery_departure_time >= 1);
