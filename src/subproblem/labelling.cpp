@@ -61,31 +61,27 @@ bool ElementaryLabel::operator<(const ElementaryLabel& other) const {
 }
 
 bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const {
-    auto n_orig = *graph[source(e, graph)];
     auto n_dest = *graph[target(e, graph)];
     
-    if(n_dest.same_row_as(n_orig)) {
-        new_label.q_pickupable = label.q_pickupable;
-        new_label.q_deliverable = label.q_deliverable;
-        new_label.cost = label.cost + graph[e]->cost;
-        return true;
-    } else {
-        new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
-        new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
+    assert(!n_dest.same_row_as(*graph[source(e, graph)]));
     
-        auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
-
-        new_label.cost = label.cost + graph[e]->cost - dual;
+    new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
+    new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
-        auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
-                     label.q_deliverable >= n_dest.de_demand());
+    auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
 
-        return ext;
-    }
+    new_label.cost = label.cost + graph[e]->cost - dual;
+    
+    auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
+                 label.q_deliverable >= n_dest.de_demand());
+
+    return ext;
 }
 
 bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const {
     auto n_dest = *graph[target(e, graph)];
+    
+    assert(!n_dest.same_row_as(*graph[source(e, graph)]));
     
     new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
