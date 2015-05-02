@@ -75,10 +75,6 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
                  label.q_deliverable >= n_dest.de_demand());
 
-    if(ext) {
-        assert(label < new_label || label == new_label);
-    }
-
     return ext;
 }
 
@@ -101,10 +97,6 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
                  label.q_deliverable >= n_dest.de_demand() &&
                  !label.visited_ports.at(dest_pp));
-    
-    if(ext) {
-        assert(label < new_label || label == new_label);
-    }
 
     return ext;
 
