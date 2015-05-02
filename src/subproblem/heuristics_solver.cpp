@@ -174,8 +174,6 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double
         pf.emplace(make_pair(p, PickupType::DELIVERY), false);
     }
 
-    // clock_t cl_start = clock();
-
     r_c_shortest_paths(
         red->graph,
         make_property_map<Vertex>(nf),
@@ -190,10 +188,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double
         std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
         default_r_c_shortest_paths_visitor()
     );
-        
-    // clock_t cl_end = clock();
-    // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
-    
+            
     for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
         sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
@@ -214,8 +209,6 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double perc
     
     auto vc = red->vessel_class;
 
-    // clock_t cl_start = clock();
-
     r_c_shortest_paths(
         red->graph,
         make_property_map<Vertex>(nf),
@@ -230,9 +223,6 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double perc
         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
         default_r_c_shortest_paths_visitor()
     );
-    
-    // clock_t cl_end = clock();
-    // cout << "Time elapsed (on " << lambda << "-reduced graph, " << num_edges(red->graph) << " edges): " << (double(cl_end - cl_start) / CLOCKS_PER_SEC) << " seconds." << endl;
     
     for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
