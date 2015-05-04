@@ -22,8 +22,8 @@ IloData MPSolver::solve(const ColumnPool& pool, bool linear) const {
     auto nv = prob->data.num_vessel_classes;
     
     for(auto i = 1; i < np; i++) {
-        port_constr.add(IloRange(env, 1.0, (linear ? IloInfinity : 1.0))); // Pickup port
-        port_constr.add(IloRange(env, 1.0, (linear ? IloInfinity : 1.0))); // Delivery port
+        port_constr.add(IloRange(env, 1.0, 1.0)); // Pickup port
+        port_constr.add(IloRange(env, 1.0, 1.0)); // Delivery port
     }
     for(auto i = 0; i < nv; i++) {
         vc_constr.add(IloRange(env, -IloInfinity, prob->data.vessel_classes[i]->num_vessels));
