@@ -41,7 +41,7 @@ IloData MPSolver::solve(const ColumnPool& pool, bool linear) const {
             ilo_c += vc_constr[i](cit->vc_coeff[i]);
         }
         
-        IloNumVar v(ilo_c, 0, 1, (linear ? IloNumVar::Float : IloNumVar::Bool), ("theta_" + std::to_string(col_n++)).c_str());
+        IloNumVar v(ilo_c, 0, IloInfinity, (linear ? IloNumVar::Float : IloNumVar::Bool), ("theta_" + std::to_string(col_n++)).c_str());
         var.add(v);
     }
     
