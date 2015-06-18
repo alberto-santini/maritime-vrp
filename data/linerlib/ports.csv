@@ -1,0 +1,436 @@
+UNLocode	name	Country	Cabotage_Region	D_Region	Longitude	Latitude	Draft	CostPerFULL	CostPerFULLTrnsf	PortCallCostFixed	PortCallCostPerFFE
+GBABD	Aberdeen	United Kingdom	United Kingdom	UK	-2.0937	57.125	9.5	289.00	137.00	34632.00	10.00
+CIABJ	Abidjan	Ivory Coast	Ivory Coast	West Africa	-4.03	5.32	9.5	170.00	309.00	2238.00	16.00
+AEAUH	Abu Dhabi	U. A. E.	U. A. E.	Dubai	54.3593	24.4531	11	75.00	57.00	1572.00	1.00
+SVAQJ	Acajutla	El Salvador	El Salvador	US West Coast	-89.8281	13.5781	9.5	183.00	109.00	1225.00	5.00
+AUADL	Adelaide	Australia	Australia	Australia	138.5937	-34.9218	12.5	386.00	87.00	25641.00	193.00
+YEADE	Aden	Yemen	Yemen	Saudi Arabia	45.01667	12.76667	9.5	143.00	59.00	4784.00	2.00
+MAAGA	Agadir	Morocco	Morocco	West Med	-9.667	30.5	9.5	70.00	111.00	6274.00	5.00
+SAJBI	Al Jubayl	Saudi Arabia	Saudi Arabia	Saudi Arabia	49.5667	27.05	12.5	99.00	60.00	3393.00	1.00
+EGALY	Alexandria	Egypt	Egypt	West Med	29.8906	31.1875	9.5	31.00	109.00	2021.00	14.00
+ESALG	Algeciras	Spain	Spain	West Med	-5.45	36.125	13.5	229.00	136.00	773.00	11.00
+DZALG	Algiers	Algeria	Algeria	West Med	3.0468	36.7812	8	147.00	105.00	9937.00	3.00
+TRAMB	Ambarli	Turkey	Turkey	West Med	28.745	40.983	9.5	146.00	19.00	9517.00	19.00
+DZAAE	Annaba	Algeria	Algeria	West Med	7.7656	36.8906	8	152.00	105.00	2495.00	12.00
+BEANR	Antwerp	Belgium	Belgium	North Continent Europe	4.416666	51.216666	11	355.00	122.00	13087.00	16.00
+NGAPP	Apapa	Nigeria	Nigeria	West Africa	3.3437	6.4218	11	196.00	0.00	34988.00	11.00
+JOAQB	Al Aqabah	Jordan	Jordan	Saudi Arabia	35	29.55	12.5	62.00	75.00	5208.00	2.00
+CLARI	Arica	Chile	Chile	South America West Coast	-70.3	-18.49	8	224.00	187.00	11949.00	19.00
+ILASH	Ashdod	Israel	Israel	West Med	34.6406	31.8125	13.5	89.00	144.00	1040.00	14.00
+NZAKL	Auckland	New Zealand	New Zealand	Australia	174.766667	-36.86667	12.5	111.00	124.00	2353.00	13.00
+ARBHI	Bahia Blanca	Argentina	Argentina	Brazil	-62.28333	-38.71667	9.5	286.00	237.00	22185.00	33.00
+BHBAH	Bahrain	Bahrain	Bahrain	Dubai	50.5	26	11	160.00	76.00	3100.00	6.00
+PABLB	Balboa	Panama	Panama	US West Coast	-79.5625	8.9375	11	238.00	101.00	533.00	9.00
+USBAL	Baltimore	United States	United States	US East Coast	-76.6212	39.28973	11	552.00	112.00	3292.00	17.00
+IRBND	Bandar Abbas	Iran	Iran	Dubai	56.25	27.2	12.5	99.00	80.00	2495.00	8.00
+GMBJL	Banjul	Gambia	Gambia	West Africa	-16.584243	13.451189	8	479.00	172.00	32300.00	57.00
+ESBCN	Barcelona	Spain	Spain	West Med	2.18334	41.38334	13.5	597.00	111.00	5530.00	16.00
+COBAQ	Barranquilla	Colombia	Colombia	US Gulf Coast	-74.8	10.98	8	81.00	242.00	9726.00	27.00
+GQBSG	Bata	Equatorial Guinea	Equatorial Guinea	West Africa	9.77	1.85	9.5	3.00	0.00	24981.00	60.00
+LBBEY	Beirut	Lebanon	Lebanon	West Med	35.5	33.8593	12.5	137.00	148.00	7084.00	2.00
+DZBJA	Bejaia	Algeria	Algeria	West Med	5.08333	36.75	9.5	98.00	146.00	32.00	27.00
+BZBZE	Belize	Belize	Belize	US Gulf Coast	-88.3	17.51	8	560.00	151.00	8645.00	34.00
+LYBEN	Benghazi	Libya	Libya	West Med	20.0625	32.1093	9.5	195.00	103.00	11481.00	5.00
+NOBGO	Bergen	Norway	Norway	North Continent Europe	5.31667	60.3834	9.5	365.00	101.00	17435.00	119.00
+GWOXB	Bissau	Guinea-Bissau	Guinea-Bissau	West Africa	-15.587181	11.851832	8	403.00	162.00	2351.00	9.00
+CDBOA	Boma	Congo. Dem. Rep. of	Congo. Dem. Rep. of	West Africa	13.053	-5.84	9.5	364.00	163.00	33794.00	59.00
+TRUSK	Bosperus	Turkey	Turkey	West Med	29.02	41.012	12.5	218.00	149.00	2916.00	3.00
+DEBRV	Bremerhaven	Germany	Germany	North Continent Europe	8.58	53.55	13.5	199.00	121.00	11795.00	14.00
+FRBES	Brest	France	France	North Continent Europe	-4.4687	48.3906	8	380.00	104.00	24700.00	131.00
+AUBNE	Brisbane	Australia	Australia	Australia	153.0156	-27.5	12.5	541.00	276.00	4670.00	12.00
+COBUN	Buenaventura	Colombia	Colombia	South America West Coast	-77.033333	3.9	8	121.00	170.00	2772.00	7.00
+ARBUE	Buenos Aires	Argentina	Argentina	Brazil	-58.466667	-34.612	8	103.00	115.00	24077.00	16.00
+KRPUS	Busan	Korea. South	Korea. South	Korea	129.04	35.1	13.5	77.00	48.00	2842.00	5.00
+PECLL	Callao	Peru	Peru	South America West Coast	-77	-12.06667	12.5	79.00	239.00	2970.00	10.00
+ZACPT	Cape Town	South Africa	South Africa	South Africa	18.416666	-33.9166	12.5	299.00	131.00	3176.00	11.00
+COCTG	Cartagena	Colombia	Colombia	South America West Coast	-75.5	10.38	12.5	71.00	71.00	3670.00	3.00
+ESCAR	Cartagena	Spain	Spain	West Med	-0.9687	37.5937	9.5	326.00	103.00	-4972.00	22.00
+MACAS	Casablanca	Morocco	Morocco	West Med	-7.616666	33.583333	9.5	36.00	141.00	820.00	9.00
+DOCAU	Caucedo	Dominican Republic	Dominican Republic	US Gulf Coast	-69.6333	18.41667	12.5	210.00	83.00	-9005.00	16.00
+USCHS	Charleston	United States	United States	US East Coast	-79.94032	32.79423	12.5	292.00	487.00	9743.00	5.00
+INMAA	Chennai	India	India	Mumbai	80.18	13.06	12.5	149.00	160.00	820.00	9.00
+BDCGP	Chittagong	Bangladesh	Bangladesh	Mumbai	91.8281	22.3281	9.5	104.00	2.00	7130.00	39.00
+CNCWN	Chiwan	China	China	South China	113.888909	22.493138	13.5	179.00	62.00	12047.00	5.00
+INCOK	Cochin	India	India	Mumbai	76.236338	9.987639	11	166.00	56.00	7383.00	3.00
+LKCMB	Colombo	Sri Lanka	Sri Lanka	Mumbai	79.85	6.933334	13.5	272.00	73.00	2568.00	4.00
+GNCKY	Conakry	Guinea	Guinea	West Africa	-13.709253	9.519446	8	117.00	226.00	24804.00	44.00
+ROCND	Constanta	Romania	Romania	West Med	28.63817	44.17541	12.5	322.00	152.00	3888.00	16.00
+NICIO	Corinto	Nicaragua	Nicaragua	US West Coast	-86.3437	12.0312	9.5	341.00	147.00	848.00	2.00
+IEORK	Cork. Co Cork	Ireland	Ireland	UK	-8.466666	51.9	9.5	291.00	146.00	28306.00	11.00
+BJCOO	Cotonou	Benin	Benin	West Africa	2.43	6.35	9.5	175.00	87.00	3913.00	2.00
+VNDAD	Da Nang	Vietnam	Vietnam	Singapore	108.25	16	9.5	91.00	60.00	3002.00	7.00
+SNDKR	Dakar	Senegal	Senegal	West Africa	-17.446	14.684	9.5	208.00	574.00	1670.00	11.00
+CNDLC	Dalian	China	China	North China	121.646487	38.922061	12.5	125.00	74.00	860.00	8.00
+EGDAM	Damietta	Egypt	Egypt	West Med	31.7968	31.4062	12.5	285.00	110.00	1240.00	12.00
+SADMM	Dammam	Saudi Arabia	Saudi Arabia	Saudi Arabia	50.1093	26.4218	12.5	50.00	55.00	3288.00	1.00
+TZDAR	Dar es Salaam	Tanzania	Tanzania	South Africa	39.277	-6.817	8	224.00	247.00	11486.00	4.00
+DJJIB	Djibouti	Djibouti	Djibouti	West Africa	43.148656	11.598434	13.5	243.00	233.00	6179.00	3.00
+CMDLA	Douala	Cameroon	Cameroon	West Africa	9.9375	3.75	8	114.00	17.00	24272.00	9.00
+IEDUB	Dublin	Ireland	Ireland	UK	-6.25	53.333333	8	218.00	138.00	34916.00	10.00
+FRDKK	Dunkerque	France	France	North Continent Europe	2.3593	51.0468	13.5	245.00	215.00	9821.00	12.00
+ZADUR	Durban	South Africa	South Africa	South Africa	31.0156	-29.8437	11	322.00	211.00	9819.00	13.00
+USDUT	Dutch Harbor	United States	United States	US West Coast	-166.53743	53.81	9.5	833.00	152.00	1762.00	26.00
+ZAELS	East London	South Africa	South Africa	South Africa	27.898	-32.989	8	199.00	97.00	15156.00	21.00
+MXESE	Ensenada	Mexico	Mexico	US West Coast	-116.61667	31.86667	9.5	297.00	148.00	11173.00	5.00
+ECESM	Esmeraldas	Ecuador	Ecuador	South America West Coast	-79.6875	0.9687	8	86.00	118.00	1171.00	11.00
+WP081	Fazendinha	Brazil	Brazil	Brazil	-47.7187	-0.9218	9.5	NULL	NULL		
+GBFXT	Felixstowe	United Kingdom	United Kingdom	UK	1.35	51.9531	13.5	250.00	108.00	12936.00	9.00
+MQFDF	Fort de France	Martinique	Martinique	US Gulf Coast	-61.081786	14.602804	9.5	468.00	360.00	6154.00	34.00
+FRFOS	Fos sur Mer	France	France	North Continent Europe	4.95	43.433333	12.5	390.00	497.00	2271.00	16.00
+BSFPO	Freeport Bahamas	Bahamas	Bahamas	US Gulf Coast	-78.6875	26.5312	13.5	516.00	85.00	689.00	17.00
+SLFNA	Freetown	Sierra Leone	Sierra Leone	West Africa	-13.2187	8.4687	8	265.00	161.00	34052.00	41.00
+AUFRE	Fremantle	Australia	Australia	Australia	115.7656	-32.0468	11	522.00	81.00	25718.00	3.00
+NOFUS	Fusa	Norway	Norway	North Continent Europe	5.5937	60.1875	8	281.00	143.00	18180.00	176.00
+CNFOC	Fuzhou	China	China	Central China	119.2968	26.0781	12.5	159.00	62.00	928.00	6.00
+PLGDY	Gdynia	Poland	Poland	North Continent Europe	18.55	54.5	11	84.00	49.00	23817.00	138.00
+PHGES	General Santos City	Philippines	Philippines	Singapore	125.16667	6.11667	8	27.00	85.00	3182.00	7.00
+ITGOA	Genoa	Italy	Italy	West Med	8.95	44.42	12.5	252.00	111.00	4169.00	14.00
+ITGIT	Gioia Tauro	Italy	Italy	West Med	15.9	38.416666	13.5	202.00	102.00	9242.00	6.00
+SEGOT	Gothenburg	Sweden	Sweden	North Continent Europe	11.9531	57.7031	12.5	247.00	143.00	26838.00	13.00
+GBGRG	Grangemouth	United Kingdom	United Kingdom	UK	-3.7187	56.0156	9.5	211.00	105.00	23712.00	11.00
+GUGUM	Guam	Guam	Guam	US West Coast	144.721	13.381	9.5	482.00	144.00	8968.00	165.00
+ECGYE	Guayaquil	Ecuador	Ecuador	South America West Coast	-79.902519	-2.169538	8	165.00	241.00	2564.00	22.00
+ILHFA	Haifa	Israel	Israel	West Med	34.9687	32.7968	11	91.00	107.00	1100.00	15.00
+VNHPH	Haiphong	Vietnam	Vietnam	Singapore	106.68334	20.866667	9.5	76.00	2.00	3112.00	8.00
+JPHKT	Hakata	Japan	Japan	Japan	130.4062	33.5937	12.5	183.00	85.00	7150.00	5.00
+INHAL	Haldia Port. India	India	India	Mumbai	88.02	22.02	8	21.00	58.00	6796.00	38.00
+DEHAM	Hamburg	Germany	Germany	North Continent Europe	10	53.55	12.5	466.00	224.00	18560.00	15.00
+CUHAV	Havana Cuba	Cuba	Cuba	US Gulf Coast	-82.3593	23.125	8	156.00	103.00	9088.00	34.00
+TRHAY	Haydarpasa Port. Istanbul	Turkey	Turkey	West Med	28.92393	41.03693	9.5	272.00	147.00	187.00	24.00
+VNSGN	Saigon	Vietnam	Vietnam	Singapore	106.66667	10.75	8	91.00	66.00	4067.00	7.00
+YEHOD	Hodeidah	Yemen	Yemen	Saudi Arabia	43.2	14.8	8	216.00	78.00	4559.00	3.00
+HKHKG	Hong Kong	Hong Kong	Hong Kong	Hong Kong	114.200376	22.320135	13.5	257.00	93.00	6809.00	2.00
+USHNL	Honolulu	United States	United States	US West Coast	-157.93542	21.38451	9.5	448.00	105.00	129.00	12.00
+USHOU	Houston	United States	United States	US Gulf Coast	-95.3631	29.7631	9.5	520.00	648.00	5872.00	15.00
+CNHUA	Huangpu	China	China	South China	113.3125	22.6875	9.5	127.00	87.00	16218.00	6.00
+UAILK	Ilyichevsk	Ukraine	Ukraine	West Med	30.65714	46.29897	12.5	503.00	442.00	13457.00	23.00
+KRICH	Inchon	Korea. South	Korea. South	Korea	126.636	37.475	8	80.00	64.00	3337.00	5.00
+CLIQQ	Iquique	Chile	Chile	South America West Coast	-70.1562	-20.2031	8	179.00	183.00	13213.00	8.00
+BRIGI	Itaguai (Sepetiba)	Brazil	Brazil	Brazil	-43.702	-22.966	12.5	456.00	178.00	5438.00	8.00
+BRITJ	Itajai	Brazil	Brazil	Brazil	-48.69	-26.52	8	358.00	408.00	7970.00	9.00
+TRIZM	Izmir	Turkey	Turkey	West Med	27.15	38.4062	8	196.00	143.00	506.00	16.00
+TRIZE	Izmit Korfezi	Turkey	Turkey	West Med	29.665	40.798	13.5	162.00	110.00	150.00	23.00
+IDJKT	Jakarta	Indonesia	Indonesia	Singapore	106.8	-6.1667	8	135.00	62.00	2999.00	7.00
+INNSA	Jawaharlal Nehru	India	India	Mumbai	73.02	18.56	9.5	200.00	186.00	6837.00	17.00
+AEJEA	Jebel Ali	U. A. E.	U. A. E.	Dubai	55.19	25.14	13.5	133.00	64.00	4164.00	2.00
+SAJED	Jeddah	Saudi Arabia	Saudi Arabia	Saudi Arabia	39.2	21.48334	13.5	102.00	66.00	3304.00	1.00
+RUKGD	Kaliningrad	Russia	Russia	North Continent Europe	20.5	54.7031	8	233.00	107.00	1062.00	27.00
+INIXY	Kandla	India	India	Mumbai	70.21666	23.0312	8	187.00	76.00	7513.00	38.00
+TWKHH	Kaohsiung	Taiwan	Taiwan	Singapore	120.28333	22.633334	12.5	18.00	25.00	2231.00	3.00
+PKKHI	Karachi	Pakistan	Pakistan	Mumbai	67.05	24.866667	9.5	257.00	0.00	9262.00	49.00
+TWKEL	Keelung	Taiwan	Taiwan	Singapore	121.7187	25.125	11	127.00	83.00	3213.00	9.00
+WP082	Kiel Kanal	Germany	Germany	North Continent Europe	10.0875	54.2071	8	290.00	138.00		
+JPUKB	Kobe	Japan	Japan	Japan	135.17	34.68	12.5	107.00	63.00	13695.00	4.00
+INCCU	Kolkata	India	India	Mumbai	88.3593	22.5312	8	91.00	94.00	7114.00	54.00
+SIKOP	Koper	Slovenia	Slovenia	North Continent Europe	13.739	45.54548	9.5	184.00	146.00	3884.00	7.00
+FIKTK	Kotka	Finland	Finland	North Continent Europe	26.92	60.47	9.5	137.00	13.00	1182.00	52.00
+NOKRS	Kristiansand	Norway	Norway	North Continent Europe	8	58.1562	8	141.00	109.00	24076.00	180.00
+KRKAN	Kwangyang	Korea. South	Korea. South	Korea	127.58	34.97	12.5	49.00	48.00	2453.00	1.00
+VELAG	La Guaira	Venezuela	Venezuela	Brazil	-66.93333	10.6	8	233.00	222.00	23772.00	26.00
+FRLPE	La Pallice	France	France	North Continent Europe	-1.19276	46.16774	8	NULL	NULL	23756.00	174.00
+THLCH	Laem Chabang	Thailand	Thailand	Singapore	100.991433	13.382173	9.5	95.00	1.00	899.00	6.00
+NOLAR	Larvik	Norway	Norway	North Continent Europe	10	59.0625	9.5	268.00	146.00	24891.00	162.00
+ESLPA	Las Palmas	Spain	Spain	West Med	-15.42	28.1	13.5	403.00	342.00	120.00	12.00
+SYLTK	Latakia	Syria	Syria	West Med	35.79	35.52	9.5	4.00	106.00	83129.00	119.00
+FJLTK	Lautoka	Fiji Islands	Fiji Islands	Australia	177.455	-17.61	9.5	355.00	87.00	3029.00	4.00
+MXLZC	Lazaro Cardenas	Mexico	Mexico	US West Coast	-105.2343	22.1875	13.5	156.00	141.00	6450.00	6.00
+FRLEH	Le Havre	France	France	North Continent Europe	0.125	49.5	12.5	382.00	148.00	9947.00	10.00
+ITLIV	Leghorn	Italy	Italy	West Med	10.316	43.55	11	262.00	203.00	-10300.00	25.00
+PTLEI	Leixoes	Portugal	Portugal	West Med	-8.709055	41.192526	9.5	282.00	139.00	476.00	13.00
+CNLYG	Lianyungang	China	China	North China	119.4375	34.7187	13.5	116.00	60.00	7962.00	9.00
+GALBV	Libreville	Gabon	Gabon	West Africa	9.5465	0.394	8	382.00	461.00	32981.00	55.00
+CYLMS	Limassol	Cyprus	Cyprus	West Med	33.03333	34.66667	13.5	221.00	144.00	1115.00	7.00
+CLLQN	Lirquen	Chile	Chile	South America West Coast	-72.9531	-36.7031	13.5	218.00	342.00	-19938.00	38.00
+PTLIS	Lisbon	Portugal	Portugal	West Med	-9.13	38.7167	9.5	277.00	277.00	2004.00	15.00
+AOLOB	Lobito	Angola	Angola	West Africa	13.5468	-12.3437	9.5	107.00	89.00	25906.00	59.00
+TGLFW	Lome	Togo	Togo	West Africa	1.2031	6.125	9.5	289.00	213.00	6812.00	2.00
+USLGB	Long Beach	United States	United States	US West Coast	-118.194944	33.766448	12.5	375.00	112.00	14449.00	3.00
+USLAX	Los Angeles	United States	United States	US West Coast	-118.2428	34.0522	13.5	530.00	571.00	6876.00	2.00
+AOLAD	Luanda	Angola	Angola	West Africa	13.242	-9.11	8	209.00	221.00	23272.00	61.00
+NZLYT	Lyttelton	New Zealand	New Zealand	Australia	172.71667	-43.6	12.5	344.00	127.00	466.00	11.00
+ESAGP	Malaga	Spain	Spain	West Med	-4.42747	36.71815	13.5	377.00	182.00	48.00	18.00
+BRMAO	Manaus	Brazil	Brazil	Brazil	-60	-3.06	8	682.00	169.00	21803.00	31.00
+PHMNL	Manila	Philippines	Philippines	Singapore	121	14.58334	9.5	151.00	1.00	3125.00	7.00
+PAMIT	Manzanillo	Panama	Panama	US West Coast	-79.9	9.35	11	341.00	107.00	4998.00	3.00
+MTMAR	Marsaxlokk	Malta	Malta	West Med	14.55	35.85	13.5	37.00	143.00	4988.00	4.00
+CDMAT	Matadi	Congo. Dem. Rep. of	Congo. Dem. Rep. of	West Africa	13.469	-5.814	9.5	361.00	235.00	23533.00	55.00
+AUMEL	Melbourne	Australia	Australia	Australia	145	-37.833333	12.5	354.00	243.00	9188.00	14.00
+ESMLN	Melilla	Spain	Spain	West Med	-2.944813	35.294129	8	382.00	138.00	5618.00	5.00
+TRMER	Mersin	Turkey	Turkey	West Med	34.63	36.8	11	238.00	144.00	10519.00	0.00
+USMIA	Miami	United States	United States	US Gulf Coast	-80.20735	25.79371	11	400.00	411.00	6973.00	3.00
+CVMIN	Mindelo	Cape Verde Island	Cape Verde Island	West Africa	-24.99	16.89	9.5	267.00	51.00	24361.00	56.00
+LYMRA	Misuratah	Libya	Libya	West Med	15.0937	32.375	9.5	204.00	141.00	10966.00	9.00
+USMOB	Mobile	United States	United States	US East Coast	-88.0431	30.6942	11	NULL	NULL	4617.00	16.00
+KEMBA	Mombasa	Kenya	Kenya	South Africa	39.6562	-4.0468	8	223.00	125.00	7956.00	18.00
+LRMLW	Monrovia	Liberia	Liberia	West Africa	-10.7968	6.3125	8	184.00	97.00	32401.00	59.00
+UYMVD	Montevideo	Uruguay	Uruguay	Brazil	-56.183333	-34.883333	8	239.00	154.00	2834.00	18.00
+FRMTX	Montoir de Bretagne	France	France	North Continent Europe	-2.16266	47.32495	11	408.00	108.00	-3367.00	34.00
+CAMTR	Montreal	Canada	Canada	Canada East Coast	-73.5781	45.5	12.5	414.00	150.00	15605.00	38.00
+OMMCT	Muscat. Oman	Oman	Oman	Saudi Arabia	58.5781	23.6093	9.5	221.00	80.00	6368.00	3.00
+NOMAY	Maaloey	Norway	Norway	North Continent Europe	5.078354	61.938442	8	541.00	96.00	23165.00	179.00
+JPNGO	Nagoya	Japan	Japan	Japan	136.92	35.17	13.5	134.00	63.00	17860.00	7.00
+AOMSZ	Namibe	Angola	Angola	West Africa	12.152578	-15.153104	8	506.00	83.00	34075.00	56.00
+CNNSA	Nansha New Port	China	China	South China	113.572	22.76	12.5	135.00	91.00	3573.00	7.00
+NZNPE	Napier	New Zealand	New Zealand	Australia	176.91666	-39.483333	12.5	217.00	175.00	-10436.00	17.00
+NZNSN	Nelson	New Zealand	New Zealand	Australia	173.2812	-41.2812	12.5	314.00	85.00	1182.00	16.00
+USMSY	New Orleans	United States	United States	US Gulf Coast	-90.075	29.9544	12.5	461.00	266.00	6380.00	27.00
+NZNPL	New Plymouth	New Zealand	New Zealand	Australia	174.0781	-39.0625	12.5	193.00	82.00	5566.00	1.00
+USEWR	Newark	United States	United States	US East Coast	-74.18329	40.73812	12.5	698.00	860.00	18260.00	3.00
+CNNGB	Ningbo	China	China	Central China	121.5468	29.875	13.5	118.00	36.00	7275.00	4.00
+USORF	Norfolk	United States	United States	US East Coast	-76.28163	36.85373	13.5	415.00	388.00	4765.00	5.00
+USNTS	North Charleston	United States	United States	US East Coast	-79.99029	32.87161	9.5	0.00	112.00	18268.00	93.00
+MRNDB	Nouadhibou	Mauritania	Mauritania	West Africa	-17.0625	20.8906	8	424.00	229.00	22978.00	56.00
+MRNKC	Nouakchott	Mauritania	Mauritania	West Africa	-15.9375	18.0937	8	382.00	0.00	32709.00	53.00
+NCNOU	Noumea	New Caledonia	New Caledonia	Australia	166.440087	-22.286509	8	169.00	65.00	-83718.00	198.00
+USOAK	Oakland	United States	United States	US West Coast	-122.26795	37.81105	12.5	475.00	483.00	6940.00	6.00
+UAODS	Odessa	Ukraine	Ukraine	West Med	30.7187	46.4531	11	510.00	109.00	76704.00	91.00
+NGONN	Onne Seaport	Nigeria	Nigeria	West Africa	7.1406	4.7031	8	356.00	226.00	23776.00	58.00
+DZORN	Oran	Algeria	Algeria	West Med	-0.625	35.6875	8	106.00	137.00	1231.00	27.00
+JPOSA	Osaka	Japan	Japan	Japan	135.5	34.67	11	160.00	86.00	12566.00	16.00
+PEPAI	Paita	Peru	Peru	South America West Coast	-81.1093	-5.0937	8	197.00	181.00	3561.00	4.00
+PFPPT	Papeete	French Polynesia	French Polynesia	Australia	-149.57	-17.535	9.5	9.00	66.00	17488.00	132.00
+BRPNG	Paranagua	Brazil	Brazil	Brazil	-48.51	-25.54	9.5	481.00	284.00	8549.00	11.00
+BRPEC	Pecem	Brazil	Brazil	Brazil	-38.869	-3.53	13.5	592.00	410.00	9678.00	3.00
+MYPEN	Penang	Malaysia	Malaysia	Singapore	100.28	5.4062	9.5	134.00	60.00	3213.00	9.00
+USPHL	Philadelphia	United States	United States	US East Coast	-75.1642	39.9522	9.5	501.00	82.00	12015.00	7.00
+INPAV	Pipavav	India	India	Mumbai	71.583081	20.974917	12.5	208.00	9.00	4372.00	4.00
+GRPIR	Piraeus	Greece	Greece	West Med	23.64113	37.95134	12.5	292.00	214.00	4368.00	4.00
+TTPTS	Point Lisas	Trinidad & Tobago	Trinidad & Tobago	US Gulf Coast	-61.482	10.405	11	220.00	103.00	-683.00	13.00
+GPPTP	Pointe a Pitre	Guadeloupe	Guadeloupe	US Gulf Coast	-61.51667	16.23333	9.5	537.00	551.00	6432.00	35.00
+CGPNR	Pointe Noire	Congo	Congo	West Africa	15.7968	1.5468	9.5	112.00	126.00	916.00	27.00
+NZPOE	Port Chalmers	New Zealand	New Zealand	Australia	170.61667	-45.81667	12.5	295.00	141.00	786.00	9.00
+ZAPLZ	Port Elizabeth	South Africa	South Africa	South Africa	25.5781	-33.9531	9.5	245.00	159.00	6863.00	8.00
+GAPOG	Port Gentil	Gabon	Gabon	West Africa	8.774	-0.719	8	255.00	221.00	24613.00	59.00
+MYPKG	Port Klang	Malaysia	Malaysia	Singapore	101.446	3.042	13.5	50.00	34.00	2549.00	3.00
+MUPLU	Port Louis	Mauritius	Mauritius	South Africa	57.5	-20.1562	12.5	324.00	169.00	5999.00	9.00
+PKBQM	Port Qasim	Pakistan	Pakistan	Mumbai	67.33334	24.767667	9.5	102.00	60.00	7581.00	23.00
+EGPSD	Port Said	Egypt	Egypt	West Med	32.35722	31.21583	13.5	37.00	73.00	4891.00	7.00
+MAPTM	Tangier	Morocco	Morocco	West Med	-5.4847	35.885	13.5	138.00	187.00	1675.00	8.00
+GEPTI	Poti	Georgia	Georgia	West Med	41.67701	42.14743	8	221.00	138.00	10091.00	22.00
+CVRAI	Praia	Cape Verde Island	Cape Verde Island	West Africa	-23.524	14.916666	8	259.00	225.00	26084.00	43.00
+MXPGO	Progreso	Mexico	Mexico	US Gulf Coast	-89.667	21.29	8	244.00	151.00	703.00	15.00
+VEPBL	Puerto Cabello	Venezuela	Venezuela	Brazil	-68.01667	10.46667	9.5	183.00	186.00	4728.00	28.00
+CRCAL	Puerto Caldera	Costa Rica	Costa Rica	US West Coast	-84.7031	9.9375	9.5	205.00	143.00	586.00	19.00
+HNPCR	Puerto Cortes	Honduras	Honduras	US Gulf Coast	-87.91667	15.83333	8	193.00	174.00	949.00	23.00
+ARPUD	Puerto Deseado	Argentina	Argentina	Brazil	-65.8906	-47.75	8	209.00	251.00	17449.00	32.00
+CRLIO	Puerto Limon	Costa Rica	Costa Rica	US Gulf Coast	-83.04	9.98	8	191.00	146.00	7364.00	27.00
+ARPMY	Puerto Madryn	Argentina	Argentina	Brazil	-65.0468	-42.7656	11	192.00	247.00	23707.00	32.00
+CRMOB	Puerto Limon-Moin	Costa Rica	Costa Rica	US Gulf Coast	-83.089	9.99	9.5	72.00	107.00	8745.00	35.00
+GTPRQ	Puerto Quetzal	Guatemala	Guatemala	US West Coast	-91.8125	15	9.5	280.00	726.00	6563.00	0.00
+CNTAO	Qingdao	China	China	North China	120.35	36.08333	12.5	124.00	25.00	6813.00	5.00
+FIRAU	Rauma	Finland	Finland	North Continent Europe	21.5	61.133333	9.5	196.00	146.00	18552.00	127.00
+BRRIG	Rio Grande	Brazil	Brazil	Brazil	-52.083333	-32.03333	9.5	492.00	311.00	10002.00	4.00
+NLRTM	Rotterdam	Netherlands	Netherlands	North Continent Europe	4.5	51.91667	13.5	195.00	148.00	19187.00	16.00
+FRURO	Rouen	France	France	North Continent Europe	1.0781	49.4218	8	205.00	133.00	22589.00	186.00
+OMSLL	Salalah	Oman	Oman	Saudi Arabia	54.091	17.014	13.5	161.00	71.00	3850.00	2.00
+ITSAL	Salerno	Italy	Italy	West Med	15	40.41	8	213.00	16.00	16294.00	4.00
+CLSAI	San Antonio	Chile	Chile	South America West Coast	-71.63	-33.58	13.5	202.00	167.00	15564.00	26.00
+PRSJU	San Juan	Puerto Rico	Puerto Rico	US Gulf Coast	-66.07	18.454	9.5	252.00	295.00	9299.00	24.00
+CISPY	San Pedro	Ivory Coast	Ivory Coast	West Africa	-6.616666	4.733333	8	61.00	160.00	2567.00	9.00
+GTSTC	Santo Tomas de Castilla	Guatemala	Guatemala	US West Coast	-88.617721	15.693433	8	303.00	189.00	7685.00	3.00
+BRSSZ	Santos	Brazil	Brazil	Brazil	-46.33	-23.95	11	349.00	257.00	7547.00	7.00
+BRSFS	Sao Francisco do Sul	Brazil	Brazil	Brazil	-48.62	-26.25	8	316.00	170.00	22079.00	25.00
+USSAV	Savannah	United States	United States	US East Coast	-81.1	32.0833	11	331.00	338.00	9365.00	3.00
+USSEA	Seattle	United States	United States	US West Coast	-122.351973	47.597244	13.5	547.00	148.00	12276.00	5.00
+IDSRG	Semarang	Indonesia	Indonesia	Singapore	110.423953	-6.974997	9.5	134.00	81.00	2926.00	10.00
+TNSFA	Sfax	Tunisia	Tunisia	West Med	10.745077	34.72024	8	23.00	103.00	10267.00	10.00
+CNSHA	Shanghai	China	China	Central China	121.4531	31.2187	13.5	150.00	62.00	6497.00	6.00
+AESHJ	Sharjah	U. A. E.	U. A. E.	Dubai	55.408	25.375	8	121.00	58.00	1466.00	1.00
+CNSHK	Shekou	China	China	South China	113.875	22.5	11	213.00	79.00	11193.00	6.00
+JPSMZ	Shimizu	Japan	Japan	Japan	138.48	35.02	13.5	197.00	82.00	18160.00	11.00
+KWSAA	Shuaiba	Kuwait	Kuwait	Dubai	48.125	29.0468	11	385.00	55.00	4046.00	8.00
+KWSWK	Ash Shuwaykh	Kuwait	Kuwait	Dubai	47.9062	29.3437	8	262.00	0.00	4464.00	6.00
+KHKOS	Sihanoukville	Cambodia	Cambodia	Singapore	103.53	10.63333	9.5	85.00	63.00	3156.00	10.00
+SGSIN	Singapore	Singapore	Singapore	Singapore	103.8437	1.2812	13.5	130.00	85.00	3268.00	1.00
+GRSKA	Skaramanga	Greece	Greece	West Med	23.60026	38.01361	9.5	0.00	101.00	92319.00	88.00
+DZSKI	Skikda	Algeria	Algeria	West Med	6.8906	36.8593	8	161.00	144.00	1183.00	10.00
+OMSOH	Sohar	Oman	Oman	Saudi Arabia	56.74	24.3593	13.5	193.00	77.00	2100.00	3.00
+THSGZ	Songkhla	Thailand	Thailand	Singapore	100.558519	7.215083	9.5	83.00	65.00	3293.00	10.00
+GBSOU	Southampton	United Kingdom	United Kingdom	UK	-1.40029	50.89926	11	243.00	67.00	38789.00	3.00
+AOSZA	Soyo	Angola	Angola	West Africa	12.3593	-6.125	9.5	357.00	232.00	35384.00	58.00
+RULED	St Petersburg	Russia	Russia	North Continent Europe	30.27	59.9	11	270.00	2.00	722.00	37.00
+NOSVG	Stavanger	Norway	Norway	North Continent Europe	5.66	58.96667	12.5	315.00	46.00	1227.00	13.00
+EGSUZ	Suez Canal	Egypt	Egypt	West Med	32.37	31.15	13.5	281.00	101.00	120902.00	122.00
+IDSUB	Surabaya	Indonesia	Indonesia	Singapore	112.75	-7.25	9.5	185.00	3.00	884.00	5.00
+FJSUV	Suva	Fiji Islands	Fiji Islands	Australia	178.464	-18.124	9.5	222.00	210.00	423.00	20.00
+AUSYD	Sydney	Australia	Australia	Australia	151.2	-33.888888	12.5	453.00	212.00	7141.00	14.00
+GHTKD	Takoradi	Ghana	Ghana	West Africa	-1.75	4.88333	8	266.00	115.00	1400.00	5.00
+MYTPP	Tanjung Pelepas	Malaysia	Malaysia	Singapore	103.593	1.405	13.5	115.00	59.00	1992.00	3.00
+ESTAR	Tarragona	Spain	Spain	West Med	1.24976	41.11713	12.5	207.00	146.00	740.00	15.00
+NZTRG	Tauranga	New Zealand	New Zealand	Australia	176.16667	-37.68333	12.5	276.00	125.00	1964.00	11.00
+GHTEM	Tema	Ghana	Ghana	West Africa	0.008	5.633	9.5	277.00	217.00	4428.00	4.00
+ESSCT	Santa Cruz De Tenerife	Spain	Spain	West Med	-16.25	28.46	12.5	362.00	110.00	118592.00	85.00
+GBTHP	Thames Haven	United Kingdom	United Kingdom	UK	0.70808	51.45573	11	137.00	134.00	29041.00	12.00
+GRSKG	Thessaloniki	Greece	Greece	West Med	22.93274	40.64098	9.5	232.00	147.00	111536.00	112.00
+GBTIL	Tilbury	United Kingdom	United Kingdom	UK	0.36583	51.46339	8	225.00	321.00	21497.00	11.00
+NZTIU	Timaru	New Zealand	New Zealand	Australia	171.25	-44.3906	12.5	286.00	85.00	18283.00	141.00
+NGTIN	Tin Can Island Port	Nigeria	Nigeria	West Africa	3.3564	6.4339	9.5	252.00	222.00	32006.00	8.00
+MGTMM	Toamasina	Madagascar	Madagascar	South Africa	49.375	-18.1562	9.5	15.00	174.00	3874.00	21.00
+JPTYO	Tokyo	Japan	Japan	Japan	139.7656	35.6875	13.5	275.00	87.00	2867.00	9.00
+WP083	Torres Strait	Australia	Australia	Australia	142.345	-9.562	12.5	157.00	65.00		
+ITTRS	Trieste	Italy	Italy	West Med	13.7834	45.65	13.5	232.00	111.00	3124.00	14.00
+TNTUN	Tunis	Tunisia	Tunisia	West Med	10.1718	36.7968	9.5	23.00	0.00	1184.00	24.00
+ARUSH	Ushuaia	Argentina	Argentina	Brazil	-68.19	-54.48	8	197.00	251.00	23076.00	25.00
+ESVLC	Valencia	Spain	Spain	West Med	-0.37	39.47	13.5	593.00	103.00	7971.00	11.00
+CAVAN	Vancouver	Canada	Canada	Canada West	-123.125	49.25	13.5	421.00	115.00	774.00	12.00
+BGVAR	Varna	Bulgaria	Bulgaria	West Med	27.916666	43.216666	8	195.00	139.00	7169.00	6.00
+SCPOV	Victoria	Seychelles	Seychelles	South Africa	55.4375	-4.6093	9.5	346.00	228.00	11391.00	16.00
+ESVGO	Vigo	Spain	Spain	West Med	-8.71136	42.23413	12.5	315.00	139.00	2155.00	7.00
+BRVLC	Vila do Conde	Brazil	Brazil	Brazil	-48.72982	-1.53838	8	778.00	250.00	16127.00	26.00
+BRVIX	Vitoria	Brazil	Brazil	Brazil	-40.22	-20.19	8	878.00	519.00	1181.00	19.00
+NAWVB	Walvis Bay	Namibia	Namibia	West Africa	14.506	-22.944	9.5	28.00	218.00	2138.00	9.00
+NZWLG	Wellington	New Zealand	New Zealand	Australia	174.7812	-41.2968	12.5	224.00	140.00	852.00	9.00
+ANWIL	Willemstad	Netherl. Antilles	Netherl. Antilles	US Gulf Coast	-68.91667	12.1	9.5	673.00	157.00	6535.00	34.00
+USILM	WilmingtonNC	United States	United States	US East Coast	-77.945	34.2256	11	NULL	NULL	18625.00	3.00
+CNXMN	Xiamen	China	China	South China	118.08	24.45	12.5	108.00	57.00	5267.00	4.00
+CNTXG	Xingang	China	China	North China	117.56	38.562	13.5	172.00	49.00	5922.00	4.00
+CNYTN	Shenzhen	China	China	South China	114.26667	22.58333	13.5	177.00	78.00	7220.00	4.00
+JPYOK	Yokohama	Japan	Japan	Japan	139.55	35.45	13.5	105.00	68.00	16900.00	1.00
+ARZAE	Zarate	Argentina	Argentina	Brazil	-59.035	-34.09	8	329.00	251.00	8064.00	26.00
+BEZEE	Zeebrugge	Belgium	Belgium	North Continent Europe	3.1875	51.3281	13.5	235.00	126.00	12047.00	9.00
+NOAES	Alesund	Norway	Norway	North Continent Europe	6.5	62.49	9.5	684.00	107.00	24098.00	130.00
+DKAAR	Aarhus	Denmark	Denmark	North Continent Europe	10.216666	56.15	12.5	429.00	203.00	11861.00	7.00
+PAPCN	Panama Canal	Panama	Panama	US West Coast	-79.5312	8.9531	12.5	509.00	115.00	-1153.00	253.00
+REREU	Port Reunion	Reunion	Reunion	South Africa	55.533333	-20.883333	9.5	126.00	9.00	11598.00	15.00
+MXACA	Acapulco	Mexico	Mexico	US West Coast	16.51	-99.52					
+GHACC	Accra	Ghana	Ghana	West Africa							
+AUALH	Albany	Australia	Australia	Australia							
+ESALC	Alicante	Spain	Spain	West Med			12.5				
+ESLEI	Almeria	Spain	Spain	West Med	36.5	-2.27					
+NLAMS	Amsterdam	Netherlands	Netherlands	North Continent Europe							
+ITAOI	Ancona	Italy	Italy	West Med							
+CLANF	Antofagasta	Chile	Chile	South America West Coast	-23.38	-70.23	13.5				
+BRAJU	Aracaju	Brazil	Brazil	Brazil							
+ITATX	Arbatax	Italy	Italy	West Med	39.56	9.42					
+AUARD	Ardrossan	Australia	Australia	Australia							
+CANWP	Argentia	Canada	Canada	Canada East Coast	47.18	-54					
+ERASA	Assab				13	42.44					
+CKAVA	Avarua				-21.11	-159.46					
+PTAVE	Aveiro	Portugal	Portugal	West Med	40.38	-8.39					
+AUBWB	Barrow Island	Australia	Australia	Australia							
+IDBLW	Belawan	Indonesia	Indonesia	Singapore							
+BRBEL	Belem	Brazil	Brazil	Brazil	-1.27	-48.3					
+FRBOD	Bordeaux	France	France	North Continent Europe							
+BBBGI	Bridgetown										
+ITBDS	Brindisi	Italy	Italy	West Med							
+BRCDO	Cabedelo	Brazil	Brazil	Brazil							
+ESCAD	Cadiz	Spain	Spain	West Med			9.5				
+ITCAG	Cagliari	Italy	Italy	West Med							
+CUCAI	Caibarien	Cuba	Cuba	US Gulf Coast	22.31	-79.28					
+AUCLN	Cape Leeuwin	Australia	Australia	Australia							
+HTCAP	Cap-Haitien				19.45	-72.12					
+VECUP	Carupano	Venezuela	Venezuela	Brazil							
+PHCEB	Cebu	Philippines	Philippines	Singapore			8				
+ESCEU	Ceuta	Spain	Spain	West Med							
+IRZBR	Chah Bahar	Iran	Iran	Dubai							
+VICHA	Charlotte Amalie										
+JPCHW	Chimu Wan	Japan	Japan	Japan	26.23	127.55					
+ITCVV	Civitavecchia	Italy	Italy	West Med							
+CRCLN	Colon	Costa Rica	Costa Rica	US West Coast	9.55	-84.15					
+CADAR	Dartmouth	Canada	Canada	Canada East Coast	44.4	-63.34					
+PHDVO	Davao	Philippines	Philippines	Singapore			8				
+TRDRC	Derince	Turkey	Turkey	West Med							
+GBDVR	Dover	United Kingdom	United Kingdom	UK							
+CAFAH	Falmouth	Canada	Canada	Canada East Coast	45	-64.1					
+TRFET	Fethiye	Turkey	Turkey	West Med							
+ITFCO	Fiumicino	Italy	Italy	West Med							
+USFLL	Fort Lauderdale	United States	United States	US East Coast							
+TVFUN	Funafuti										
+PTFNC	Funchal	Portugal	Portugal	West Med							
+USGLS	Galveston	United States	United States	US East Coast							
+ITGEA	Gela	Italy	Italy	West Med							
+AUGTT	Georgetown	Australia	Australia	Australia							
+ESGIJ	Gijon	Spain	Spain	West Med	43.32	-5.4					
+LRGRE	Greenville	Liberia	Liberia	West Africa							
+JPHKD	Hakodate	Japan	Japan	Japan							
+AUHAL	Halifax	Australia	Australia	Australia	-18.35	146.17					
+AUHLT	Hamilton	Australia	Australia	Australia							
+AUHBA	Hobart	Australia	Australia	Australia	-42.52	147.18					
+PEILQ	Ilo	Peru	Peru	South America West Coast							
+PHILO	Iloilo	Philippines	Philippines	Singapore							
+GRNAI	Iraklion	Greece	Greece	West Med	35.2	22.43					
+LKKNK	Kankesanturai	Sri Lanka	Sri Lanka	Mumbai							
+SEKAA	Karlskrona	Sweden	Sweden	North Continent Europe							
+JPKWS	Kawasaki	Japan	Japan	Japan							
+AUKIT	Kingston	Australia	Australia	Australia							
+DKCPH	Kobenhavn	Denmark	Denmark	North Continent Europe			8				
+PGLAE	Lae										
+ESZGM	Lagos	Spain	Spain	West Med	36.48	-3.26					
+CYLCA	Larnaca	Cyprus	Cyprus	West Med							
+GBLOW	Lowestoft	United Kingdom	United Kingdom	UK							
+MYMKZ	Malacca	Malaysia	Malaysia	Singapore							
+MZMPM	Maputo										
+ARMDQ	Mar Del Plata	Argentina	Argentina	Brazil	-38	-57.33	8				
+FRETN	Menton	France	France	North Continent Europe	43.47	7.3					
+ITMSN	Messina	Italy	Italy	West Med							
+SOMGQ	Mogadishu										
+ITMNP	Monopoli	Italy	Italy	West Med							
+MXMRE	Morro Redondo	Mexico	Mexico	US West Coast							
+JPNGS	Nagasaki	Japan	Japan	Japan							
+IDNAH	Naha	Indonesia	Indonesia	Singapore							
+ITNAP	Napoli	Italy	Italy	West Med	40.5	14.15	9.5				
+BSNAS	Nassau	Bahamas	Bahamas	US Gulf Coast	25.05	-77.21					
+BRNAT	Natal	Brazil	Brazil	Brazil							
+AWORJ	Oranjestad										
+ASPPG	Pago Pago										
+ITPMO	Palermo	Italy	Italy	West Med							
+MZLMZ	Palma										
+IDPNJ	Panjang	Indonesia	Indonesia	Singapore							
+SRPBM	Paramaribo										
+SLPEP	Pepel	Sierra Leone	Sierra Leone	West Africa							
+GBPLY	Plymouth	United Kingdom	United Kingdom	UK	50.24	-4.07					
+PRPSE	Ponce	Puerto Rico	Puerto Rico	US Gulf Coast							
+PTPDL	Ponta Delgada	Portugal	Portugal	West Med	37.44	-25.4					
+JMPOT	Port Antonio										
+USNTD	Port Hueneme	United States	United States	US East Coast	34.08	-119.11					
+CVGRA	Porto Grande	Cape Verde Island	Cape Verde Island	West Africa	16.52	-25					
+CAPRR	Prince Rupert	Canada	Canada	Canada East Coast			13.5				
+CLPUQ	Punta Arenas	Chile	Chile	South America West Coast	-53.08	-70.56					
+VNUIH	Qui Nhon	Vietnam	Vietnam	Singapore							
+PGRAB	Rabaul										
+ITRAN	Ravenna	Italy	Italy	West Med			8				
+BRREC	Recife	Brazil	Brazil	Brazil							
+AURDS	Rhodes	Australia	Australia	Australia	-33.5	151.05					
+ZARCB	Richards Bay	South Africa	South Africa	South Africa			8				
+BRRIO	Rio De Janeiro	Brazil	Brazil	Brazil							
+PESVY	Salaverry	Peru	Peru	South America West Coast							
+ZASDB	Saldanha Bay	South Africa	South Africa	South Africa							
+BRSSA	Salvador	Brazil	Brazil	Brazil			9.5				
+ESSCI	San Ciprian	Spain	Spain	West Med							
+USSAN	San Diego	United States	United States	US East Coast							
+ARSFE	San Fernando	Argentina	Argentina	Brazil							
+ARSFO	San Francisco	Argentina	Argentina	Brazil	-31.25	-62.04					
+PESNX	San Nicolas	Peru	Peru	South America West Coast							
+ESEAS	San Sebastian	Spain	Spain	West Med							
+CUSCU	Santiago De Cuba	Cuba	Cuba	US Gulf Coast			8				
+CLSDO	Santo Domingo	Chile	Chile	South America West Coast	-33.38	-71.39					
+DESAS	Sassnitz	Germany	Germany	North Continent Europe							
+GBSFW	Scapa Flow	United Kingdom	United Kingdom	UK							
+GHSEK	Sekondi	Ghana	Ghana	West Africa							
+JPSHS	Shimonoseki	Japan	Japan	Japan							
+ITSIR	Siracusa	Italy	Italy	West Med							
+SESLI	Slite	Sweden	Sweden	North Continent Europe							
+IDSOQ	Sorong	Indonesia	Indonesia	Singapore							
+BESGS	St Georges	Belgium	Belgium	North Continent Europe	50.36	5.21					
+USSJ4	St Johns	United States	United States	US East Coast	43	-84.33					
+FRSNG	St Nazaire	France	France	North Continent Europe	44.12	4.36					
+TWTXG	Taichung	Taiwan	Taiwan	Singapore							
+PETYL	Talara	Peru	Peru	South America West Coast							
+MXTAM	Tampico	Mexico	Mexico	US West Coast	22.15	-97.52					
+TZTGT	Tanga	Tanzania	Tanzania	South Africa							
+JPTKY	Tokuyama	Japan	Japan	Japan							
+FOTOR	Torshavn				62.1	-64.6					
+BRTRM	Tramandai	Brazil	Brazil	Brazil	-29.58	-50.08					
+LKTRR	Trincomalee	Sri Lanka	Sri Lanka	Mumbai							
+INTUT	Tuticorin	India	India	Mumbai	8.47	78.08	9.5				
+JPUBJ	Ube	Japan	Japan	Japan							
+BRVPO	Valparaiso	Brazil	Brazil	Brazil							
+LVVNT	Ventspils										
+INVVA	Veraval	India	India	Mumbai							
+JPWTU	Wakamatsu	Japan	Japan	Japan							
+JPWAK	Wakayama	Japan	Japan	Japan							
+UMAWK	Wake Island										
+NZWAG	Wanganui	New Zealand	New Zealand	Australia							
+NZWRE	Whangarei	New Zealand	New Zealand	Australia							
+DEWVN	Wilhelmshaven	Germany	Germany	North Continent Europe	53.31	8.08					
+TZZNZ	Zanzibar	Tanzania	Tanzania	South Africa			8				
