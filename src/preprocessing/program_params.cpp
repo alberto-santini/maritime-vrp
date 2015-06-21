@@ -20,7 +20,6 @@ ProgramParams::ProgramParams(const std::string& data_file_name) {
     try_elementary_labelling = pt.get<bool>("try_elementary_labelling");
     try_smart_graph_reduction = pt.get<bool>("try_smart_graph_reduction");
     try_reduced_labelling = pt.get<bool>("try_reduced_labelling");
-    use_stop_arcs = pt.get<bool>("use_stop_arcs");
     smart_min_chance = pt.get<double>("smart_min_chance");
     smart_max_chance = pt.get<double>("smart_max_chance");
 }

@@ -17,7 +17,6 @@ public:
     bool    try_elementary_labelling;
     bool    try_smart_graph_reduction;
     bool    try_reduced_labelling;
-    bool    use_stop_arcs;
     double  smart_min_chance;
     double  smart_max_chance;
     

@@ -189,11 +189,7 @@ namespace GraphGenerator {
                 
                     for(auto q : data.ports) {
                         if(p == q) {
-                            if(params.use_stop_arcs && t < data.num_times - 2) {
-                                create_edge(*p, pu, t, *p, pu, t+1, g, vessel_class->base_cost);
-                            } else {
-                                continue;
-                            }
+                            continue;
                         }
                     
                         if(q->hub) {

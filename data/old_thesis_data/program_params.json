@@ -8,6 +8,5 @@
   "try_reduced_labelling":          false,
   "smart_min_chance":               0.1,
   "smart_max_chance":               0.6,
-  "use_stop_arcs":                  false,
   "cplex_cores":                    4
 }
