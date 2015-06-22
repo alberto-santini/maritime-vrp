@@ -1,12 +1,13 @@
 {
-  "delta":                          10,
-  "theta":                          100,
-  "max_cols_to_solve_mp":           100000,
-  "dummy_column_price":             999999,
-  "try_elementary_labelling":       true,
-  "try_smart_graph_reduction":      true,
-  "try_reduced_labelling":          false,
-  "smart_min_chance":               0.1,
-  "smart_max_chance":               0.6,
-  "cplex_cores":                    4
+  "delta":                              10,
+  "theta":                              100,
+  "max_cols_to_solve_mp":               100000,
+  "dummy_column_price":                 999999,
+  "try_elementary_labelling":           true,
+  "try_smart_graph_reduction":          true,
+  "try_reduced_labelling":              false,
+  "elementary_labelling_every_n_nodes": 5,
+  "smart_min_chance":                   0.1,
+  "smart_max_chance":                   0.6,
+  "cplex_cores":                        4
 }

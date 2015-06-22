@@ -126,7 +126,7 @@ void BBNode::check_for_duplicate_columns() {
     }
 }
 
-void BBNode::solve() {
+void BBNode::solve(unsigned int node_number) {
     auto node_start = clock();
     std::cerr << "\tGraphs at this node:" << std::endl;
     for(const auto& vg : local_graphs) {
@@ -176,6 +176,10 @@ void BBNode::solve() {
         //     }
         // }
         
+        if(node_number % prob->params.elementary_labelling_every_n_nodes != 0) {
+            try_elementary = false;
+        }
+        
         auto sp_start = clock();
         tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary, max_time_spent_by_exact_solver);
         auto sp_end = clock();
@@ -185,7 +189,7 @@ void BBNode::solve() {
 
         if(sp_found_columns > 0) {
             // If new columns are found, solve the LP again
-            if((orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {
+            if(try_elementary && (orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {
                 try_elementary = false;
             }
             auto mp_start = clock();

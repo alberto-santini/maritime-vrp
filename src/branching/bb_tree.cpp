@@ -74,6 +74,8 @@ void BBTree::print_header() const {
 void BBTree::explore_tree() {
     print_header();
     
+    auto node_number = 0u;
+    
     while(!unexplored_nodes.empty()) {
         std::cerr << "Nodes in tree: " << unexplored_nodes.size() << std::endl;
         
@@ -82,7 +84,7 @@ void BBTree::explore_tree() {
         lb = current_node->father_lb;
         
         // Solve the master problem to obtain a lower bound
-        current_node->solve();
+        current_node->solve(node_number++);
         std::cerr << "\tNode LB: " << current_node->sol_value << std::endl;
         
         if(!current_node->is_feasible()) {

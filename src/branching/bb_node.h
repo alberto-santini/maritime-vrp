@@ -76,7 +76,7 @@ public:
            double total_time_spent = 0,
            double max_time_spent_by_exact_solver = 0);
     
-    void solve();
+    void solve(unsigned int node_number);
     bool solve_integer(const ColumnPool& feasible_columns);
     
     bool is_feasible() const;
