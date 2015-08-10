@@ -64,7 +64,7 @@ class VesselClass
       \"cost_when_idle_in_tons_of_bunker_per_day\": #{@cost_idle.round(4)},
       \"cost_when_idle_in_tons_of_bunker_per_time_interval\": #{@cost_idle_ti.round(4)},
       \"cost_when_idle_in_dollars_per_time_interval\": #{(@cost_idle_ti * @options[:bunker_cost_per_ton]).round(4)},
-      \"number_of_available_vesseles\": #{@quantity.to_i},
+      \"number_of_available_vessels\": #{@quantity.to_i},
       \"speeds_in_knots\": #{@speeds.map{|s|s.round(4)}.to_json},
       \"speeds_in_miles_per_time_interval\": #{@speeds_ti.map{|s|s.round(4)}.to_json},
       \"speed_costs_in_tons_of_bunker_per_mile\": #{@speed_costs.map{|s|s.round(4)}.to_json},
