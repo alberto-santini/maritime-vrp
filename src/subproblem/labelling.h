@@ -17,13 +17,15 @@
 
 class Label {
 public:
+    const std::shared_ptr<const Graph>& g;
     int             q_pickupable;
     int             q_deliverable;
     double          cost;
     
-    Label(int qp,
+    Label(const std::shared_ptr<const Graph>& g,
+          int qp,
           int qd,
-          double c = 0) : q_pickupable(qp), q_deliverable(qd), cost(c) {}
+          double c = 0) : g(g), q_pickupable(qp), q_deliverable(qd), cost(c) {}
           
     bool operator==(const Label& other) const;
     bool operator<(const Label& other) const;
@@ -37,7 +39,7 @@ class ElementaryLabel : public Label {
 public:
     VisitedPortsFlags visited_ports;
     
-    ElementaryLabel(int qp, int qd, double c, const VisitedPortsFlags& vp) : Label(qp, qd, c), visited_ports(vp) {}
+    ElementaryLabel(const std::shared_ptr<const Graph>& g, int qp, int qd, double c, const VisitedPortsFlags& vp) : Label(g, qp, qd, c), visited_ports(vp) {}
     
     bool operator==(const ElementaryLabel& other) const;
     bool operator<(const ElementaryLabel& other) const;

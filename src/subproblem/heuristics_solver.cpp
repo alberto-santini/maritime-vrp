@@ -27,6 +27,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
                         
             for(auto ep = out_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
                 auto n_dest = *g->graph[target(*ep.first, g->graph)];
+                
                 auto dual = g->dual_of(n_dest);
                 EdgeWithCost ewc = { *ep.first, g->graph[*ep.first]->cost, g->graph[*ep.first]->cost - dual };
                 
@@ -156,7 +157,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast() const {
     return total;
 }
 
-std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double percentage) const {
+std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double percentage) const {
     std::vector<Solution> sols;
     auto red = g->reduce_graph(percentage);
     
@@ -182,7 +183,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double
         red->h2().second,
         optimal_paths,
         optimal_labels,
-        ElementaryLabel(vc->capacity, vc->capacity, 0, pf),
+        ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
         LabelExtender(),
         Dominance(),
         std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
@@ -197,7 +198,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(const double
     return sols;
 }
 
-std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double percentage, const bool smart) const {
+std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage, bool smart) const {
     std::vector<Solution> sols;
     auto red = smart ? g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance) : g->reduce_graph(percentage);
     
@@ -217,7 +218,7 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(const double perc
         red->h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0),
+        Label(g, vc->capacity, vc->capacity, 0),
         LabelExtender(),
         Dominance(),
         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),

@@ -22,7 +22,7 @@ public:
     
     std::vector<Solution> solve_fast() const;
     std::vector<Solution> solve_elem_on_reduced_graph(double percentage) const;
-    std::vector<Solution> solve_on_reduced_graph(const double percentage) const { return solve_on_generic_graph(percentage, false); }
+    std::vector<Solution> solve_on_reduced_graph(double percentage) const { return solve_on_generic_graph(percentage, false); }
     std::vector<Solution> solve_on_smart_graph() const { return solve_on_generic_graph(0, true); };
     
 private:

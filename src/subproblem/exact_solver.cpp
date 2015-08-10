@@ -31,7 +31,7 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) const {
         g->h2().second,
         optimal_paths,
         optimal_labels,
-        Label(vc->capacity, vc->capacity, 0),
+        Label(g, vc->capacity, vc->capacity, 0),
         LabelExtender(),
         Dominance(),
         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
