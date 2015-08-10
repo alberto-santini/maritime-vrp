@@ -19,6 +19,7 @@ class DataGenerator
     read_distances
     calculate_port_data
     edit_ports_with_eccess_capacity
+    reorder_ports
   end
 
   def read_requests
@@ -228,6 +229,12 @@ class DataGenerator
         
         @ports << new_port
       end
+    end
+  end
+  
+  def reorder_ports
+    @ports.sort_by! do |p1, p2|
+      p1.is_hub ? -1 : 1
     end
   end
   
