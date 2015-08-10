@@ -6,6 +6,18 @@
 
 #include <base/vessel_class.h>
 
-VesselClass::VesselClass(const std::string& name, int capacity, int num_vessels, double base_cost, const SpeedCostMap& bunker_cost) : name(name), capacity(capacity), num_vessels(num_vessels), base_cost(base_cost), bunker_cost(bunker_cost) {
-    top_speed = std::max_element(bunker_cost.begin(), bunker_cost.end(), [] (const auto& sc1, const auto& sc2) { return (sc1.first < sc2.first); })->first;
+VesselClass::VesselClass(const std::string& name,
+                         int capacity,
+                         int num_vessels,
+                         double time_charter_cost_per_time_unit,
+                         double hotel_cost_per_time_unit,
+                         const SpeedCostMap& bunker_cost_per_time_unit) :
+        name(name),
+        capacity(capacity),
+        num_vessels(num_vessels),
+        time_charter_cost_per_time_unit(time_charter_cost_per_time_unit),
+        hotel_cost_per_time_unit(hotel_cost_per_time_unit),
+        bunker_cost_per_time_unit(bunker_cost_per_time_unit)
+{
+    top_speed = std::max_element(bunker_cost_per_time_unit.begin(), bunker_cost_per_time_unit.end(), [] (const auto& sc1, const auto& sc2) { return (sc1.first < sc2.first); })->first;
 }

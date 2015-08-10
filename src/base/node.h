@@ -28,7 +28,13 @@ public:
          PickupType pu_type,
          NodeType n_type,
          int time_step,
-         std::shared_ptr<VesselClass> vessel_class) : port(port), pu_type(pu_type), n_type(n_type), time_step(time_step), vessel_class(vessel_class) {
+         std::shared_ptr<VesselClass> vessel_class) :
+            port(port),
+            pu_type(pu_type),
+            n_type(n_type),
+            time_step(time_step),
+            vessel_class(vessel_class)
+    {
         boost_vertex_id = 0;
     }
     

@@ -15,11 +15,17 @@ public:
     std::string     name;
     int             capacity;
     int             num_vessels;
-    double          base_cost;
-    SpeedCostMap    bunker_cost;
+    double          time_charter_cost_per_time_unit;
+    double          hotel_cost_per_time_unit;
+    SpeedCostMap    bunker_cost_per_time_unit;
     double          top_speed;
     
-    VesselClass(const std::string& name, int capacity, int num_vessels, double base_cost, const SpeedCostMap& bunker_cost);
+    VesselClass(const std::string& name,
+                int capacity,
+                int num_vessels,
+                double time_charter_cost_per_time_unit,
+                double hotel_cost_per_time_unit,
+                const SpeedCostMap& bunker_cost_per_time_unit);
 };
 
 #endif
