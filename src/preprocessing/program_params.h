@@ -12,7 +12,7 @@ public:
     int     delta;
     int     theta;
     int     max_cols_to_solve_mp;
-    int     dummy_column_price;
+    long    dummy_column_price;
     int     cplex_cores;
     int     elementary_labelling_every_n_nodes;
     bool    try_elementary_labelling;
