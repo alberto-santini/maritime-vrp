@@ -277,10 +277,12 @@ double Graph::calculate_cost(const Path& p) const {
 
 double Graph::dual_of(const Node& n) const {
     if(n.n_type == NodeType::REGULAR_PORT) {
+        auto it = graph[graph_bundle].port_duals.find(n.port);
+        
         if(n.pu_type == PickupType::PICKUP) {
-            return graph[graph_bundle].port_duals.at(n.port).first;
+            return (it == graph[graph_bundle].port_duals.end() ? 0 : it->second.first);
         } else {
-            return graph[graph_bundle].port_duals.at(n.port).second;
+            return (it == graph[graph_bundle].port_duals.end() ? 0 : it->second.second);
         }
     } else if(n.n_type == NodeType::H2) {
         return graph[graph_bundle].vc_dual;
