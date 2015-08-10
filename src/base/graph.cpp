@@ -212,14 +212,14 @@ std::shared_ptr<Graph> Graph::smart_reduce_graph(double min_chance, double max_c
     auto dest = std::make_shared<Graph>(graph, vessel_class, new_name);
     auto max_prize = max_dual_prize();
     auto min_prize = min_dual_prize();
-    
+
     eit ei, ei_end, ei_next;
     std::tie(ei, ei_end) = edges(dest->graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
         auto trgt = graph[target(*ei, graph)];
         if(trgt->n_type == NodeType::REGULAR_PORT) {
-            auto dual_prize = (trgt->pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(trgt->port).first : graph[graph_bundle].port_duals.at(trgt->port).second);
+            auto dual_prize = dual_of(*trgt);
             auto threshold = min_chance + (dual_prize - min_prize) * (max_chance - min_chance) / (max_prize - min_prize);
             auto rnd = static_cast<double> (rand()) / static_cast<double> (RAND_MAX);
             if(rnd > threshold) {

@@ -68,7 +68,7 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
-    auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
+    auto dual = label.g->dual_of(n_dest);
 
     new_label.cost = label.cost + graph[e]->cost - dual;
     
@@ -86,7 +86,7 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
-    auto dual = (n_dest.n_type == NodeType::REGULAR_PORT ? (n_dest.pu_type == PickupType::PICKUP ? graph[graph_bundle].port_duals.at(n_dest.port).first : graph[graph_bundle].port_duals.at(n_dest.port).second) : graph[graph_bundle].vc_dual);
+    auto dual = label.g->dual_of(n_dest);
 
     new_label.cost = label.cost + graph[e]->cost - dual;
     new_label.visited_ports = label.visited_ports;
