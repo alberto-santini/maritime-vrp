@@ -89,7 +89,12 @@ void BBTree::explore_tree() {
         
         if(!current_node->is_feasible()) {
             // Prune by infeasibility
-            std::cerr << "\t\tPruned by infeasibility" << std::endl;
+            std::cerr << "\t\tPruned by infeasibility (optimal LP solution contains dummy column)" << std::endl;
+            if(node_number == 1u) {
+                // Infeasible at root node!
+                std::cout << "Root node infeasible" << std::endl;
+            }
+            
             continue;
         }
         
