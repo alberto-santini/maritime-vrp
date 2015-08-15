@@ -13,13 +13,13 @@ class DataGenerator
     
     read_requests
     read_ports
+    reorder_ports
     calculate_request_data
     read_vessel_classes
     calculate_vessel_class_data
     read_distances
     calculate_port_data
     edit_ports_with_eccess_capacity
-    reorder_ports
     calculate_port_penalties
   end
 
