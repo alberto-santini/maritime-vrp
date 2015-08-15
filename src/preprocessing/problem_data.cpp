@@ -75,6 +75,8 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         auto fixed_fee = child.second.get<double>("call_fee_fixed_in_dollars");
         auto pickup_revenue = child.second.get<double>("total_revenue_for_pickup");
         auto delivery_revenue = child.second.get<double>("total_revenue_for_delivery");
+        auto pickup_penalty = child.second.get<double>("penalty_if_not_served_pickup");
+        auto delivery_penalty = child.second.get<double>("penalty_if_not_served_delivery");
         std::vector<int> tw_left;
         std::vector<int> tw_right;
         std::vector<double> p_distances;
@@ -137,6 +139,8 @@ ProblemData::ProblemData(const std::string& data_file_name) {
                                         variable_fee,
                                         pickup_revenue,
                                         delivery_revenue,
+                                        pickup_penalty,
+                                        delivery_penalty,
                                         tw);
         
         ports.push_back(p);

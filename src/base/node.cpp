@@ -12,6 +12,14 @@ double Node::de_demand() const {
     return (pu_type == PickupType::DELIVERY ? port->delivery_demand : 0);
 }
 
+double Node::pu_penalty() const {
+    return (pu_type == PickupType::PICKUP ? port->pickup_penalty : 0);
+}
+
+double Node::de_penalty() const {
+    return (pu_type == PickupType::DELIVERY ? port->delivery_penalty : 0);
+}
+
 bool Node::same_row_as(const Node& other) const {
     return (other.port == port && other.pu_type == pu_type);
 }

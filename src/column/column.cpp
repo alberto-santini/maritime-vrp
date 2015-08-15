@@ -15,7 +15,7 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
     Path global_p = g->transfer_path(sol.path, *node_g);
     Solution global_sol(global_p, sol.cost, sol.reduced_cost, sol.vessel_class, g);
     
-    obj_coeff = global_sol.cost;    
+    obj_coeff = global_sol.cost;
     
     auto np = prob->data.num_ports;
     auto nv = prob->data.num_vessel_classes;
@@ -40,6 +40,12 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
         if(global_sol.vessel_class == prob->data.vessel_classes[i]) {
             vc_coeff[i] = 1;
         }
+    }
+    
+    // Calculate penalties to remove from obj function:
+    for(auto i = 1; i < np; ++i) {
+        obj_coeff -= prob->data.ports[i]->pickup_penalty * port_coeff[i - 1];
+        obj_coeff -= prob->data.ports[i]->delivery_penalty * port_coeff[np - 1 + i - 1];
     }
     
     this->sol = global_sol;

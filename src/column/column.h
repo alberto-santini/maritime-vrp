@@ -19,8 +19,8 @@ public:
     std::shared_ptr<const Problem>  prob;
     Solution                        sol;
     double                          obj_coeff;
-    std::vector<double>              port_coeff;
-    std::vector<double>              vc_coeff;
+    std::vector<double>             port_coeff;
+    std::vector<double>             vc_coeff;
     bool                            dummy;
     std::string                     created_by;
     ColumnOrigin                    origin; 

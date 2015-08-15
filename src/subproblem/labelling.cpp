@@ -69,8 +69,9 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
     auto dual = label.g->dual_of(n_dest);
+    auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
 
-    new_label.cost = label.cost + graph[e]->cost - dual;
+    new_label.cost = label.cost + graph[e]->cost - avoided_penalty - dual;
     
     auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
                  label.q_deliverable >= n_dest.de_demand());
@@ -87,8 +88,9 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
     
     auto dual = label.g->dual_of(n_dest);
+    auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
 
-    new_label.cost = label.cost + graph[e]->cost - dual;
+    new_label.cost = label.cost + graph[e]->cost - avoided_penalty - dual;
     new_label.visited_ports = label.visited_ports;
 
     auto dest_pp = std::make_pair(n_dest.port, n_dest.pu_type);

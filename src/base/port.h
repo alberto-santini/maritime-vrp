@@ -34,6 +34,8 @@ public:
     VcFee               variable_fee;
     double              pickup_revenue;
     double              delivery_revenue;
+    double              pickup_penalty;
+    double              delivery_penalty;
     ClosingTimeWindows  closing_time_windows;
     
     Port() {}
@@ -52,6 +54,8 @@ public:
          VcFee variable_fee,
          double pickup_revenue,
          double delivery_revenue,
+         double pickup_penalty,
+         double delivery_penalty,
          const ClosingTimeWindows& closing_time_windows) :
             name(name),
             pickup_demand(pickup_demand),
@@ -67,6 +71,8 @@ public:
             variable_fee(variable_fee),
             pickup_revenue(pickup_revenue),
             delivery_revenue(delivery_revenue),
+            pickup_penalty(pickup_penalty),
+            delivery_penalty(delivery_penalty),
             closing_time_windows(closing_time_windows) {}
 
     inline bool models_same_port_as(const Port& q) const { return q.name.substr(0,5) == name.substr(0,5); }

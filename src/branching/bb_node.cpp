@@ -187,6 +187,8 @@ void BBNode::solve(unsigned int node_number) {
         total_time_spent_on_sp += (double(sp_end - sp_start) / CLOCKS_PER_SEC);
         all_times_spent_on_sp.push_back((double(sp_end - sp_start) / CLOCKS_PER_SEC));
 
+        std::cerr << std::unitbuf << "\t\tSP found " << sp_found_columns << " columns" << std::endl;
+
         if(sp_found_columns > 0) {
             // If new columns are found, solve the LP again
             if(try_elementary && (orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {

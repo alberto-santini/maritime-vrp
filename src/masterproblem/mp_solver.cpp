@@ -9,6 +9,12 @@
 #include <masterproblem/mp_solver.h>
 
 IloData MPSolver::solve(const ColumnPool& pool, bool linear) const {
+    // Calculate the sum of all penalties
+    auto all_penalties = 0.0;
+    for(const auto& p : prob->data.ports) {
+        all_penalties += p->pickup_penalty + p->delivery_penalty;
+    }
+    
     IloEnv env;
     IloModel model(env);
     
@@ -16,15 +22,16 @@ IloData MPSolver::solve(const ColumnPool& pool, bool linear) const {
     IloRangeArray port_constr(env);
     IloRangeArray vc_constr(env);
     
-    IloObjective obj = IloMinimize(env);
+    IloObjective obj = IloMinimize(env, all_penalties);
     
     auto np = prob->data.num_ports;
     auto nv = prob->data.num_vessel_classes;
     
     for(auto i = 1; i < np; i++) {
-        port_constr.add(IloRange(env, 1.0, 1.0)); // Pickup port
-        port_constr.add(IloRange(env, 1.0, 1.0)); // Delivery port
+        port_constr.add(IloRange(env, -IloInfinity, 1.0)); // Pickup port
+        port_constr.add(IloRange(env, -IloInfinity, 1.0)); // Delivery port
     }
+    
     for(auto i = 0; i < nv; i++) {
         vc_constr.add(IloRange(env, -IloInfinity, prob->data.vessel_classes[i]->num_vessels));
     }
