@@ -4,7 +4,7 @@ class Port
                 :delivery_demand, :pickup_revenue, :delivery_revenue,
                 :allowed_vc, :pickup_handling, :delivery_handling, :distances,
                 :num_tw, :tw_start, :tw_end, :pickup_transfer, :delivery_transfer,
-                :pickup_unit_revenue, :delivery_unit_revenue
+                :pickup_unit_revenue, :delivery_unit_revenue,
   
   def initialize(options, name, draught, cost_per_container, call_fee_fixed, call_fee_variable)
     @options = options
@@ -24,11 +24,9 @@ class Port
     "{
       \"unlo_code\": \"#{@name}\",
       \"draught\": #{@draught.round(4)},
-      \"cost_per_loaded_or_unloaded_ffe_in_dollars\": #{@cost_per_container.round(4)},
       \"total_movement_cost_pickup\": #{(@cost_per_container * (@is_hub ? 0 : @pickup_demand.to_i)).round(4)},
       \"total_movement_cost_delivery\": #{(@cost_per_container * (@is_hub ? 0 : @delivery_demand.to_i)).round(4)},
       \"call_fee_fixed_in_dollars\": #{@call_fee_fixed.round(4)},
-      \"call_fee_per_ffe_of_vessel_capacity_in_dollars\": #{@call_fee_variable.round(4)},
       \"call_fee_per_vessel_class_in_dollars\": #{@call_fee_vc.map{|c|c.round(4)}.to_json},
       \"is_hub\": #{@is_hub},
       \"pickup_demand_in_ffe\": #{@is_hub ? 0 : @pickup_demand.to_i},

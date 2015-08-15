@@ -51,24 +51,11 @@ class VesselClass
     "{
       \"vessel_class_name\": \"#{@name}\",
       \"capacity_in_ffe\": #{@capacity.to_i},
-      \"time_charter_cost_per_day\": #{@cost_tc.round(4)},
       \"time_charter_cost_per_time_interval\": #{@cost_tc_ti.round(4)},
       \"draught\": #{@draught.round(4)},
-      \"min_speed_in_knots\": #{@min_speed.round(4)},
-      \"max_speed_in_knots\": #{@max_speed.round(4)},
-      \"design_speed_in_knots\": #{@design_speed.round(4)},
-      \"min_speed_in_miles_per_time_interval\": #{@min_speed_ti.round(4)},
-      \"max_speed_in_miles_per_time_interval\": #{@max_speed_ti.round(4)},
-      \"design_speed_in_miles_per_time_interval\": #{@design_speed_ti.round(4)},
-      \"cost_at_design_speed_in_tons_of_bunker_per_mile\": #{@cost_design_speed.round(4)},
-      \"cost_when_idle_in_tons_of_bunker_per_day\": #{@cost_idle.round(4)},
-      \"cost_when_idle_in_tons_of_bunker_per_time_interval\": #{@cost_idle_ti.round(4)},
       \"cost_when_idle_in_dollars_per_time_interval\": #{(@cost_idle_ti * @options[:bunker_cost_per_ton]).round(4)},
       \"number_of_available_vessels\": #{@quantity.to_i},
-      \"speeds_in_knots\": #{@speeds.map{|s|s.round(4)}.to_json},
       \"speeds_in_miles_per_time_interval\": #{@speeds_ti.map{|s|s.round(4)}.to_json},
-      \"speed_costs_in_tons_of_bunker_per_mile\": #{@speed_costs.map{|s|s.round(4)}.to_json},
-      \"speed_costs_in_dollars_per_mile\": #{@speed_costs_dol.map{|s|s.round(4)}.to_json},
       \"speed_costs_in_dollars_per_time_interval\": #{@speed_costs_dol_ti.map{|s|s.round(4)}.to_json}
     }"
   end
