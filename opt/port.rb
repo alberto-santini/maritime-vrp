@@ -5,6 +5,7 @@ class Port
                 :allowed_vc, :pickup_handling, :delivery_handling, :distances,
                 :num_tw, :tw_start, :tw_end, :pickup_transfer, :delivery_transfer,
                 :pickup_unit_revenue, :delivery_unit_revenue,
+                :penalty_if_not_served_pickup, :penalty_if_not_served_delivery
   
   def initialize(options, name, draught, cost_per_container, call_fee_fixed, call_fee_variable)
     @options = options
@@ -33,6 +34,8 @@ class Port
       \"delivery_demand_in_ffe\": #{@is_hub ? 0 : @delivery_demand.to_i},
       \"total_revenue_for_pickup\": #{@pickup_revenue.to_f.round(4)},
       \"total_revenue_for_delivery\": #{@delivery_revenue.to_f.round(4)},
+      \"penalty_if_not_served_pickup\": #{@penalty_if_not_served_pickup.to_f.round(4)},
+      \"penalty_if_not_served_delivery\": #{@penalty_if_not_served_delivery.to_f.round(4)},
       \"allowed_vessel_classes\": #{@allowed_vc.to_json},
       \"pickup_handling_time_in_time_intervals\": #{@is_hub ? 0 : @pickup_handling.to_i},
       \"delivery_handling_time_in_time_intervals\": #{@is_hub ? 0 : @delivery_handling.to_i},

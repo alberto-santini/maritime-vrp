@@ -82,6 +82,12 @@ class Parser
       opts.on "--max-transfer=MANDATORY" do |m|
         @options[:max_transfer] = m.to_i
       end
+      
+      # Penalty coefficient: if cargo is not picked up, the ship
+      # operator pays this number * the lost profit, as a penalty
+      opts.on "--penalty-coefficient=MANDATORY" do |p|
+        @options[:penalty_coefficient] = p.to_f
+      end
     end.parse!
     
     @options[:time_intervals_per_day] = (24 / @options[:discretisation]).to_i

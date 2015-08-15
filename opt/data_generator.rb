@@ -20,6 +20,7 @@ class DataGenerator
     calculate_port_data
     edit_ports_with_eccess_capacity
     reorder_ports
+    calculate_port_penalties
   end
 
   def read_requests
@@ -229,6 +230,13 @@ class DataGenerator
         
         @ports << new_port
       end
+    end
+  end
+  
+  def calculate_port_penalties
+    @ports.each do |port|
+      port.penalty_if_not_served_pickup = @options[:penalty_coefficient] * port.pickup_revenue.to_f
+      port.penalty_if_not_served_delivery = @options[:penalty_coefficient] * port.delivery_revenue.to_f
     end
   end
   
