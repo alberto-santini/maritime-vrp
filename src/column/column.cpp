@@ -114,7 +114,7 @@ bool Column::has_cycles() const {
 }
 
 std::ostream& operator<<(std::ostream& out, const Column& c) {
-    out << std::setw(6) << c.obj_coeff << " | ";
+    out << std::setw(6) << c.obj_coeff << " |\t";
     
     auto hs = (int)(c.port_coeff.size() / 2);
     
