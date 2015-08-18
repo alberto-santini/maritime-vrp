@@ -12,6 +12,8 @@
 namespace GraphGenerator {
     std::shared_ptr<Graph> create_graph(const ProblemData& data, const ProgramParams& params, std::shared_ptr<VesselClass> vessel_class) {
         auto g = std::make_shared<Graph>(BGraph(), vessel_class, "Graph for " + vessel_class->name);
+        auto created_pu = std::unordered_map<std::shared_ptr<Port>,bool>();
+        auto created_de = std::unordered_map<std::shared_ptr<Port>,bool>();
     
         /*  Add vertices */
         Vertex v_h1, v_h2;
@@ -29,12 +31,29 @@ namespace GraphGenerator {
 
                 continue;
             }
-
-            /* Create all other nodes */
-            for(auto t = 0; t < data.num_times; t++) {
-                for(auto pu : {PickupType::PICKUP, PickupType::DELIVERY}) {
-                    auto v = add_vertex(g->graph);
-                    g->graph[v] = std::make_shared<Node>(p, pu, NodeType::REGULAR_PORT, t, vessel_class);
+            
+            if(p->allowed[vessel_class]) {
+                /* Create all other nodes */
+                if(p->pickup_demand > 0 && p->pickup_demand <= vessel_class->capacity) {
+                    for(auto t = 0; t < data.num_times; t++) {
+                        auto v = add_vertex(g->graph);
+                        g->graph[v] = std::make_shared<Node>(p, PickupType::PICKUP, NodeType::REGULAR_PORT, t, vessel_class);
+                    }
+                
+                    created_pu[p] = true;
+                } else {
+                    created_pu[p] = false;
+                }
+                
+                if(p->delivery_demand > 0 && p->delivery_demand <= vessel_class->capacity) {
+                    for(auto t = 0; t < data.num_times; t++) {
+                        auto v = add_vertex(g->graph);
+                        g->graph[v] = std::make_shared<Node>(p, PickupType::DELIVERY, NodeType::REGULAR_PORT, t, vessel_class);
+                    }
+                    
+                    created_de[p] = true;
+                } else {
+                    created_de[p] = false;
                 }
             }
         }
@@ -48,81 +67,85 @@ namespace GraphGenerator {
             if(!p->allowed[vessel_class]) {
                 continue;
             }
-        
+
             for(const auto& sc : vessel_class->bunker_cost_per_time_unit) {
                 auto distance = data.distances.at(std::make_pair(n_h1.port, p));
                 auto speed = sc.first;
                 auto bunker_cost_per_time_unit = sc.second;
                 auto arrival_time = 0 + (int) ceil(distance / speed);
-                        
+                
                 if(arrival_time >= data.num_times) {
                     continue;
                 }
-            
-                auto final_time_pu = final_time(data, *p, arrival_time, PickupType::PICKUP);
+                
+                if(created_pu[p]) {
+                    auto final_time_pu = final_time(data, *p, arrival_time, PickupType::PICKUP);
+                
+                    if(final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
+                        auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
+                        auto movement_cost = p->pickup_movement_cost;
+                        auto fixed_port_fee = p->fixed_fee;
+                        auto variable_port_fee = p->variable_fee[vessel_class];
+                        auto revenue = p->pickup_revenue;
+
+                        if(final_time_pu >= data.num_times - 1 - p->pickup_transit) {
+                            // Normal arc: arrives at a time when it's allowed
+                            auto time_charter_cost = (final_time_pu - 0) * vessel_class->time_charter_cost_per_time_unit;
+                            auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+
+                            auto cost = time_charter_cost +
+                                        hotel_cost +
+                                        bunker_cost +
+                                        movement_cost +
+                                        fixed_port_fee +
+                                        variable_port_fee -
+                                        revenue;
                         
-                if(final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
-                    auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
-                    auto movement_cost = p->pickup_movement_cost;
-                    auto fixed_port_fee = p->fixed_fee;
-                    auto variable_port_fee = p->variable_fee[vessel_class];
-                    auto revenue = p->pickup_revenue;
+                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g, cost);
+                        } else {
+                            // Travel + wait arc: arrives at a time when it's not allowed
+                            auto overall_final_time = data.num_times - 1 - p->pickup_transit;
 
-                    if(final_time_pu >= data.num_times - 1 - p->pickup_transit) {
-                        // Normal arc: arrives at a time when it's allowed
-                        auto time_charter_cost = (final_time_pu - 0) * vessel_class->time_charter_cost_per_time_unit;
-                        auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                            auto time_charter_cost = (overall_final_time - 0) * vessel_class->time_charter_cost_per_time_unit;
+                            auto hotel_cost = (overall_final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                        auto cost = time_charter_cost +
-                                    hotel_cost +
-                                    bunker_cost +
-                                    movement_cost +
-                                    fixed_port_fee +
-                                    variable_port_fee -
-                                    revenue;
+                            auto cost = time_charter_cost +
+                                        hotel_cost +
+                                        bunker_cost +
+                                        movement_cost +
+                                        fixed_port_fee +
+                                        variable_port_fee -
+                                        revenue;
 
-                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g, cost);
-                    } else {
-                        // Travel + wait arc: arrives at a time when it's not allowed
-                        auto overall_final_time = data.num_times - 1 - p->pickup_transit;
-
-                        auto time_charter_cost = (overall_final_time - 0) * vessel_class->time_charter_cost_per_time_unit;
-                        auto hotel_cost = (overall_final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-
-                        auto cost = time_charter_cost +
-                                    hotel_cost +
-                                    bunker_cost +
-                                    movement_cost +
-                                    fixed_port_fee +
-                                    variable_port_fee -
-                                    revenue;
-
-                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, overall_final_time, g, cost);
+                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, overall_final_time, g, cost);
+                        }
                     }
                 }
-            
-                auto final_time_de = final_time(data, *p, arrival_time, PickupType::DELIVERY);
-                        
-                if( (final_time_de <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
-                    (final_time_de <= p->delivery_transit)) {
                 
-                    auto time_charter_cost = (final_time_de - 0) * vessel_class->time_charter_cost_per_time_unit;
-                    auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-                    auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
-                    auto movement_cost = p->delivery_movement_cost;
-                    auto fixed_port_fee = p->fixed_fee;
-                    auto variable_port_fee = p->variable_fee[vessel_class];
-                    auto revenue = p->delivery_revenue;
+                if(created_de[p]) {
+                    auto final_time_de = final_time(data, *p, arrival_time, PickupType::DELIVERY);
+                    
+                    if( (final_time_de <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
+                        (final_time_de <= p->delivery_transit)) {
+                
+                        auto time_charter_cost = (final_time_de - 0) * vessel_class->time_charter_cost_per_time_unit;
+                        auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                        auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
+                        auto movement_cost = p->delivery_movement_cost;
+                        auto fixed_port_fee = p->fixed_fee;
+                        auto variable_port_fee = p->variable_fee[vessel_class];
+                        auto revenue = p->delivery_revenue;
 
-                    auto cost = time_charter_cost +
-                                hotel_cost +
-                                bunker_cost +
-                                movement_cost +
-                                fixed_port_fee +
-                                variable_port_fee -
-                                revenue;
+                        auto cost = time_charter_cost +
+                                    hotel_cost +
+                                    bunker_cost +
+                                    movement_cost +
+                                    fixed_port_fee +
+                                    variable_port_fee -
+                                    revenue;
                 
-                    create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g, cost);
+                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g, cost);
+                    }
                 }
             }
         }
@@ -133,93 +156,100 @@ namespace GraphGenerator {
                 continue;
             }
             
-            auto pickup_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit), 1);
-            auto delivery_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit), 1);
+            // auto pickup_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit), 1);
+            // auto delivery_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit), 1);
+            
+            auto pickup_departure_time = std::max(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit);
+            auto delivery_departure_time = std::max(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit);
             
             assert(pickup_departure_time >= 1);
             assert(delivery_departure_time >= 1);
             
-            // For pickup nodes:
-            for(auto departure_time = pickup_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
-                auto falls_in_tw = false;
-                for(const auto& tw : p->closing_time_windows) {
-                    if(departure_time > tw.first && departure_time <= tw.second) {
-                        falls_in_tw = true;
-                        break;
+            if(created_pu[p]) {
+                // For pickup nodes:
+                for(auto departure_time = pickup_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
+                    auto falls_in_tw = false;
+                    for(const auto& tw : p->closing_time_windows) {
+                        if(departure_time > tw.first && departure_time <= tw.second) {
+                            falls_in_tw = true;
+                            break;
+                        }
                     }
-                }
             
-                if(falls_in_tw) {
-                    continue;
-                }
-                
-                for(const auto& sc : vessel_class->bunker_cost_per_time_unit) {
-                    auto distance = data.distances.at(std::make_pair(p, n_h2.port));
-                    auto speed = sc.first;
-                    auto bunker_cost_per_time_unit = sc.second;
-                    auto arrival_time = departure_time + (int) ceil(distance / speed);
-                    auto final_time = data.num_times - 1;
-                    
-                    if(arrival_time >= data.num_times) {
+                    if(falls_in_tw) {
                         continue;
                     }
+                
+                    for(const auto& sc : vessel_class->bunker_cost_per_time_unit) {
+                        auto distance = data.distances.at(std::make_pair(p, n_h2.port));
+                        auto speed = sc.first;
+                        auto bunker_cost_per_time_unit = sc.second;
+                        auto arrival_time = departure_time + (int) ceil(distance / speed);
+                        auto final_time = data.num_times - 1;
                     
-                    // The following works the same for:
-                    // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
-                    // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
-                    auto time_charter_cost = (final_time - departure_time) * vessel_class->time_charter_cost_per_time_unit;
-                    auto hotel_cost = (final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-                    auto bunker_cost = (arrival_time - departure_time) * bunker_cost_per_time_unit;
-                    auto movement_cost = 0;
-                    auto fixed_port_fee = n_h2.port->fixed_fee;
-                    auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
-                    auto revenue = 0;
+                        if(arrival_time >= data.num_times) {
+                            continue;
+                        }
+                    
+                        // The following works the same for:
+                        // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
+                        // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
+                        auto time_charter_cost = (final_time - departure_time) * vessel_class->time_charter_cost_per_time_unit;
+                        auto hotel_cost = (final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                        auto bunker_cost = (arrival_time - departure_time) * bunker_cost_per_time_unit;
+                        auto movement_cost = 0;
+                        auto fixed_port_fee = n_h2.port->fixed_fee;
+                        auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
+                        auto revenue = 0;
 
-                    auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
-
-                    create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                        auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
+                    
+                        create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                    }
                 }
             }
             
-            // For delivery nodes:
-            for(auto departure_time = delivery_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
-                auto falls_in_tw = false;
-                for(const auto& tw : p->closing_time_windows) {
-                    if(departure_time > tw.first && departure_time <= tw.second) {
-                        falls_in_tw = true;
-                        break;
+            if(created_de[p]) {
+                // For delivery nodes:
+                for(auto departure_time = delivery_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
+                    auto falls_in_tw = false;
+                    for(const auto& tw : p->closing_time_windows) {
+                        if(departure_time > tw.first && departure_time <= tw.second) {
+                            falls_in_tw = true;
+                            break;
+                        }
                     }
-                }
             
-                if(falls_in_tw) {
-                    continue;
-                }
-                
-                for(const auto& sc : vessel_class->bunker_cost_per_time_unit) {
-                    auto distance = data.distances.at(std::make_pair(p, n_h2.port));
-                    auto speed = sc.first;
-                    auto bunker_cost_per_time_unit = sc.second;
-                    auto arrival_time = departure_time + (int) ceil(distance / speed);
-                    auto final_time = data.num_times - 1;
-                    
-                    if(arrival_time >= data.num_times) {
+                    if(falls_in_tw) {
                         continue;
                     }
+                
+                    for(const auto& sc : vessel_class->bunker_cost_per_time_unit) {
+                        auto distance = data.distances.at(std::make_pair(p, n_h2.port));
+                        auto speed = sc.first;
+                        auto bunker_cost_per_time_unit = sc.second;
+                        auto arrival_time = departure_time + (int) ceil(distance / speed);
+                        auto final_time = data.num_times - 1;
                     
-                    // Thew following works the same for:
-                    // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
-                    // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
-                    auto time_charter_cost = (final_time - departure_time) * vessel_class->time_charter_cost_per_time_unit;
-                    auto hotel_cost = (final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-                    auto bunker_cost = (arrival_time - departure_time) * bunker_cost_per_time_unit;
-                    auto movement_cost = 0;
-                    auto fixed_port_fee = n_h2.port->fixed_fee;
-                    auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
-                    auto revenue = 0;
+                        if(arrival_time >= data.num_times) {
+                            continue;
+                        }
+                    
+                        // Thew following works the same for:
+                        // 1) When arrival_time == data.num_times - 1 => arrival at exact time => no waiting at hub
+                        // 2) When arrival_time < data.num_times - 1 => early arrival => waiting at the hub
+                        auto time_charter_cost = (final_time - departure_time) * vessel_class->time_charter_cost_per_time_unit;
+                        auto hotel_cost = (final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                        auto bunker_cost = (arrival_time - departure_time) * bunker_cost_per_time_unit;
+                        auto movement_cost = 0;
+                        auto fixed_port_fee = n_h2.port->fixed_fee;
+                        auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
+                        auto revenue = 0;
 
-                    auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
+                        auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
 
-                    create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                        create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost);
+                    }
                 }
             }
         }
@@ -248,10 +278,10 @@ namespace GraphGenerator {
                 }
             
                 for(auto pu : {PickupType::PICKUP, PickupType::DELIVERY}) {
-                    if(pu == PickupType::PICKUP && t < data.num_times - 1 - p->pickup_transit) {
+                    if(pu == PickupType::PICKUP && (!created_pu[p] || t < data.num_times - 1 - p->pickup_transit)) {
                         continue;
                     }
-                    if(pu == PickupType::DELIVERY && t > p->delivery_transit) {
+                    if(pu == PickupType::DELIVERY && (!created_de[p] || t > p->delivery_transit)) {
                         continue;
                     }
                 
@@ -289,50 +319,54 @@ namespace GraphGenerator {
                             if( (pu == PickupType::DELIVERY) ||
                                 (pu == PickupType::PICKUP && p->pickup_demand + q->pickup_demand <= vessel_class->capacity)) {
 
-                                auto final_time_pu = final_time(data, *q, arrival_time, PickupType::PICKUP);
+                                if(created_pu[q]) {
+                                    auto final_time_pu = final_time(data, *q, arrival_time, PickupType::PICKUP);
                         
-                                if( (final_time_pu <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
-                                    (final_time_pu >= data.num_times - 1 - q->pickup_transit)) {
+                                    if( (final_time_pu <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
+                                        (final_time_pu >= data.num_times - 1 - q->pickup_transit)) {
                             
-                                    auto time_charter_cost = (final_time_pu - t) * vessel_class->time_charter_cost_per_time_unit;
-                                    auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-                                    auto movement_cost = q->pickup_movement_cost;
-                                    auto revenue = q->pickup_revenue;
+                                        auto time_charter_cost = (final_time_pu - t) * vessel_class->time_charter_cost_per_time_unit;
+                                        auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                                        auto movement_cost = q->pickup_movement_cost;
+                                        auto revenue = q->pickup_revenue;
 
-                                    auto cost = time_charter_cost +
-                                                hotel_cost +
-                                                bunker_cost +
-                                                movement_cost +
-                                                fixed_port_fee +
-                                                variable_port_fee -
-                                                revenue;
+                                        auto cost = time_charter_cost +
+                                                    hotel_cost +
+                                                    bunker_cost +
+                                                    movement_cost +
+                                                    fixed_port_fee +
+                                                    variable_port_fee -
+                                                    revenue;
                             
-                                    create_edge(*p, pu, t, *q, PickupType::PICKUP, final_time_pu, g, cost);
+                                        create_edge(*p, pu, t, *q, PickupType::PICKUP, final_time_pu, g, cost);
+                                    }
                                 }
                             }
                         
                             if( (pu == PickupType::DELIVERY && p->delivery_demand + q->delivery_demand <= vessel_class->capacity) ||
                                 (pu == PickupType::PICKUP && p->pickup_demand + q->delivery_demand <= vessel_class->capacity)) {
 
-                                auto final_time_de = final_time(data, *q, arrival_time, PickupType::DELIVERY);
+                                if(created_de[q]) {
+                                    auto final_time_de = final_time(data, *q, arrival_time, PickupType::DELIVERY);
                         
-                                if( (final_time_de <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
-                                    (final_time_de <= q->delivery_transit)) {
+                                    if( (final_time_de <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
+                                        (final_time_de <= q->delivery_transit)) {
                             
-                                    auto time_charter_cost = (final_time_de - t) * vessel_class->time_charter_cost_per_time_unit;
-                                    auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-                                    auto movement_cost = q->delivery_movement_cost;
-                                    auto revenue = q->delivery_revenue;
+                                        auto time_charter_cost = (final_time_de - t) * vessel_class->time_charter_cost_per_time_unit;
+                                        auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                                        auto movement_cost = q->delivery_movement_cost;
+                                        auto revenue = q->delivery_revenue;
 
-                                    auto cost = time_charter_cost +
-                                                hotel_cost +
-                                                bunker_cost +
-                                                movement_cost +
-                                                fixed_port_fee +
-                                                variable_port_fee -
-                                                revenue;
+                                        auto cost = time_charter_cost +
+                                                    hotel_cost +
+                                                    bunker_cost +
+                                                    movement_cost +
+                                                    fixed_port_fee +
+                                                    variable_port_fee -
+                                                    revenue;
                                                     
-                                    create_edge(*p, pu, t, *q, PickupType::DELIVERY, final_time_de, g, cost);
+                                        create_edge(*p, pu, t, *q, PickupType::DELIVERY, final_time_de, g, cost);
+                                    }
                                 }
                             }
                         }
@@ -345,7 +379,7 @@ namespace GraphGenerator {
         for(auto vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
             auto n = *g->graph[*vp.first];
 
-            if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
+            if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY && created_pu[n.port] && created_de[n.port]) {
                 // 1) Create an arc from port delivery to port pickup
                 auto t = n.time_step;
                 auto arrival_time = n.time_step;
@@ -487,7 +521,7 @@ namespace GraphGenerator {
         }
     
         g->prepare_for_labelling();
-    
+
         return g;
     }
 
@@ -529,13 +563,13 @@ namespace GraphGenerator {
         std::tie(origin_found, origin_v) = g->get_vertex(origin_p, origin_pu, origin_type);
     
         if(!origin_found) {
-            throw std::runtime_error("Can't find the origin vertex: " + origin_p.name + " at time " + std::to_string(origin_type));
+            return;
         }
     
         std::tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_type);
     
         if(!destination_found) {
-            throw std::runtime_error("Can't find the destination vertex: " + destination_p.name + " at time " + std::to_string(destination_type));
+            return;
         }
     
         Edge e = add_edge(origin_v, destination_v, g->graph).first;
