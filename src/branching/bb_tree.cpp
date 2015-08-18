@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <utility>
 
@@ -153,28 +154,13 @@ void BBTree::explore_tree() {
             lb = current_node->sol_value;
         }
         
-        auto gap_node = ((ub - current_node->sol_value) / ub) * 100;
-        auto gap = ((ub - lb) / ub) * 100;
+        auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
+        auto gap = std::abs((ub - lb) / ub) * 100;
         
         print_row(*current_node, gap_node, gap);
     }
     
-    std::cout << std::endl << "*** SOLUTION ***" << std::endl;
-    if(node_bound_type == BoundType::FROM_LP) {
-        // UB was attained as LP solution
-        std::cout << "*** OBTAINED FROM LP ***" << std::endl;
-        for(const auto& cc : node_attaining_ub->base_columns) {
-            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
-            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
-        }
-    } else {
-        // UB was attained as MIP solution
-        std::cout << "*** OBTAINED FROM MIP ***" << std::endl;
-        for(const auto& cc : node_attaining_ub->mip_base_columns) {
-            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
-            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
-        }
-    }
+    print_summary();
 }
 
 // LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
@@ -203,6 +189,46 @@ void BBTree::print_row(const BBNode& current_node, double gap_node, double gap) 
     std::cout << std::setw(24) << std::setprecision(4) << current_node.max_time_spent_by_exact_solver << "  ";
     std::cout << std::setw(6) << current_node.depth << "  " << std::endl;
     defaultfloat(std::cout);
+}
+
+void BBTree::print_summary() const {
+    std::cout << std::endl << "*** SOLUTION ***" << std::endl;
+    std::cout << "Total cost: " << ub << std::endl;
+    
+    auto np = prob->data.num_ports - 1;
+    auto total_visited_ports = std::vector<int>(2 * np, 0);
+    
+    if(node_bound_type == BoundType::FROM_LP) {
+        // UB was attained as LP solution
+        std::cout << "*** OBTAINED FROM LP ***" << std::endl;
+        for(const auto& cc : node_attaining_ub->base_columns) {
+            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
+            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
+            
+            for(auto i = 0; i < np; ++i) {
+                total_visited_ports[i] += cc.first.port_coeff[i];
+                total_visited_ports[np + i] += cc.first.port_coeff[np + i];
+            }
+        }
+    } else {
+        // UB was attained as MIP solution
+        std::cout << "*** OBTAINED FROM MIP ***" << std::endl;
+        for(const auto& cc : node_attaining_ub->mip_base_columns) {
+            std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
+            cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
+            
+            for(auto i = 0; i < np; ++i) {
+                total_visited_ports[i] += cc.first.port_coeff[i];
+                total_visited_ports[np + i] += cc.first.port_coeff[np + i];
+            }
+        }
+    }
+    
+    std::cout << std::endl << "Total visited ports:\t";
+    for(auto i = 0u; i < total_visited_ports.size(); ++i) {
+        std::cout << total_visited_ports[i] << (i % 2 ? "\t" : " ");
+    }
+    std::cout << std::endl;
 }
 
 void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> current_node) {    

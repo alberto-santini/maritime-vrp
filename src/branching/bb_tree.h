@@ -38,6 +38,7 @@ private:
     void try_to_obtain_ub(std::shared_ptr<BBNode> current_node);
     void print_header() const;
     void print_row(const BBNode& current_node, double gap, double gap_node) const;
+    void print_summary() const;
 };
 
 #endif
