@@ -39,7 +39,7 @@ class VesselClass
     
     @speed_costs_dol_ti = Array.new(@speeds.size)
     @speeds.each_with_index do |speed, index|
-      @speed_costs_dol_ti[index] = @speed_costs_dol[index] * speed
+      @speed_costs_dol_ti[index] = @speed_costs_dol[index] / @options[:time_intervals_per_day]
     end
   end
   
