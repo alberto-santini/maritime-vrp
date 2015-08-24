@@ -91,6 +91,7 @@ void BBTree::explore_tree() {
         if(!current_node->is_feasible()) {
             // Prune by infeasibility
             std::cerr << "\t\tPruned by infeasibility (optimal LP solution contains dummy column)" << std::endl;
+            
             if(node_number == 1u) {
                 // Infeasible at root node!
                 std::cout << "Root node infeasible" << std::endl;
@@ -194,21 +195,13 @@ void BBTree::print_row(const BBNode& current_node, double gap_node, double gap) 
 void BBTree::print_summary() const {
     std::cout << std::endl << "*** SOLUTION ***" << std::endl;
     std::cout << "Total cost: " << ub << std::endl;
-    
-    auto np = prob->data.num_ports - 1;
-    auto total_visited_ports = std::vector<int>(2 * np, 0);
-    
+        
     if(node_bound_type == BoundType::FROM_LP) {
         // UB was attained as LP solution
         std::cout << "*** OBTAINED FROM LP ***" << std::endl;
         for(const auto& cc : node_attaining_ub->base_columns) {
             std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
             cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
-            
-            for(auto i = 0; i < np; ++i) {
-                total_visited_ports[i] += cc.first.port_coeff[i];
-                total_visited_ports[np + i] += cc.first.port_coeff[np + i];
-            }
         }
     } else {
         // UB was attained as MIP solution
@@ -216,19 +209,8 @@ void BBTree::print_summary() const {
         for(const auto& cc : node_attaining_ub->mip_base_columns) {
             std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
             cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
-            
-            for(auto i = 0; i < np; ++i) {
-                total_visited_ports[i] += cc.first.port_coeff[i];
-                total_visited_ports[np + i] += cc.first.port_coeff[np + i];
-            }
         }
     }
-    
-    std::cout << std::endl << "Total visited ports:\t";
-    for(auto i = 0u; i < total_visited_ports.size(); ++i) {
-        std::cout << total_visited_ports[i] << (i % 2 ? "\t" : " ");
-    }
-    std::cout << std::endl;
 }
 
 void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> current_node) {    
