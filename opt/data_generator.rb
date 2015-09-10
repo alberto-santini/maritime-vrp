@@ -108,7 +108,7 @@ class DataGenerator
         vessel_class = VesselClass.new(@options, *(line.split("\t")[0..8]))
     
         if @vessel_class_names_and_quantities.include? vessel_class.name
-          vessel_class.quantity = @vessel_class_names_and_quantities[vessel_class.name]
+          vessel_class.quantity = @vessel_class_names_and_quantities[vessel_class.name].to_i / @options[:weeks]
           if vessel_class.capacity > @max_capacity
             @max_capacity = vessel_class.capacity
           end
