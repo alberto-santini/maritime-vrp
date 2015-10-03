@@ -7,6 +7,8 @@
 #include <iterator>
 #include <limits>
 #include <utility>
+#include <chrono>
+#include <ctime>
 
 #include <branching/bb_tree.h>
 
@@ -27,6 +29,7 @@ BBTree::BBTree(const std::string& program_params_file_name, const std::string& d
     node_attaining_ub = root_node;
     node_bound_type = BoundType::FROM_LP;
     bb_nodes_generated = 1;
+    elapsed_time = 0;
 }
 
 void BBTree::print_header() const {
@@ -76,6 +79,7 @@ void BBTree::explore_tree() {
     print_header();
     
     auto node_number = 0u;
+    auto start_time = high_resolution_clock::now();
     
     while(!unexplored_nodes.empty()) {
         std::cerr << "Nodes in tree: " << unexplored_nodes.size() << std::endl;
@@ -159,7 +163,17 @@ void BBTree::explore_tree() {
         auto gap = std::abs((ub - lb) / ub) * 100;
         
         print_row(*current_node, gap_node, gap);
+        auto curr_time = high_resolution_clock::now();
+        auto el_time = duration_cast<duration<double>>(curr_time - start_time).count();
+        
+        if(el_time > prob->params.time_limit_in_s) {
+            std::cerr << std::endl << "Over time limit! " << el_time << std::endl;
+            break;
+        }
     }
+    
+    auto end_time = high_resolution_clock::now();
+    elapsed_time = duration_cast<duration<double>>(end_time - start_time).count();
     
     print_summary();
 }
