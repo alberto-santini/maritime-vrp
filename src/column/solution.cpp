@@ -55,3 +55,13 @@ bool Solution::operator==(const Solution& other) const {
     }
     return true;
 }
+
+double Solution::length() const {
+    auto l = 0.0;
+    
+    for(const auto& e : path) {
+        l += g->graph[e]->length;
+    }
+    
+    return l;
+}
