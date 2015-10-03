@@ -40,7 +40,7 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) const {
         
     auto cl_end = clock();
     auto time_s = (double(cl_end - cl_start) / CLOCKS_PER_SEC);
-    if(time_s - time_spent > std::numeric_limits<double>::epsilon()) {
+    if(time_s > time_spent) {
         time_spent = time_s;
     }
         

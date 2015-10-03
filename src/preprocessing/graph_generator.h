@@ -29,7 +29,7 @@ namespace GraphGenerator {
     
     void create_edge(const Port& origin_p, PickupType origin_pu, int origin_type,
                      const Port& destination_p, PickupType destination_pu, int destination_type,
-                     std::shared_ptr<Graph> g, double cost);
+                     std::shared_ptr<Graph> g, double cost, double length);
 }
 
 #endif

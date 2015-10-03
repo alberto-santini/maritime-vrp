@@ -9,7 +9,7 @@
 bool Label::operator==(const Label& other) const {
     return( q_pickupable == other.q_pickupable &&
             q_deliverable == other.q_deliverable &&
-            fabs(cost - other.cost) < std::numeric_limits<double>::epsilon());
+            fabs(cost - other.cost) < 0.00001);
 }
 
 bool Label::operator<(const Label& other) const {
@@ -17,7 +17,7 @@ bool Label::operator<(const Label& other) const {
         
     if( q_pickupable > other.q_pickupable ||
         q_deliverable > other.q_deliverable ||
-        cost < other.cost - std::numeric_limits<double>::epsilon()) {
+        cost < other.cost) {
             strict = true;
     }
     
@@ -39,7 +39,7 @@ bool ElementaryLabel::operator<(const ElementaryLabel& other) const {
         
     if( q_pickupable > other.q_pickupable ||
         q_deliverable > other.q_deliverable ||
-        cost < other.cost - std::numeric_limits<double>::epsilon()) {
+        cost < other.cost) {
             strict = true;
     }
     
@@ -67,7 +67,7 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     
     new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
-    
+        
     auto dual = label.g->dual_of(n_dest);
     auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
 
@@ -86,7 +86,7 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     
     new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
     new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
-    
+        
     auto dual = label.g->dual_of(n_dest);
     auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
 
