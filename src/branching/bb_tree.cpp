@@ -78,6 +78,22 @@ void BBTree::print_header() const {
 					"-------*" << std::endl;
 }
 
+void BBTree::update_lb(std::shared_ptr<BBNode> current_node, unsigned int node_number) {
+    // Root node. Global LB is node's LB.
+    if(node_number <= 1u) {
+        lb = current_node->sol_value;
+        return;
+    }
+    
+    // Ran out of nodes => Tree explored completely => Solution found! => LB = UB
+    if(unexplored_nodes.empty()) {
+        lb = ub;
+        return;
+    }
+    
+    lb = unexplored_nodes.top()->father_lb;
+}
+
 void BBTree::explore_tree() {
     using namespace std::chrono;
     
@@ -91,7 +107,6 @@ void BBTree::explore_tree() {
         
         auto current_node = unexplored_nodes.top();
         unexplored_nodes.pop();
-        lb = current_node->father_lb;
         
         // Solve the master problem to obtain a lower bound
         current_node->solve(node_number++);
@@ -110,12 +125,19 @@ void BBTree::explore_tree() {
                 std::cout << "Root node infeasible" << std::endl;
             }
             
+            update_lb(current_node, node_number);
+            gap = std::abs((ub - lb) / ub) * 100;
+            
             continue;
         }
         
         if(current_node->sol_value >= ub) {
             // Prune by sub-optimality
             std::cerr << "\t\tPruned by sub-optimality (UB = " << ub << ")" << std::endl;
+            
+            update_lb(current_node, node_number);
+            gap = std::abs((ub - lb) / ub) * 100;
+            
             continue;
         }
         
@@ -163,21 +185,20 @@ void BBTree::explore_tree() {
             }
         }
         
-        // Used in the first iteration when there is no father node
-        if(abs(lb - no_father_lb) < std::numeric_limits<double>::epsilon()) {
-            lb = current_node->sol_value;
+        update_lb(current_node, node_number);
+                
+        auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
+        gap = std::abs((ub - lb) / ub) * 100;
+                
         if(node_number == 1u) {
             gap_at_root = gap_node;
         }
         
-        auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
-        auto gap = std::abs((ub - lb) / ub) * 100;
         total_time_on_master += current_node->total_time_spent_on_mp;
         total_time_on_pricing += current_node->total_time_spent_on_sp;
         
         print_row(*current_node, gap_node);
         
-        print_row(*current_node, gap_node, gap);
         auto curr_time = high_resolution_clock::now();
         auto el_time = duration_cast<duration<double>>(curr_time - start_time).count();
         

@@ -47,6 +47,7 @@ private:
     void print_row(const BBNode& current_node, double gap_node) const;
     void print_summary() const;
     void print_results() const;
+    void update_lb(std::shared_ptr<BBNode> current_node, unsigned int node_number);
 };
 
 #endif
