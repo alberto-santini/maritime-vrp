@@ -43,8 +43,6 @@ public:
     /* Depth in the BB tree */
     int                         depth;
     
-    IsolateRule                 isolate_rule;
-    
     /*  Used to determine if a solution is integral, or with cost < 0 */
     static constexpr double     cplex_epsilon = 0.0000001;
     
@@ -68,7 +66,6 @@ public:
            const VisitRuleList& separate_rules,
            double father_lb,
            int depth = 0,
-           const IsolateRule& isolate_rule = IsolateRule(),
            bool try_elementary = true,
            double avg_time_spent_on_sp = 0,
            double total_time_spent_on_sp = 0,

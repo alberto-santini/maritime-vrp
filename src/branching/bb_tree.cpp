@@ -220,13 +220,14 @@ void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> curr
         });
 
     const auto g = shortest->second;    
-    VisitRuleList unite_rules, separate_rules;
 
     std::cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc " << g->vessel_class->name << ": ";
     Cycle::print_cycle(shortest->first, g, std::cerr);
 
     for(auto fix_forb = shortest->first.begin(); fix_forb != shortest->first.end(); ++fix_forb) {
         std::cerr << "\t\t\tCreating child node:" << std::endl;
+        
+        VisitRuleList unite_rules, separate_rules;
         
         for(auto fix_impo = shortest->first.begin(); fix_impo != fix_forb; ++fix_impo) {
             auto n_source_impo = g->graph[source(*fix_impo, g->graph)];
@@ -279,10 +280,9 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                     if(!n_inner_src->same_row_as(*n_src)) {
                         std::cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << std::endl;
                         
-                        VisitRuleList v_rules;
-                        IsolateRule i_rule;
-                        v_rules.push_back(make_pair(n_src, n));
-                        i_rule = make_pair(n_src, n);
+                        VisitRuleList unite_rules, separate_rules;
+                        unite_rules.push_back(make_pair(n_src, n));
+                        separate_rules.push_back(make_pair(n_src, n));
                         
                         std::cerr << "\t\t\tCreating child node 1:" << std::endl;
                         unexplored_nodes.push(
@@ -291,8 +291,8 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->local_graphs,
                                 current_node->pool,
                                 current_node->local_pool,
+                                unite_rules,
                                 VisitRuleList(),
-                                v_rules,
                                 current_node->sol_value,
                                 current_node->depth + 1
                             )
@@ -305,11 +305,10 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                                 current_node->local_graphs,
                                 current_node->pool,
                                 current_node->local_pool,
-                                v_rules,
                                 VisitRuleList(),
+                                separate_rules,
                                 current_node->sol_value,
-                                current_node->depth + 1,
-                                i_rule
+                                current_node->depth + 1
                             )
                         );
                                 

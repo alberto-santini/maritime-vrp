@@ -8,7 +8,7 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool& local_pool, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules, double father_lb, int depth, const IsolateRule& isolate_rule, bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp, double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), isolate_rule(isolate_rule), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
+BBNode::BBNode(const std::shared_ptr<const Problem> prob, const GraphMap& local_graphs, const std::shared_ptr<ColumnPool> pool, const ColumnPool& local_pool, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules, double father_lb, int depth, bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp, double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
     sol_value = std::numeric_limits<double>::max();
     mip_sol_value = std::numeric_limits<double>::max();
     all_times_spent_on_sp = std::vector<double>(0);
@@ -20,43 +20,26 @@ void BBNode::make_local_graphs() {
     GraphMap new_graphs;
     
     for(const auto& vg : local_graphs) {
-        auto g = std::make_shared<Graph>(vg.second->graph, vg.second->vessel_class, vg.second->name);
+        auto g = std::make_shared<Graph>(vg.second->graph, vg.first, vg.second->name);
         new_graphs.emplace(vg.first, g);
     }
     
     for(const auto& vr : unite_rules) {
         auto vc = vr.first->vessel_class;
-        auto g = new_graphs.at(vc);
-        g->unite_ports(vr);
+        
+        for(auto& vg : new_graphs) {
+            if(vg.first == vc) {
+                vg.second->unite_ports(vr);
+            } else {
+                vg.second->separate_ports(vr);
+            }
+        }
     }
+    
     for(const auto& vr : separate_rules) {
         auto vc = vr.first->vessel_class;
         auto g = new_graphs.at(vc);
         g->separate_ports(vr);
-    }
-    
-    if(isolate_rule.first != nullptr && isolate_rule.second != nullptr) {
-        for(const auto& vg : new_graphs) {
-            auto g = vg.second;
-            auto found_first = false;
-            auto found_second = false;
-        
-            for(auto vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
-                if(g->graph[*vp.first]->same_row_as(*isolate_rule.first) && !found_first) {
-                    found_first = true;
-                    g->isolate_port(*(g->graph[*vp.first]));
-                    continue;
-                }
-                if(g->graph[*vp.first]->same_row_as(*isolate_rule.second) && !found_second) {
-                    found_second = true;
-                    g->isolate_port(*(g->graph[*vp.first]));
-                    continue;
-                }
-                if(found_first && found_second) {
-                    break;
-                }
-            }
-        }
     }
     
     local_graphs = new_graphs;
@@ -116,7 +99,7 @@ void BBNode::check_for_duplicate_columns() {
             auto i_column_coeff = column_coefficients(*iit);
             
             if(std::equal(o_column_coeff.begin(), o_column_coeff.end(), i_column_coeff.begin())) {
-                if(fabs(o_column_cost - i_column_cost) < std::numeric_limits<double>::epsilon()) {
+                if(fabs(o_column_cost - i_column_cost) < 0.00001) {
                     std::cerr << ">>> Duplicate column - same cost!" << std::endl;
                 } else {
                     std::cerr << ">>> Duplicate column - different cost!" << std::endl;

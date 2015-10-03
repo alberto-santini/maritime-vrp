@@ -108,11 +108,8 @@ void Graph::unite_ports(const VisitRule& vr) {
     std::shared_ptr<Node> n1, n2;
     std::tie(n1, n2) = vr;
     
-    if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
-        throw std::runtime_error("Trying to unite ports of nodes not both in this graph");
-    }
-    
-    name = name + " uniting " + n1->port->name + " with " + n2->port->name;
+    name =  name + " uniting " + n1->port->name + "(" + (n1->pu_type == PickupType::PICKUP ? "pu" : "de") + ")" +
+            " with " + n2->port->name + "(" + (n2->pu_type == PickupType::PICKUP ? "pu" : "de") + ")";
     
     for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
         auto v1 = *vp.first;
@@ -147,11 +144,8 @@ void Graph::separate_ports(const VisitRule& vr) {
     std::shared_ptr<Node> n1, n2;
     std::tie(n1, n2) = vr;
     
-    if(n1->vessel_class != vessel_class || n2->vessel_class != vessel_class) {
-        throw std::runtime_error("Trying to separate ports of nodes not both in this graph");
-    }
-    
-    name = name + " separating " + n1->port->name + " with " + n2->port->name;
+    name =  name + " separating " + n1->port->name + "(" + (n1->pu_type == PickupType::PICKUP ? "pu" : "de") + ")" +
+            " and " + n2->port->name + "(" + (n2->pu_type == PickupType::PICKUP ? "pu" : "de") + ")";
 
     for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
         auto v1 = *vp.first;
@@ -172,18 +166,6 @@ void Graph::separate_ports(const VisitRule& vr) {
     prepare_for_labelling();
 }
 
-void Graph::isolate_port(const Node& n) {
-    name = name + " isolating " + n.port->name;
-    
-    for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        if(graph[*vp.first]->same_row_as(n)) {
-            clear_vertex(*vp.first, graph);
-        }
-    }
-    
-    prepare_for_labelling();
-}
-
 std::shared_ptr<Graph> Graph::reduce_graph(double percentage) const {
     if(ordered_arcs.size() != num_edges(graph)) {
         throw std::runtime_error("Trying to reduce a graph whose edges are not sorted");
@@ -198,7 +180,7 @@ std::shared_ptr<Graph> Graph::reduce_graph(double percentage) const {
     std::tie(ei, ei_end) = edges(dest->graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        if(dest->graph[*ei]->cost > cost_limit - std::numeric_limits<double>::epsilon()) {
+        if(dest->graph[*ei]->cost > cost_limit) {
             remove_edge(*ei, dest->graph);
         }
     }
