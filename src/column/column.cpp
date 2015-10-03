@@ -106,7 +106,7 @@ bool Column::is_compatible_with_separate_rule(const VisitRule& vr) const {
 
 bool Column::has_cycles() const {
     for(auto coeff : port_coeff) {
-        if(coeff > 1 + std::numeric_limits<double>::epsilon()) {
+        if(coeff > 1 + 0.000001) {
             return true;
         }
     }

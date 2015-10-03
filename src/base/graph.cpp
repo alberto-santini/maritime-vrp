@@ -48,7 +48,7 @@ void Graph::sort_arcs() {
     
         struct ArcComparer {
             bool operator()(std::shared_ptr<Arc> a1, std::shared_ptr<Arc> a2) {
-                return (a2->cost - a1->cost > std::numeric_limits<double>::epsilon());
+                return (a2->cost > a1->cost);
             }
         } arc_comparer;
     

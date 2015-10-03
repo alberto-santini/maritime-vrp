@@ -44,7 +44,7 @@ public:
     int                         depth;
     
     /*  Used to determine if a solution is integral, or with cost < 0 */
-    static constexpr double     cplex_epsilon = 0.0000001;
+    static constexpr double     cplex_epsilon = 0.000001;
     
     /* Should we still try to run the ESPPRC labelling at this node? */
     bool                        try_elementary;
