@@ -12,7 +12,7 @@
 
 #include <branching/bb_tree.h>
 
-BBTree::BBTree(const std::string& program_params_file_name, const std::string& data_file_name) {
+BBTree::BBTree(const std::string& program_params_file_name, const std::string& data_file_name) : instance_file_name{data_file_name} {
     prob = std::make_shared<Problem>(program_params_file_name, data_file_name);
     ub = std::numeric_limits<double>::max();
     lb = std::numeric_limits<double>::max();
@@ -30,6 +30,9 @@ BBTree::BBTree(const std::string& program_params_file_name, const std::string& d
     node_bound_type = BoundType::FROM_LP;
     bb_nodes_generated = 1;
     elapsed_time = 0;
+    max_depth = 0;
+    total_time_on_master = 0;
+    total_time_on_pricing = 0;
 }
 
 void BBTree::print_header() const {
@@ -76,6 +79,8 @@ void BBTree::print_header() const {
 }
 
 void BBTree::explore_tree() {
+    using namespace std::chrono;
+    
     print_header();
     
     auto node_number = 0u;
@@ -92,6 +97,10 @@ void BBTree::explore_tree() {
         current_node->solve(node_number++);
         std::cerr << "\tNode LB: " << current_node->sol_value << std::endl;
         
+        if(current_node->depth > max_depth) {
+            max_depth = current_node->depth;
+        }
+ 
         if(!current_node->is_feasible()) {
             // Prune by infeasibility
             std::cerr << "\t\tPruned by infeasibility (optimal LP solution contains dummy column)" << std::endl;
@@ -157,10 +166,16 @@ void BBTree::explore_tree() {
         // Used in the first iteration when there is no father node
         if(abs(lb - no_father_lb) < std::numeric_limits<double>::epsilon()) {
             lb = current_node->sol_value;
+        if(node_number == 1u) {
+            gap_at_root = gap_node;
         }
         
         auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
         auto gap = std::abs((ub - lb) / ub) * 100;
+        total_time_on_master += current_node->total_time_spent_on_mp;
+        total_time_on_pricing += current_node->total_time_spent_on_sp;
+        
+        print_row(*current_node, gap_node);
         
         print_row(*current_node, gap_node, gap);
         auto curr_time = high_resolution_clock::now();
@@ -176,12 +191,120 @@ void BBTree::explore_tree() {
     elapsed_time = duration_cast<duration<double>>(end_time - start_time).count();
     
     print_summary();
+    print_results();
 }
 
 // LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
 inline std::ostream& defaultfloat(std::ostream& os) { os.unsetf(std::ios_base::floatfield); return os; }
 
-void BBTree::print_row(const BBNode& current_node, double gap_node, double gap) const {
+void BBTree::print_results() const {
+    std::ofstream results_file;
+    results_file.open("results.txt", std::ios::out | std::ios::app);
+    
+    auto elements = std::vector<std::string>();
+    auto ss = std::stringstream(instance_file_name);
+    auto item = std::string();
+
+    while(std::getline(ss, item, '/')) {
+        elements.push_back(item);
+    }
+    
+    ss = std::stringstream(std::string(elements.back()));
+    elements = std::vector<std::string>();
+    item = std::string();
+        
+    while(std::getline(ss, item, '.')) {
+        elements.push_back(item);
+    }
+    
+    ss = std::stringstream(std::string(elements[0]));
+    elements = std::vector<std::string>();
+    item = std::string();
+    
+    while(std::getline(ss, item, '_')) {
+        elements.push_back(item);
+    }
+    
+    assert(elements.size() == 10u);
+    
+    // Scenario name
+    results_file << elements[0] << ",";
+    // Number of weeks
+    results_file << elements[1] << ",";
+    // Min handling
+    results_file << elements[2] << ",";
+    // Max handling
+    results_file << elements[3] << ",";
+    // Bunker price
+    results_file << elements[4] << ",";
+    // Penalty coefficient
+    results_file << elements[5] << ",";
+    // Min time window
+    results_file << elements[6] << ",";
+    // Max time window
+    results_file << elements[7] << ",";
+    // Min transit
+    results_file << elements[8] << ",";
+    // Max transit
+    results_file << elements[9] << ",";
+    
+    results_file << ",";
+    
+    results_file << elapsed_time << ",";
+    results_file << total_time_on_master << ",";
+    results_file << total_time_on_pricing << ",";
+    results_file << ub << ",";
+    results_file << lb << ",";
+    results_file << gap << ",";
+    results_file << gap_at_root << ",";
+    results_file << bb_nodes_generated << ",";
+    results_file << max_depth << ",";
+    results_file << pool->size() << ",";
+    
+    results_file << ",";
+    
+    // 1) Ships used
+    auto vc_used = std::unordered_map<std::shared_ptr<VesselClass>, unsigned int>();
+    auto actual_base = std::vector<Column>();
+    
+    for(const auto& vc : prob->data.vessel_classes) {
+        vc_used[vc] = 0u;
+    }
+    
+    if(node_bound_type == BoundType::FROM_LP) {
+        for(const auto& col : node_attaining_ub->base_columns) {
+            actual_base.push_back(col.first);
+            vc_used[col.first.sol.vessel_class]++;
+        }
+    } else {
+        for(const auto& col : node_attaining_ub->mip_base_columns) {
+            actual_base.push_back(col.first);
+            vc_used[col.first.sol.vessel_class]++;
+        }
+    }
+    
+    for(const auto& vc : prob->data.vessel_classes) {
+        results_file << vc->name << "=" << vc_used[vc] << "/" << vc->num_vessels << " ";
+    }
+    
+    results_file << ",";
+    
+    // 2) Average length of a rotation
+    auto rot_lengths = 0.0;
+    
+    for(const auto& col : actual_base) {
+        rot_lengths += col.sol.length();
+    }
+    
+    results_file << rot_lengths / actual_base.size() << ",";
+    
+    // 3) Average travel distance of cargo
+    
+    results_file << std::endl;
+    results_file.close();
+}
+
+void BBTree::print_row(const BBNode& current_node, double gap_node) const {
     auto print_ub = (ub < std::numeric_limits<double>::max() - 100);
     
     std::cout << std::fixed;
@@ -207,8 +330,13 @@ void BBTree::print_row(const BBNode& current_node, double gap_node, double gap) 
 }
 
 void BBTree::print_summary() const {
+    auto all_penalties = 0.0;
+    for(const auto& p : prob->data.ports) {
+        all_penalties += p->pickup_penalty + p->delivery_penalty;
+    }
+    
     std::cout << std::endl << "*** SOLUTION ***" << std::endl;
-    std::cout << "Total cost: " << ub << std::endl;
+    std::cout << "Total cost: " << ub << " (all penalties: " << all_penalties << ")" << std::endl;
         
     if(node_bound_type == BoundType::FROM_LP) {
         // UB was attained as LP solution

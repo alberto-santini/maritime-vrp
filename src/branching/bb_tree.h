@@ -28,6 +28,13 @@ public:
     int                             bb_nodes_generated;
     std::shared_ptr<BBNode>         node_attaining_ub;
     BoundType                       node_bound_type;
+    std::string                     instance_file_name;
+    double                          gap_at_root;
+    double                          gap;
+    double                          elapsed_time;
+    int                             max_depth;
+    double                          total_time_on_master;
+    double                          total_time_on_pricing;
     
     BBTree(const std::string& program_params_file_name, const std::string& data_file_name);
     void explore_tree();
@@ -37,8 +44,9 @@ private:
     void branch_on_fractional(std::shared_ptr<BBNode> current_node);
     void try_to_obtain_ub(std::shared_ptr<BBNode> current_node);
     void print_header() const;
-    void print_row(const BBNode& current_node, double gap, double gap_node) const;
+    void print_row(const BBNode& current_node, double gap_node) const;
     void print_summary() const;
+    void print_results() const;
 };
 
 #endif
