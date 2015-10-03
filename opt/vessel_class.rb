@@ -51,12 +51,12 @@ class VesselClass
     "{
       \"vessel_class_name\": \"#{@name}\",
       \"capacity_in_ffe\": #{@capacity.to_i},
-      \"time_charter_cost_per_time_interval\": #{@cost_tc_ti.round(4)},
+      \"time_charter_cost_per_time_interval\": #{(@cost_tc_ti / 1000).round(4)},
       \"draught\": #{@draught.round(4)},
-      \"cost_when_idle_in_dollars_per_time_interval\": #{(@cost_idle_ti * @options[:bunker_cost_per_ton]).round(4)},
+      \"cost_when_idle_in_dollars_per_time_interval\": #{(@cost_idle_ti * @options[:bunker_cost_per_ton] / 1000).round(4)},
       \"number_of_available_vessels\": #{@quantity.to_i},
       \"speeds_in_miles_per_time_interval\": #{@speeds_ti.map{|s|s.round(4)}.to_json},
-      \"speed_costs_in_dollars_per_time_interval\": #{@speed_costs_dol_ti.map{|s|s.round(4)}.to_json}
+      \"speed_costs_in_dollars_per_time_interval\": #{@speed_costs_dol_ti.map{|s|(s / 1000).round(4)}.to_json}
     }"
   end
 end
