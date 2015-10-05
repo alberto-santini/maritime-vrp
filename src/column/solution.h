@@ -28,6 +28,7 @@ public:
     bool satisfies_capacity_constraints() const;
     bool operator==(const Solution& other) const;
     double length() const;
+    std::vector<double> cargo_travel_distances() const;
 };
 
 #endif

@@ -321,6 +321,17 @@ void BBTree::print_results() const {
     
     // 3) Average travel distance of cargo
     
+    auto distance_sum = 0.0;
+    auto distance_n = 0u;
+    
+    for(const auto& col : actual_base) {
+        auto d = col.sol.cargo_travel_distances();
+        distance_sum += std::accumulate(d.begin(), d.end(), 0.0);
+        distance_n += d.size();
+    }
+    
+    results_file << (distance_sum / distance_n);
+    
     results_file << std::endl;
     results_file.close();
 }

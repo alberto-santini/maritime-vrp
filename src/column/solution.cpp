@@ -65,3 +65,27 @@ double Solution::length() const {
     
     return l;
 }
+
+std::vector<double> Solution::cargo_travel_distances() const {
+    auto l = length();
+    auto current_distance = 0.0;
+    auto distances = std::vector<double>();
+    
+    for(const auto & e : path) {
+        current_distance += g->graph[e]->length;
+        
+        auto dest = g->graph[target(e, g->graph)];
+        
+        if(dest->n_type == NodeType::REGULAR_PORT) {
+            if(dest->pu_type == PickupType::PICKUP) {
+                distances.push_back(l - current_distance);
+            } else {
+                distances.push_back(current_distance);
+            }
+        }
+    }
+    
+    assert(std::abs(current_distance - l) < 0.00001);
+    
+    return distances;
+}
