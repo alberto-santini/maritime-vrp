@@ -5,9 +5,53 @@
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
+#include <fstream>
 
 #include <base/graph.h>
 #include <util/knapsack.h>
+
+void Graph::dump_graph() const {
+    std::ofstream gfile;
+    gfile.open("graph.txt", std::ios::out);
+    
+    gfile << num_vertices(graph) << " #" << vessel_class->name << std::endl;
+    
+    for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+        auto node = graph[*vp.first];
+        
+        auto desc = "reg";
+        if(node->n_type == NodeType::H1) { desc = "src"; }
+        if(node->n_type == NodeType::H2) { desc = "snk"; }
+        
+        auto pickup = 0u;
+        if(node->pu_type == PickupType::PICKUP) { pickup = node->port->pickup_demand; }
+        
+        auto delivery = 0u;
+        if(node->pu_type == PickupType::DELIVERY) { delivery = node->port->delivery_demand; }
+        
+        gfile <<
+            node->boost_vertex_id << "\t" <<
+            desc << "\t" <<
+            pickup << "\t" <<
+            delivery << "\t" <<
+            dual_of(*node) << "\t" <<
+            node->pu_penalty() + node->de_penalty() << std::endl;
+    }
+    
+    for(auto ep = edges(graph); ep.first != ep.second; ++ep.first) {
+        auto arc = graph[*ep.first];
+        auto src_n = graph[source(*ep.first, graph)];
+        auto dst_n = graph[target(*ep.first, graph)];
+        
+        gfile <<
+            arc->boost_edge_id << "\t" <<
+            src_n->boost_vertex_id << "\t" <<
+            dst_n->boost_vertex_id << "\t" <<
+            arc->cost << std::endl;
+    }
+    
+    gfile.close();
+}
 
 void Graph::print(bool detailed) const {
     std::cout << "Graph: " << name << std::endl;

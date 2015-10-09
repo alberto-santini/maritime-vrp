@@ -88,6 +88,9 @@ public:
         is the reduced graph of the current graph. */
     Path transfer_path(const Path& path, const Graph& subgraph) const;
     
+    /* Produces a text dump of the graph */
+    void dump_graph() const;
+    
 private:
     std::pair<bool, Vertex> get_vertex_by_node_type(NodeType n_type) const;
 };
