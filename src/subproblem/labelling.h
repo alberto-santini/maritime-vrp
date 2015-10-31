@@ -15,35 +15,32 @@
 #include <base/vessel_class.h>
 #include <subproblem/id_maps.h>
 
+using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>;
+
 class Label {
 public:
     const std::shared_ptr<const Graph>& g;
-    int             q_pickupable;
-    int             q_deliverable;
-    double          cost;
+    int pic;
+    int del;
+    double cost;
     
-    Label(const std::shared_ptr<const Graph>& g,
-          int qp,
-          int qd,
-          double c = 0) : g(g), q_pickupable(qp), q_deliverable(qd), cost(c) {}
-          
-    bool operator==(const Label& other) const;
-    bool operator<(const Label& other) const;
+    static constexpr double EPS = 0.00001;
+    
+    Label(const std::shared_ptr<const Graph>& g, int p, int d, double c = 0) : g(g), pic(p), del(d), cost(c) {}
 };
 
-typedef std::unordered_map<
-    std::pair<std::shared_ptr<Port>, PickupType>, bool,
-    boost::hash<std::pair<std::shared_ptr<Port>,PickupType>>> VisitedPortsFlags;
+bool operator==(const Label& lhs, const Label& rhs);
+bool operator<(const Label& lhs, const Label& rhs);
 
 class ElementaryLabel : public Label {
 public:
-    VisitedPortsFlags visited_ports;
+    VisitablePorts por;
     
-    ElementaryLabel(const std::shared_ptr<const Graph>& g, int qp, int qd, double c, const VisitedPortsFlags& vp) : Label(g, qp, qd, c), visited_ports(vp) {}
-    
-    bool operator==(const ElementaryLabel& other) const;
-    bool operator<(const ElementaryLabel& other) const;
+    ElementaryLabel(const std::shared_ptr<const Graph>& g, int p, int d, double c, const VisitablePorts& v) : Label(g, p, d, c), por(v) {}
 };
+
+bool operator==(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
+bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 
 class LabelExtender {
 public:
@@ -53,8 +50,8 @@ public:
 
 class Dominance {
 public:
-    bool operator()(const Label& l1, const Label& l2) const { return (l1 == l2 || l1 < l2); }
-    bool operator()(const ElementaryLabel& l1, const ElementaryLabel& l2) const { return (l1 == l2 || l1 < l2); }
+    bool operator()(const Label& l1, const Label& l2) const { return l1 < l2 || l1 == l2; }
+    bool operator()(const ElementaryLabel& l1, const ElementaryLabel& l2) const { return l1 < l2 || l1 == l2; }
 };
 
 #endif

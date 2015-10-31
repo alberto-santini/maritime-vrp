@@ -156,3 +156,14 @@ ProblemData::ProblemData(const std::string& data_file_name) {
         }
     }
 }
+
+std::vector<std::pair<std::shared_ptr<Port>, PickupType>> ProblemData::get_ports_list() const {
+  auto list = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>();
+  
+  for(auto p : ports) {
+    list.push_back(std::make_pair(p, PickupType::PICKUP));
+    list.push_back(std::make_pair(p, PickupType::DELIVERY));
+  }
+  
+  return list;
+}

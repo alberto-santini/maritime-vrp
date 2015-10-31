@@ -12,6 +12,7 @@
 
 #include <boost/functional/hash.hpp>
 
+#include <base/node.h>
 #include <base/port.h>
 #include <base/vessel_class.h>
 
@@ -32,6 +33,8 @@ public:
     DistMap                                     distances;
     
     ProblemData(const std::string& data_file_name);
+    
+    std::vector<std::pair<std::shared_ptr<Port>, PickupType>> get_ports_list() const;
 };
 
 #endif

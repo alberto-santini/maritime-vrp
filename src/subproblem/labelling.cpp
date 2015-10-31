@@ -6,100 +6,56 @@
 
 #include <subproblem/labelling.h>
 
-bool Label::operator==(const Label& other) const {
-    return( q_pickupable == other.q_pickupable &&
-            q_deliverable == other.q_deliverable &&
-            fabs(cost - other.cost) < 0.00001);
+bool operator==(const ElementaryLabel& lhs, const ElementaryLabel& rhs) {
+    return( lhs.del == rhs.del &&
+            lhs.por == rhs.por &&
+            std::abs(lhs.cost - rhs.cost) < Label::EPS);
 }
 
-bool Label::operator<(const Label& other) const {
-    bool strict = false;
-        
-    if( q_pickupable > other.q_pickupable ||
-        q_deliverable > other.q_deliverable ||
-        cost < other.cost) {
-            strict = true;
-    }
-    
-    bool dom = ( q_pickupable >= other.q_pickupable &&
-                 q_deliverable >= other.q_deliverable &&
-                 cost <= other.cost &&
-                 strict);
-    
-    return dom;
+bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs) {
+    if(rhs.cost < lhs.cost - Label::EPS) { return false; }
+    if(rhs.del > lhs.del) { return false; }
+    for(const auto& vp : rhs.por) { if(std::find(lhs.por.begin(), lhs.por.end(), vp) == lhs.por.end()) { return false; } }
+    return true;
 }
 
-bool ElementaryLabel::operator==(const ElementaryLabel& other) const {
-    return (Label::operator==(other) && visited_ports == other.visited_ports);
+bool operator==(const Label& lhs, const Label& rhs) {
+    return( lhs.del == rhs.del &&
+            lhs.pic == rhs.pic &&
+            std::abs(lhs.cost - rhs.cost) < Label::EPS);
 }
 
-bool ElementaryLabel::operator<(const ElementaryLabel& other) const {
-    auto strict = false;
-    auto visited_d = true;
-        
-    if( q_pickupable > other.q_pickupable ||
-        q_deliverable > other.q_deliverable ||
-        cost < other.cost) {
-            strict = true;
-    }
-    
-    for(const auto& pp : visited_ports) {
-        if((pp.second != other.visited_ports.at(pp.first)) && pp.second) {
-            visited_d = false;
-        }
-    }
-    
-    strict = strict || (visited_d && (visited_ports != other.visited_ports));
-    
-    auto dom = ( q_pickupable >= other.q_pickupable &&
-                 q_deliverable >= other.q_deliverable &&
-                 cost <= other.cost &&
-                 visited_d &&
-                 strict);
-    
-    return dom;
-}
-
-bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const {
-    auto n_dest = *graph[target(e, graph)];
-    
-    assert(!n_dest.same_row_as(*graph[source(e, graph)]));
-    
-    new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
-    new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
-        
-    auto dual = label.g->dual_of(n_dest);
-    auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
-
-    new_label.cost = label.cost + graph[e]->cost - avoided_penalty - dual;
-    
-    auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
-                 label.q_deliverable >= n_dest.de_demand());
-
-    return ext;
+bool operator<(const Label& lhs, const Label& rhs) {
+    if(rhs.cost < lhs.cost - Label::EPS) { return false; }
+    if(rhs.del > lhs.del) { return false; }
+    if(rhs.pic > lhs.pic) { return false; }
+    return true;
 }
 
 bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const {
-    auto n_dest = *graph[target(e, graph)];
+    auto arc = *graph[e];
+    auto dest_node = *graph[target(e, graph)];
+    auto dest_port = std::make_pair(dest_node.port, dest_node.pu_type);
     
-    assert(!n_dest.same_row_as(*graph[source(e, graph)]));
+    new_label.por = label.por;
+    new_label.por.erase(std::remove(new_label.por.begin(), new_label.por.end(), dest_port), new_label.por.end());
     
-    new_label.q_pickupable = label.q_pickupable - n_dest.pu_demand();
-    new_label.q_deliverable = std::min(label.q_deliverable - n_dest.de_demand(), label.q_pickupable - n_dest.pu_demand());
-        
-    auto dual = label.g->dual_of(n_dest);
-    auto avoided_penalty = n_dest.pu_penalty() + n_dest.de_penalty(); // At most 1 of these is non-zero
-
-    new_label.cost = label.cost + graph[e]->cost - avoided_penalty - dual;
-    new_label.visited_ports = label.visited_ports;
-
-    auto dest_pp = std::make_pair(n_dest.port, n_dest.pu_type);
-    new_label.visited_ports[dest_pp] = true;
+    new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+    new_label.pic = label.pic - dest_node.pu_demand();
+    new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
     
-    auto ext = ( label.q_pickupable >= n_dest.pu_demand() &&
-                 label.q_deliverable >= n_dest.de_demand() &&
-                 !label.visited_ports.at(dest_pp));
+    return( std::find(label.por.begin(), label.por.end(), dest_port) != label.por.end() &&
+            label.pic >= dest_node.pu_demand() &&
+            label.del >= dest_node.de_demand());
+}
 
-    return ext;
-
+bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const {
+    auto arc = *graph[e];
+    auto dest_node = *graph[target(e, graph)];
+    
+    new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+    new_label.pic = label.pic - dest_node.pu_demand();
+    new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
+    
+    return (label.pic >= dest_node.pu_demand() && label.del >= dest_node.de_demand());
 }

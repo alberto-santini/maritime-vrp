@@ -20,6 +20,10 @@ double Node::de_penalty() const {
     return (pu_type == PickupType::DELIVERY ? port->delivery_penalty : 0);
 }
 
+double Node::penalty() const {
+  return (pu_type == PickupType::PICKUP ? port->pickup_penalty : port->delivery_penalty);
+}
+
 bool Node::same_row_as(const Node& other) const {
     return (other.port == port && other.pu_type == pu_type);
 }

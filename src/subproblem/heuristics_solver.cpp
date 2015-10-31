@@ -168,13 +168,8 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
     ArcIdFunctor af(red);
     
     auto vc = red->vessel_class;
-    VisitedPortsFlags pf;
+    VisitablePorts pf = prob->data.get_ports_list();
     
-    for(auto p : prob->data.ports) {
-        pf.emplace(make_pair(p, PickupType::PICKUP), false);
-        pf.emplace(make_pair(p, PickupType::DELIVERY), false);
-    }
-
     r_c_shortest_paths(
         red->graph,
         make_property_map<Vertex>(nf),

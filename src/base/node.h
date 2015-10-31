@@ -42,6 +42,7 @@ public:
     double de_demand() const;
     double pu_penalty() const;
     double de_penalty() const;
+    double penalty() const;
     bool same_row_as(const Node& other) const;
     bool operator==(const Node& other) const;
     bool operator!=(const Node& other) const { return !(*this == other); }
