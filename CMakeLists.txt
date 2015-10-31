@@ -11,7 +11,7 @@ endif()
 
 # BOOST ROOT DIR HINT (Linux only)
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(BOOST_ROOT "~/boost-trunk/boost")
+    set(BOOST_ROOT "~/boost")
 endif()
 # if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 #     set(Boost_NO_SYSTEM_PATHS TRUE)
