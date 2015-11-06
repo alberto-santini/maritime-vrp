@@ -60,7 +60,15 @@ IloData MPSolver::solve(const ColumnPool& pool, bool linear) const {
     cplex.setParam(IloCplex::Threads, prob->params.cplex_cores);
     cplex.setOut(env.getNullStream());
     
-    if(!cplex.solve()) {
+    auto solved = false;
+    
+    try {
+      solved = cplex.solve();
+    } catch(IloException& e) {
+      std::cerr << "IloException: " << e << std::endl;
+    }
+    
+    if(!solved) {
         throw std::runtime_error("Infeasible problem!");
     }
     
