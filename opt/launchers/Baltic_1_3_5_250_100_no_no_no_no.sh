@@ -4,4 +4,4 @@
 #PBS -l vmem=32G
 #PBS -N Baltic_1_3_5_250_100_no_no_no_no
 cd /zhome/fc/e/102910/maritime-vrp/build
-./maritime_vrp ../data/old_thesis_data/program_params.json ../data/new/Baltic_1_3_5_250_100_no_no_no_no.json
+LD_LIBRARY_PATH=/zhome/fc/e/102910/gcc/lib64 ./maritime_vrp ../data/old_thesis_data/program_params.json ../data/new/Baltic_1_3_5_250_100_no_no_no_no.json
