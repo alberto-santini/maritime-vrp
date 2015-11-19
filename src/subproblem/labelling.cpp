@@ -45,8 +45,8 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
     
     return( std::find(label.por.begin(), label.por.end(), dest_port) != label.por.end() &&
-            label.pic >= dest_node.pu_demand() &&
-            label.del >= dest_node.de_demand());
+            label.pic >= 0 &&
+            label.del >= 0);
 }
 
 bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const {
@@ -57,5 +57,5 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     new_label.pic = label.pic - dest_node.pu_demand();
     new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
     
-    return (label.pic >= dest_node.pu_demand() && label.del >= dest_node.de_demand());
+    return (label.pic >= 0 && label.del >= 0);
 }
