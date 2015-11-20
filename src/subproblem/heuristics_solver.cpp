@@ -170,7 +170,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
         red->h2().second,
         optimal_paths,
         optimal_labels,
-        ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
+        ElementaryLabel(red, vc->capacity, vc->capacity, 0, pf),
         LabelExtender(),
         Dominance(),
         std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
@@ -179,7 +179,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
             
     for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
-        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
+        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, g));
     }
         
     return sols;
@@ -205,7 +205,7 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage
         red->h2().second,
         optimal_paths,
         optimal_labels,
-        Label(g, vc->capacity, vc->capacity, 0),
+        Label(red, vc->capacity, vc->capacity, 0),
         LabelExtender(),
         Dominance(),
         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
@@ -214,7 +214,7 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage
     
     for(auto i = 0u; i < optimal_paths.size(); i++) {
         auto og_path = g->transfer_path(optimal_paths[i], *red);
-        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, red));
+        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, g));
     }
         
     return sols;
