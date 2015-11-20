@@ -8,7 +8,6 @@
 #include <fstream>
 
 #include <base/graph.h>
-#include <util/knapsack.h>
 
 void Graph::dump_graph() const {
     std::ofstream gfile;
@@ -119,28 +118,10 @@ std::pair<bool, Vertex> Graph::get_vertex_by_node_type(NodeType n_type) const {
 
 void Graph::prepare_for_labelling() {
     auto i = 0;
-    std::vector<std::pair<std::shared_ptr<Port>, PickupType>> checked_ports;
-    std::vector<int> pickup_demands;
-    std::vector<int> delivery_demands;
     
     for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        auto v = *vp.first;
-        graph[v]->boost_vertex_id = i++;
-        if(graph[v]->n_type == NodeType::REGULAR_PORT) {
-            auto pp = std::make_pair(graph[v]->port, graph[v]->pu_type);
-            if(find(checked_ports.begin(), checked_ports.end(), pp) == checked_ports.end()) {
-                checked_ports.push_back(pp);
-                if(graph[v]->pu_type == PickupType::PICKUP) {
-                    pickup_demands.push_back(graph[v]->pu_demand());
-                } else {
-                    delivery_demands.push_back(graph[v]->de_demand());
-                }
-            }
-        }
+        graph[*vp.first]->boost_vertex_id = i++;
     }
-    
-    graph[graph_bundle].pu_upper_bound = Knapsack::solve(pickup_demands, vessel_class->capacity);
-    graph[graph_bundle].de_upper_bound = Knapsack::solve(delivery_demands, vessel_class->capacity);
     
     i = 0;
     for(auto ep = edges(graph); ep.first != ep.second; ++ep.first) {

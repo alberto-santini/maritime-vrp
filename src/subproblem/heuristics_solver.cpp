@@ -60,10 +60,6 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
             tot_c += chosen.c;
             tot_rc += chosen.rc;
             
-            if(path.size() > (unsigned int) (g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1)) {
-                break;
-            }
-            
             current = target(chosen.e, g->graph);
             
             if(current == h2) {
@@ -127,10 +123,6 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
             path.push_back(chosen.e);
             tot_c += chosen.c;
             tot_rc += chosen.rc;
-            
-            if(path.size() > (unsigned int)(g->graph[graph_bundle].pu_upper_bound + g->graph[graph_bundle].de_upper_bound + 1)) {
-                break;
-            }
             
             current = source(chosen.e, g->graph);
             

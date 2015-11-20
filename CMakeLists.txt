@@ -69,7 +69,6 @@ set(SOURCE_FILES
   src/subproblem/id_maps.h
   src/subproblem/labelling.h
   src/subproblem/sp_solver.h
-  src/util/knapsack.h
   src/base/graph.cpp
   src/base/node.cpp
   src/base/problem.cpp
@@ -88,8 +87,7 @@ set(SOURCE_FILES
   src/subproblem/heuristics_solver.cpp
   src/subproblem/labelling.cpp
   src/subproblem/sp_solver.cpp
-  src/util/knapsack.cpp
-  )
+)
 
 add_executable(maritime_vrp ${SOURCE_FILES})
 target_link_libraries(maritime_vrp ${CPLEX_LIBRARIES})

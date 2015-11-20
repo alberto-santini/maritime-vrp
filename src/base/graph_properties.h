@@ -16,16 +16,12 @@ public:
     PortDuals                       port_duals;
     PortDuals                       old_port_duals;
     double                          vc_dual;
-    int                             pu_upper_bound;
-    int                             de_upper_bound;
     
     GraphProperties() {}
     
     GraphProperties(PortDuals port_duals,
                     PortDuals old_port_duals,
-                    double vc_dual,
-                    int pu_upper_bound,
-                    int de_upper_bound) : port_duals(port_duals), old_port_duals(old_port_duals), vc_dual(vc_dual), pu_upper_bound(pu_upper_bound), de_upper_bound(de_upper_bound) {}
+                    double vc_dual) : port_duals(port_duals), old_port_duals(old_port_duals), vc_dual(vc_dual) {}
 };
 
 #endif
