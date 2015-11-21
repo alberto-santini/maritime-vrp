@@ -459,6 +459,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                         separate_rules.push_back(make_pair(n_src, n));
                         
                         std::cerr << "\t\t\tCreating child node 1:" << std::endl;
+                        std::cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << std::endl;
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,
@@ -473,6 +474,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
                         );  
                         
                         std::cerr << "\t\t\tCreating child node 2:" << std::endl;
+                        std::cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << std::endl;
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,
