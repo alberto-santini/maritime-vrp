@@ -20,7 +20,7 @@ typedef std::tuple<IloEnv, IloNumVarArray, IloRangeArray, IloRangeArray, IloCple
 
 class MPSolver {
 public:
-    const std::shared_ptr<const Problem> prob;
+    std::shared_ptr<const Problem> prob;
 
     MPSolver(std::shared_ptr<const Problem> prob) : prob(prob) {}
     

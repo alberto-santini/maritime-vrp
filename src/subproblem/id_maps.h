@@ -12,7 +12,7 @@
 #include <base/graph.h>
 
 class NodeIdFunctor {
-    const std::shared_ptr<const Graph> g;
+    std::shared_ptr<const Graph> g;
     
 public:
     typedef int result_type;
@@ -25,7 +25,7 @@ public:
 };
 
 class ArcIdFunctor {
-    const std::shared_ptr<const Graph> g;
+    std::shared_ptr<const Graph> g;
 
 public:
     typedef int result_type;

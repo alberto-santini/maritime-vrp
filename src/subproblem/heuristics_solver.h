@@ -15,10 +15,10 @@
 
 class HeuristicsSolver {
 public:
-    const std::shared_ptr<const Problem> prob;
-    const std::shared_ptr<const Graph>  g;
+    std::shared_ptr<const Problem> prob;
+    std::shared_ptr<const Graph>  g;
     
-    HeuristicsSolver(const std::shared_ptr<const Problem> prob, const std::shared_ptr<const Graph> g) : prob(prob), g(g) {}
+    HeuristicsSolver(std::shared_ptr<const Problem> prob, std::shared_ptr<const Graph> g) : prob(prob), g(g) {}
     
     std::vector<Solution> solve_fast() const;
     std::vector<Solution> solve_elem_on_reduced_graph(double percentage) const;

@@ -431,7 +431,7 @@ void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> curr
     }
 }
 
-void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
+void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
     // Detect the most fractional column
     auto cc_it = std::max_element(current_node->base_columns.begin(), current_node->base_columns.end(),
         [] (const auto& cc1, const auto& cc2) {
@@ -501,7 +501,7 @@ void BBTree::branch_on_fractional(const std::shared_ptr<BBNode> current_node) {
     {}
 }
 
-void BBTree::try_to_obtain_ub(const std::shared_ptr<BBNode> current_node) {
+void BBTree::try_to_obtain_ub(std::shared_ptr<BBNode> current_node) {
     ColumnPool feasible_columns;
     
     for(const auto& c : current_node->local_pool) {

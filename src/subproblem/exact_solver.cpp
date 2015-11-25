@@ -10,7 +10,7 @@
 #include <subproblem/exact_solver.h>
 #include <subproblem/labelling.h>
 
-std::vector<Solution> ExactSolver::solve(double& time_spent) const {
+std::vector<Solution> ExactSolver::solve(double& time_spent) {
     std::vector<Solution> sols;
     
     std::vector<Path> optimal_paths;
@@ -22,6 +22,8 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) const {
     auto vc = g->vessel_class;
     
     auto cl_start = clock();
+    
+    g->prepare_for_labelling();
     
     r_c_shortest_paths(
         g->graph,

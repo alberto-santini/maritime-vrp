@@ -12,7 +12,7 @@
 
 #include <base/graph.h>
 
-typedef std::vector<std::pair<Path, const std::shared_ptr<const Graph>>> Cycles;
+typedef std::vector<std::pair<Path, std::shared_ptr<const Graph>>> Cycles;
 
 namespace Cycle {
     Path shortest_cycle(const Path& route, std::shared_ptr<const Graph> g);

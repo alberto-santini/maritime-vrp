@@ -162,6 +162,8 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
     auto vc = red->vessel_class;
     VisitablePorts pf = prob->data.get_ports_list();
     
+    red->prepare_for_labelling();
+    
     r_c_shortest_paths(
         red->graph,
         make_property_map<Vertex>(nf),
@@ -196,6 +198,8 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage
     ArcIdFunctor af(red);
     
     auto vc = red->vessel_class;
+    
+    red->prepare_for_labelling();
 
     r_c_shortest_paths(
         red->graph,

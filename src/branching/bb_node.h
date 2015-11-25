@@ -19,10 +19,10 @@ static constexpr int no_father_lb = -999;
 
 class BBNode {
 public:
-    const std::shared_ptr<const Problem> prob;
+    std::shared_ptr<const Problem> prob;
     GraphMap                    local_graphs;
     
-    const std::shared_ptr<ColumnPool> pool;
+    std::shared_ptr<ColumnPool> pool;
     ColumnPool                  local_pool;
     
     VisitRuleList               unite_rules;
@@ -58,9 +58,9 @@ public:
     double                      max_time_spent_by_exact_solver;
     
     BBNode() {}
-    BBNode(const std::shared_ptr<const Problem> prob,
+    BBNode(std::shared_ptr<const Problem> prob,
            const GraphMap& local_graphs,
-           const std::shared_ptr<ColumnPool> pool,
+           std::shared_ptr<ColumnPool> pool,
            const ColumnPool& local_pool,
            const VisitRuleList& unite_rules,
            const VisitRuleList& separate_rules,

@@ -19,14 +19,14 @@ using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>
 
 class Label {
 public:
-    const std::shared_ptr<const Graph>& g;
+    std::shared_ptr<const Graph> g;
     int pic;
     int del;
     double cost;
     
     static constexpr double EPS = 0.00001;
     
-    Label(const std::shared_ptr<const Graph>& g, int p, int d, double c = 0) : g(g), pic(p), del(d), cost(c) {}
+    Label(std::shared_ptr<const Graph> g, int p, int d, double c = 0) : g(g), pic(p), del(d), cost(c) {}
 };
 
 bool operator==(const Label& lhs, const Label& rhs);
@@ -36,7 +36,7 @@ class ElementaryLabel : public Label {
 public:
     VisitablePorts por;
     
-    ElementaryLabel(const std::shared_ptr<const Graph>& g, int p, int d, double c, const VisitablePorts& v) : Label(g, p, d, c), por(v) {}
+    ElementaryLabel(std::shared_ptr<const Graph> g, int p, int d, double c, const VisitablePorts& v) : Label(g, p, d, c), por(v) {}
 };
 
 bool operator==(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
