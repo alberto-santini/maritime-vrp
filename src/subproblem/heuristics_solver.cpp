@@ -26,6 +26,8 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
             std::vector<EdgeWithCost> out_e;
                         
             for(auto ep = out_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
+                if(erased.find(current) != erased.end() && erased.at(current).find(*ep.first) != erased.at(current).end()) { continue; }
+                
                 auto n_dest = *g->graph[target(*ep.first, g->graph)];
                 
                 auto dual = g->dual_of(n_dest);
@@ -91,7 +93,11 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
             std::vector<EdgeWithCost> in_e;
             
             for(auto ep = in_edges(current, g->graph); ep.first != ep.second; ++ep.first) {
-                auto n_orig = *g->graph[source(*ep.first, g->graph)];
+                auto v_orig = source(*ep.first, g->graph);
+                
+                if(erased.find(v_orig) != erased.end() && erased.at(v_orig).find(*ep.first) != erased.at(v_orig).end()) { continue; }
+                
+                auto n_orig = *g->graph[v_orig];
                 auto dual = g->dual_of(n_orig);
                 EdgeWithCost ewc = { *ep.first, g->graph[*ep.first]->cost, g->graph[*ep.first]->cost - dual };
                 
@@ -143,45 +149,46 @@ std::vector<Solution> HeuristicsSolver::solve_fast() const {
     std::vector<Solution> fast_fwd_sols = solve_fast_forward();
     std::vector<Solution> fast_bwd_sols = solve_fast_backward();
     
-    std::vector<Solution> total = fast_fwd_sols;
-    total.insert(total.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
+    fast_fwd_sols.insert(fast_fwd_sols.end(), fast_bwd_sols.begin(), fast_bwd_sols.end());
     
-    return total;
+    return fast_fwd_sols;
 }
 
 std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double percentage) const {
     std::vector<Solution> sols;
-    auto red = g->reduce_graph(percentage);
+    auto local_erased = g->reduce_graph(percentage, erased);
     
     std::vector<Path> optimal_paths;
     std::vector<ElementaryLabel> optimal_labels;
     
-    NodeIdFunctor nf(red);
-    ArcIdFunctor af(red);
+    NodeIdFunctor nf(g);
+    ArcIdFunctor af(g);
     
-    auto vc = red->vessel_class;
+    auto vc = g->vessel_class;
     VisitablePorts pf = prob->data.get_ports_list();
-    
-    red->prepare_for_labelling();
-    
-    r_c_shortest_paths(
-        red->graph,
-        make_property_map<Vertex>(nf),
-        make_property_map<Edge>(af),
-        red->h1().second,
-        red->h2().second,
-        optimal_paths,
-        optimal_labels,
-        ElementaryLabel(red, vc->capacity, vc->capacity, 0, pf),
-        LabelExtender(),
-        Dominance(),
-        std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
-        default_r_c_shortest_paths_visitor()
-    );
+        
+    try {
+        r_c_shortest_paths(
+            g->graph,
+            make_property_map<Vertex>(nf),
+            make_property_map<Edge>(af),
+            g->h1().second,
+            g->h2().second,
+            optimal_paths,
+            optimal_labels,
+            ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
+            LabelExtender(local_erased),
+            Dominance(),
+            std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
+            default_r_c_shortest_paths_visitor()
+        );
+    } catch(...) {
+        g->dump();
+        throw;
+    }
             
     for(auto i = 0u; i < optimal_paths.size(); i++) {
-        auto og_path = g->transfer_path(optimal_paths[i], *red);
-        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, g));
+        sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
     }
         
     return sols;
@@ -189,36 +196,40 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
 
 std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage, bool smart) const {
     std::vector<Solution> sols;
-    auto red = smart ? g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance) : g->reduce_graph(percentage);
+    auto local_erased = smart ?
+        g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased) :
+        g->reduce_graph(percentage, erased);
     
     std::vector<Path> optimal_paths;
     std::vector<Label> optimal_labels;
     
-    NodeIdFunctor nf(red);
-    ArcIdFunctor af(red);
+    NodeIdFunctor nf(g);
+    ArcIdFunctor af(g);
     
-    auto vc = red->vessel_class;
+    auto vc = g->vessel_class;
     
-    red->prepare_for_labelling();
-
-    r_c_shortest_paths(
-        red->graph,
-        make_property_map<Vertex>(nf),
-        make_property_map<Edge>(af),
-        red->h1().second,
-        red->h2().second,
-        optimal_paths,
-        optimal_labels,
-        Label(red, vc->capacity, vc->capacity, 0),
-        LabelExtender(),
-        Dominance(),
-        std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
-        default_r_c_shortest_paths_visitor()
-    );
+    try {
+        r_c_shortest_paths(
+            g->graph,
+            make_property_map<Vertex>(nf),
+            make_property_map<Edge>(af),
+            g->h1().second,
+            g->h2().second,
+            optimal_paths,
+            optimal_labels,
+            Label(g, vc->capacity, vc->capacity, 0),
+            LabelExtender(local_erased),
+            Dominance(),
+            std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
+            default_r_c_shortest_paths_visitor()
+        );
+    } catch(...) {
+        g->dump();
+        throw;
+    }
     
     for(auto i = 0u; i < optimal_paths.size(); i++) {
-        auto og_path = g->transfer_path(optimal_paths[i], *red);
-        sols.push_back(Solution(og_path, g->calculate_cost(og_path), optimal_labels[i].cost, vc, g));
+        sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
     }
         
     return sols;

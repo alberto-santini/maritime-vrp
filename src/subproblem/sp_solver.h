@@ -20,9 +20,12 @@ static constexpr double pct_increment = 0.1;
 class SPSolver {
 public:
     std::shared_ptr<const Problem> prob;
-    const GraphMap& local_graphs;
+    const ErasedEdgesMap& local_erased_edges;
     
-    SPSolver(std::shared_ptr<const Problem> prob, const GraphMap& local_graphs) : prob(prob), local_graphs(local_graphs) {}
+    SPSolver(   std::shared_ptr<const Problem> prob,
+                const ErasedEdgesMap& local_erased_edges) :
+                prob(prob),
+                local_erased_edges{local_erased_edges} {}
     
     /* Returns how many columns were added to the column pool and their origin */
     std::pair<int, ColumnOrigin> solve(ColumnPool& node_pool, std::shared_ptr<ColumnPool> global_pool, bool try_elementary, double& time_spent_by_exact_solver) const;

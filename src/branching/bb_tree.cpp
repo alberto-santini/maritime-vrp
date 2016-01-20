@@ -22,7 +22,7 @@ BBTree::BBTree(const std::string& program_params_file_name, const std::string& d
     pool = std::make_shared<ColumnPool>();
     pool->push_back(dummy);
     
-    auto root_node = std::make_shared<BBNode>(prob, prob->graphs, pool, *pool, VisitRuleList(), VisitRuleList(), no_father_lb);
+    auto root_node = std::make_shared<BBNode>(prob, ErasedEdgesMap(), pool, *pool, VisitRuleList(), VisitRuleList(), no_father_lb);
 
     unexplored_nodes.push(root_node);
     
@@ -418,7 +418,7 @@ void BBTree::branch_on_cycles(const Cycles& cycles, std::shared_ptr<BBNode> curr
         unexplored_nodes.push(
             std::make_shared<BBNode>(
                 current_node->prob,
-                current_node->local_graphs,
+                current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
                 unite_rules,
@@ -463,7 +463,7 @@ void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,
-                                current_node->local_graphs,
+                                current_node->local_erased_edges,
                                 current_node->pool,
                                 current_node->local_pool,
                                 unite_rules,
@@ -478,7 +478,7 @@ void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,
-                                current_node->local_graphs,
+                                current_node->local_erased_edges,
                                 current_node->pool,
                                 current_node->local_pool,
                                 VisitRuleList(),

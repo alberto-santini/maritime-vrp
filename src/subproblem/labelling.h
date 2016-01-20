@@ -8,6 +8,7 @@
 #include <memory>
 #include <unordered_map>
 #include <utility>
+#include <iostream>
 
 #include <boost/functional/hash.hpp>
 
@@ -31,6 +32,7 @@ public:
 
 bool operator==(const Label& lhs, const Label& rhs);
 bool operator<(const Label& lhs, const Label& rhs);
+std::ostream& operator<<(std::ostream& out, const Label& l);
 
 class ElementaryLabel : public Label {
 public:
@@ -44,6 +46,10 @@ bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 
 class LabelExtender {
 public:
+    const ErasedEdges& erased;
+    
+    LabelExtender(const ErasedEdges& erased) : erased{erased} {}
+
     bool operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const;
     bool operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const;
 };

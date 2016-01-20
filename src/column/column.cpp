@@ -8,15 +8,17 @@
 
 #include <column/column.h>
 
-Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const std::string& created_by, ColumnOrigin origin) : prob(prob), created_by(created_by), origin(origin) {
+Column::Column( std::shared_ptr<const Problem> prob,
+                const Solution& sol,
+                const std::string& created_by,
+                ColumnOrigin origin) :
+                prob(prob),
+                sol(sol),
+                created_by(created_by),
+                origin(origin)
+{
     auto g = prob->graphs.at(sol.vessel_class);
-    auto node_g = sol.g;
-    
-    Path global_p = g->transfer_path(sol.path, *node_g);
-    Solution global_sol(global_p, sol.cost, sol.reduced_cost, sol.vessel_class, g);
-    
-    obj_coeff = global_sol.cost;
-    
+
     auto np = prob->data.num_ports;
     auto nv = prob->data.num_vessel_classes;
     
@@ -37,10 +39,12 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
     
     vc_coeff = std::vector<double>(nv, 0);
     for(auto i = 0; i < nv; i++) {
-        if(global_sol.vessel_class == prob->data.vessel_classes[i]) {
+        if(sol.vessel_class == prob->data.vessel_classes[i]) {
             vc_coeff[i] = 1;
         }
     }
+    
+    obj_coeff = sol.cost;
     
     // Calculate penalties to remove from obj function:
     for(auto i = 1; i < np; ++i) {
@@ -48,7 +52,6 @@ Column::Column(std::shared_ptr<const Problem> prob, const Solution& sol, const s
         obj_coeff -= prob->data.ports[i]->delivery_penalty * port_coeff[np - 1 + i - 1];
     }
     
-    this->sol = global_sol;
     dummy = false;
 }
 

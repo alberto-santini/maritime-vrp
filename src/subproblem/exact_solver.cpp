@@ -23,22 +23,25 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) {
     
     auto cl_start = clock();
     
-    g->prepare_for_labelling();
-    
-    r_c_shortest_paths(
-        g->graph,
-        make_property_map<Vertex>(nf),
-        make_property_map<Edge>(af),
-        g->h1().second,
-        g->h2().second,
-        optimal_paths,
-        optimal_labels,
-        Label(g, vc->capacity, vc->capacity, 0),
-        LabelExtender(),
-        Dominance(),
-        std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
-        default_r_c_shortest_paths_visitor()
-    );
+    try {
+        r_c_shortest_paths(
+            g->graph,
+            make_property_map<Vertex>(nf),
+            make_property_map<Edge>(af),
+            g->h1().second,
+            g->h2().second,
+            optimal_paths,
+            optimal_labels,
+            Label(g, vc->capacity, vc->capacity, 0),
+            LabelExtender(erased),
+            Dominance(),
+            std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
+            default_r_c_shortest_paths_visitor()
+        );
+    } catch (...) {
+        g->dump();
+        throw;
+    }
         
     auto cl_end = clock();
     auto time_s = (double(cl_end - cl_start) / CLOCKS_PER_SEC);

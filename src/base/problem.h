@@ -14,7 +14,8 @@
 #include <preprocessing/problem_data.h>
 #include <preprocessing/program_params.h>
 
-typedef std::unordered_map<std::shared_ptr<VesselClass>, std::shared_ptr<Graph>> GraphMap;
+using GraphMap = std::unordered_map<std::shared_ptr<VesselClass>, std::shared_ptr<Graph>>;
+using ErasedEdgesMap = std::unordered_map<std::shared_ptr<VesselClass>, ErasedEdges>;
 
 class Problem {
 public:

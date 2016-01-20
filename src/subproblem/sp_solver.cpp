@@ -38,8 +38,10 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     if(PEDANTIC) { std::cerr << "\t\tFast heuristic" << std::endl; }
     
     for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {    
-        auto g = local_graphs.at(*vcit);
-        HeuristicsSolver hsolv(prob, g);
+        auto g = prob->graphs.at(*vcit);
+        const auto& erased = local_erased_edges.at(*vcit);
+        
+        HeuristicsSolver hsolv(prob, g, erased);
         
         auto total = hsolv.solve_fast();
                 
@@ -82,7 +84,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     
     auto percentage = pct_start;
     for(const auto& vc : prob->data.vessel_classes) {
-        local_graphs.at(vc)->sort_arcs();
+        prob->graphs.at(vc)->sort_arcs();
     }
     
     /********************** ELEMENTARY LABELLING ON THE REDUCED GRAPH **********************/
@@ -97,11 +99,12 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             std::vector<std::thread> threads;
         
             for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-                auto g = local_graphs.at(*vcit);
+                std::shared_ptr<const Graph> g = prob->graphs.at(*vcit);
+                const auto& erased = local_erased_edges.at(*vcit);
             
                 threads.push_back(std::thread(
-                    [this, g, &elem_sols, percentage, &mtx] () {                    
-                        HeuristicsSolver hsolv(prob, g);
+                    [this, g, &erased, &elem_sols, percentage, &mtx] () noexcept {                        
+                        HeuristicsSolver hsolv(prob, g, erased);
                         auto sols = hsolv.solve_elem_on_reduced_graph(percentage);
     
                         std::lock_guard<std::mutex> guard(mtx);
@@ -163,11 +166,12 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         std::vector<std::thread> threads;
     
         for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-            auto g = local_graphs.at(*vcit);
+            std::shared_ptr<const Graph> g = prob->graphs.at(*vcit);
+            const auto& erased = local_erased_edges.at(*vcit);
 
             threads.push_back(std::thread(
-                [this, g, &sred_sols, &mtx] () {
-                    HeuristicsSolver hsolv(prob, g);
+                [this, g, &erased, &sred_sols, &mtx] () noexcept {
+                    HeuristicsSolver hsolv(prob, g, erased);
                     auto sols = hsolv.solve_on_smart_graph();
             
                     std::lock_guard<std::mutex> guard(mtx);
@@ -228,11 +232,12 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             std::vector<std::thread> threads;
         
             for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-                auto g = local_graphs.at(*vcit);
+                std::shared_ptr<const Graph> g = prob->graphs.at(*vcit);
+                const auto& erased = local_erased_edges.at(*vcit);
             
                 threads.push_back(std::thread(
-                    [this, g, &red_sols, percentage, &mtx] () {                    
-                        HeuristicsSolver hsolv(prob, g);
+                    [this, g, &erased, &red_sols, percentage, &mtx] () noexcept {                    
+                        HeuristicsSolver hsolv(prob, g, erased);
                         auto sols = hsolv.solve_on_reduced_graph(percentage);
     
                         std::lock_guard<std::mutex> guard(mtx);
@@ -293,11 +298,12 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
     std::vector<std::thread> threads;
     
     for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-        auto g = local_graphs.at(*vcit);
+        std::shared_ptr<const Graph> g = prob->graphs.at(*vcit);
+        const auto& erased = local_erased_edges.at(*vcit);
         
         threads.push_back(std::thread(
-            [this, g, &e_sols, &mtx, &max_time_spent_by_exact_solver] () {                    
-                ExactSolver esolv(g);
+            [this, g, &erased, &e_sols, &mtx, &max_time_spent_by_exact_solver] () noexcept {                    
+                ExactSolver esolv(g, erased);
                 // Writing a double should be atomic on all x86_64 (-malign-double)
                 auto sols = esolv.solve(max_time_spent_by_exact_solver);
 

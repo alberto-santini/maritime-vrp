@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <set>
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -34,6 +35,8 @@ typedef std::vector<Edge> Path;
 
 typedef std::pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
 typedef std::vector<VisitRule> VisitRuleList;
+
+using ErasedEdges = std::map<Vertex, std::set<Edge>>;
 
 class Graph {
 public:
@@ -63,12 +66,11 @@ public:
     
     /*  Used in branching when we want to enforce that n2->port is [not] visited just
         after n1->port */
-    void unite_ports(const VisitRule& vr);
-    void separate_ports(const VisitRule& vr);
+    ErasedEdges get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules) const;
     
-    /*  Creates the reduced graphs, where edges with high cost are removed */
-    std::shared_ptr<Graph> reduce_graph(double percentage) const;
-    std::shared_ptr<Graph> smart_reduce_graph(double min_chance, double max_chance) const;
+    /*  Remove edges to reduce the graphs */
+    ErasedEdges reduce_graph(double percentage, ErasedEdges already_erased) const;
+    ErasedEdges smart_reduce_graph(double min_chance, double max_chance, ErasedEdges already_erased) const;
 
     /*  The highest/lowest dual prize among all ports */
     double max_dual_prize() const;
@@ -84,12 +86,8 @@ public:
     /*  Gets the correct dual value */
     double dual_of(const Node& n) const;
     
-    /*  Transfers a path fro a subgraph to the current graph. Typically the subgraph
-        is the reduced graph of the current graph. */
-    Path transfer_path(const Path& path, const Graph& subgraph) const;
-    
     /* Produces a text dump of the graph */
-    void dump_graph() const;
+    void dump() const;
     
 private:
     std::pair<bool, Vertex> get_vertex_by_node_type(NodeType n_type) const;

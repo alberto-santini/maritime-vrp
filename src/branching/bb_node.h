@@ -20,7 +20,7 @@ static constexpr int no_father_lb = -999;
 class BBNode {
 public:
     std::shared_ptr<const Problem> prob;
-    GraphMap                    local_graphs;
+    ErasedEdgesMap                 local_erased_edges;
     
     std::shared_ptr<ColumnPool> pool;
     ColumnPool                  local_pool;
@@ -59,7 +59,7 @@ public:
     
     BBNode() {}
     BBNode(std::shared_ptr<const Problem> prob,
-           const GraphMap& local_graphs,
+           const ErasedEdgesMap& local_erased_edges,
            std::shared_ptr<ColumnPool> pool,
            const ColumnPool& local_pool,
            const VisitRuleList& unite_rules,
@@ -80,10 +80,9 @@ public:
     bool is_integer_feasible() const;
 
 private:
-    /*  Modifies the graphs in local_prob according to the rules
-        in unite_rules and separate_rules and sets the duals from
-        port_duals and vc_duals */
-    void make_local_graphs();
+    /*  Modifies the erased edges according to the rules
+        in unite_rules and separate_rules */
+    void make_local_erased_edges();
     
     /*  Removes from local_pool those columns that are not compatible
         with unite_rules and separate_rules */

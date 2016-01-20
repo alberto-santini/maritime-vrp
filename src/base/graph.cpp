@@ -9,7 +9,7 @@
 
 #include <base/graph.h>
 
-void Graph::dump_graph() const {
+void Graph::dump() const {
     std::ofstream gfile;
     gfile.open("graph.txt", std::ios::out);
     
@@ -95,7 +95,7 @@ void Graph::sort_arcs() {
             }
         } arc_comparer;
     
-        sort(ordered_arcs.begin(), ordered_arcs.end(), arc_comparer);
+        std::sort(ordered_arcs.begin(), ordered_arcs.end(), arc_comparer);
     }
 }
 
@@ -129,99 +129,100 @@ void Graph::prepare_for_labelling() {
     }
 }
 
-void Graph::unite_ports(const VisitRule& vr) {
-    std::shared_ptr<Node> n1, n2;
-    std::tie(n1, n2) = vr;
+ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules) const {
+    ErasedEdges erased = already_erased;
     
-    name =  name + " uniting " + n1->port->name + "(" + (n1->pu_type == PickupType::PICKUP ? "pu" : "de") + ")" +
-            " with " + n2->port->name + "(" + (n2->pu_type == PickupType::PICKUP ? "pu" : "de") + ")";
-    
-    for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        auto v1 = *vp.first;
+    for(const auto& vr : unite_rules) {
+        std::shared_ptr<Node> n1, n2;
+        std::tie(n1, n2) = vr;
         
-        if(graph[v1]->same_row_as(*n1)) {
-            oeit ei, ei_end, ei_next;
-            std::tie(ei, ei_end) = out_edges(v1, graph);
-            for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                ++ei_next;
-                auto v2 = target(*ei, graph);
-                if(!graph[v2]->same_row_as(*n2)) {
-                    remove_edge(*ei, graph);
+        for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+            auto v1 = *vp.first;
+        
+            if(graph[v1]->same_row_as(*n1)) {
+                oeit ei, ei_end, ei_next;
+                std::tie(ei, ei_end) = out_edges(v1, graph);
+                for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                    ++ei_next;
+                    auto v2 = target(*ei, graph);
+                    if(!graph[v2]->same_row_as(*n2)) {
+                        if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
+                        erased[v1].insert(*ei);
+                    }
                 }
-            }
-        } else if(graph[v1]->same_row_as(*n2)) {
-            ieit ei, ei_end, ei_next;
-            std::tie(ei, ei_end) = in_edges(v1, graph);
-            for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                ++ei_next;
-                auto v2 = source(*ei, graph);
-                if(!graph[v2]->same_row_as(*n1)) {
-                    remove_edge(*ei, graph);
+            } else if(graph[v1]->same_row_as(*n2)) {
+                ieit ei, ei_end, ei_next;
+                std::tie(ei, ei_end) = in_edges(v1, graph);
+                for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                    ++ei_next;
+                    auto v2 = source(*ei, graph);
+                    if(!graph[v2]->same_row_as(*n1)) {
+                        if(erased.find(v2) == erased.end()) { erased[v2] = std::set<Edge>(); }
+                        erased[v2].insert(*ei);
+                    }
                 }
             }
         }
     }
     
-    prepare_for_labelling();
-}
-
-void Graph::separate_ports(const VisitRule& vr) {
-    std::shared_ptr<Node> n1, n2;
-    std::tie(n1, n2) = vr;
+    for(const auto& vr : separate_rules) {
+        std::shared_ptr<Node> n1, n2;
+        std::tie(n1, n2) = vr;
     
-    name =  name + " separating " + n1->port->name + "(" + (n1->pu_type == PickupType::PICKUP ? "pu" : "de") + ")" +
-            " and " + n2->port->name + "(" + (n2->pu_type == PickupType::PICKUP ? "pu" : "de") + ")";
-
-    for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        auto v1 = *vp.first;
+        for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+            auto v1 = *vp.first;
         
-        if(graph[v1]->same_row_as(*n1)) {
-            oeit ei, ei_end, ei_next;
-            std::tie(ei, ei_end) = out_edges(v1, graph);
-            for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                ++ei_next;
-                auto v2 = target(*ei, graph);
-                if(graph[v2]->same_row_as(*n2)) {
-                    remove_edge(*ei, graph);
+            if(graph[v1]->same_row_as(*n1)) {
+                oeit ei, ei_end, ei_next;
+                std::tie(ei, ei_end) = out_edges(v1, graph);
+                for(ei_next = ei; ei != ei_end; ei = ei_next) {
+                    ++ei_next;
+                    auto v2 = target(*ei, graph);
+                    if(graph[v2]->same_row_as(*n2)) {
+                        if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
+                        erased[v1].insert(*ei);
+                    }
                 }
             }
         }
     }
     
-    prepare_for_labelling();
+    return erased;
 }
 
-std::shared_ptr<Graph> Graph::reduce_graph(double percentage) const {
+ErasedEdges Graph::reduce_graph(double percentage, ErasedEdges already_erased) const {
+    ErasedEdges erased = already_erased;
+    auto n_erased = std::accumulate(erased.begin(), erased.end(), 0u, [] (auto sum, const auto& ve) { return sum + ve.second.size(); });
+    
     if(ordered_arcs.size() != num_edges(graph)) {
         throw std::runtime_error("Trying to reduce a graph whose edges are not sorted");
     }
     
-    auto limit_index = (int) (floor((double) num_edges(graph) * percentage));
+    auto limit_index = (int) (floor((double) (num_edges(graph) - n_erased) * percentage));
     auto cost_limit = ordered_arcs[limit_index]->cost;
-    auto new_name = name + " reduced for arc cost < " + std::to_string(cost_limit);
-    auto dest = std::make_shared<Graph>(graph, vessel_class, new_name);
     
     eit ei, ei_end, ei_next;
-    std::tie(ei, ei_end) = edges(dest->graph);
+    std::tie(ei, ei_end) = edges(graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        if(dest->graph[*ei]->cost > cost_limit) {
-            remove_edge(*ei, dest->graph);
+        if(graph[*ei]->cost > cost_limit) {
+            auto src = source(*ei, graph);
+            if(erased.find(src) == erased.end()) { erased[src] = std::set<Edge>(); }
+            erased[src].insert(*ei);
         }
     }
     
-    dest->prepare_for_labelling();
-    return dest;
+    return erased;
 }
 
-std::shared_ptr<Graph> Graph::smart_reduce_graph(double min_chance, double max_chance) const {
-    auto new_name = name + " reduced smartly";
-    auto dest = std::make_shared<Graph>(graph, vessel_class, new_name);
+ErasedEdges Graph::smart_reduce_graph(double min_chance, double max_chance, ErasedEdges already_erased) const {
+    ErasedEdges erased = already_erased;
+
     auto max_prize = max_dual_prize();
     auto min_prize = min_dual_prize();
 
     eit ei, ei_end, ei_next;
-    std::tie(ei, ei_end) = edges(dest->graph);
+    std::tie(ei, ei_end) = edges(graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
         auto trgt = graph[target(*ei, graph)];
@@ -230,13 +231,14 @@ std::shared_ptr<Graph> Graph::smart_reduce_graph(double min_chance, double max_c
             auto threshold = min_chance + (dual_prize - min_prize) * (max_chance - min_chance) / (max_prize - min_prize);
             auto rnd = static_cast<double> (rand()) / static_cast<double> (RAND_MAX);
             if(rnd > threshold) {
-                remove_edge(*ei, dest->graph);
+                auto src = source(*ei, graph);
+                if(erased.find(src) == erased.end()) { erased[src] = std::set<Edge>(); }
+                erased[src].insert(*ei);
             }
         }
     }
-    
-    dest->prepare_for_labelling();
-    return dest;
+
+    return erased;
 }
 
 double Graph::max_dual_prize() const {
@@ -296,42 +298,4 @@ double Graph::dual_of(const Node& n) const {
     }
     
     return 0;
-}
-
-Path Graph::transfer_path(const Path& path, const Graph& subgraph) const {
-    Path local_path;
-    Path::const_iterator pit;
-    for(pit = path.begin(); pit != path.end(); ++pit) {
-        auto e = *pit;
-        auto n_orig = *subgraph.graph[source(e, subgraph.graph)];
-        auto n_dest = *subgraph.graph[target(e, subgraph.graph)];
-                
-        bool o_found;
-        Vertex local_orig;
-        std::tie(o_found, local_orig) = get_vertex(*n_orig.port, n_orig.pu_type, n_orig.time_step);
-        
-        if(!o_found) {
-            throw std::runtime_error("In transferring a path from " + subgraph.name + " to " + name + " - " + "Can't find the origin of an edge while transferring paths: " + n_orig.port->name + " at time " + std::to_string(n_orig.time_step));
-        }
-        
-        bool d_found;
-        Vertex local_dest;
-        std::tie(d_found, local_dest) = get_vertex(*n_dest.port, n_dest.pu_type, n_dest.time_step);
-        
-        if(!d_found) {
-            throw std::runtime_error("In transferring a path from " + subgraph.name + " to " + name + " - " + "Can't find the destination of an edge while transferring paths: " + n_dest.port->name + " at time " + std::to_string(n_dest.time_step));
-        }
-        
-        bool e_found;
-        Edge local_edge;
-        std::tie(local_edge, e_found) = edge(local_orig, local_dest, graph);
-        
-        if(!e_found) {
-            throw std::runtime_error("In transferring a path from " + subgraph.name + " to " + name + " - " + "The two vertices are not connected in the graph where you want to transfer the path");
-        }
-        
-        local_path.push_back(local_edge);
-    }
-    
-    return local_path;
 }

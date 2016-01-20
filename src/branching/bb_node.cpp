@@ -8,41 +8,47 @@
 
 #include <branching/bb_node.h>
 
-BBNode::BBNode(std::shared_ptr<const Problem> prob, const GraphMap& local_graphs, std::shared_ptr<ColumnPool> pool, const ColumnPool& local_pool, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules, double father_lb, int depth, bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp, double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) : prob(prob), local_graphs(local_graphs), pool(pool), local_pool(local_pool), unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth), try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp), total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp), total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver) {
+BBNode::BBNode( std::shared_ptr<const Problem> prob,
+                const ErasedEdgesMap& local_erased_edges,
+                std::shared_ptr<ColumnPool> pool,
+                const ColumnPool& local_pool,
+                const VisitRuleList& unite_rules,
+                const VisitRuleList& separate_rules,
+                double father_lb,
+                int depth,
+                bool try_elementary,
+                double avg_time_spent_on_sp,
+                double total_time_spent_on_sp,
+                double total_time_spent_on_mp,
+                double total_time_spent,
+                double max_time_spent_by_exact_solver) :
+                prob(prob),
+                local_erased_edges(local_erased_edges),
+                pool(pool),
+                local_pool(local_pool),
+                unite_rules(unite_rules),
+                separate_rules(separate_rules),
+                father_lb(father_lb),
+                depth(depth),
+                try_elementary(try_elementary),
+                avg_time_spent_on_sp(avg_time_spent_on_sp),
+                total_time_spent_on_sp(total_time_spent_on_sp),
+                total_time_spent_on_mp(total_time_spent_on_mp),
+                total_time_spent(total_time_spent),
+                max_time_spent_by_exact_solver(max_time_spent_by_exact_solver)
+{
     sol_value = std::numeric_limits<double>::max();
     mip_sol_value = std::numeric_limits<double>::max();
     all_times_spent_on_sp = std::vector<double>(0);
-    make_local_graphs();
+    make_local_erased_edges();
     remove_incompatible_columns();
 }
 
-void BBNode::make_local_graphs() {
-    GraphMap new_graphs;
-    
-    for(const auto& vg : local_graphs) {
-        auto g = std::make_shared<Graph>(vg.second->graph, vg.first, vg.second->name);
-        new_graphs.emplace(vg.first, g);
+void BBNode::make_local_erased_edges() {
+    for(const auto& vg : prob->graphs) {
+        local_erased_edges[vg.first] =
+            vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first], unite_rules, separate_rules);
     }
-    
-    for(const auto& vr : unite_rules) {
-        auto vc = vr.first->vessel_class;
-        
-        for(auto& vg : new_graphs) {
-            if(vg.first == vc) {
-                vg.second->unite_ports(vr);
-            } else {
-                vg.second->separate_ports(vr);
-            }
-        }
-    }
-    
-    for(const auto& vr : separate_rules) {
-        auto vc = vr.first->vessel_class;
-        auto g = new_graphs.at(vc);
-        g->separate_ports(vr);
-    }
-    
-    local_graphs = new_graphs;
 }
 
 void BBNode::remove_incompatible_columns() {
@@ -111,22 +117,15 @@ void BBNode::check_for_duplicate_columns() {
 
 void BBNode::solve(unsigned int node_number) {
     auto node_start = clock();
-    std::cerr << "\tGraphs at this node:" << std::endl;
-    for(const auto& vg : local_graphs) {
-        std::cerr << "\t\tVessel class: " << vg.first->name << std::endl;
-        std::cerr << "\t\t\t" << vg.second->name << std::endl;
-        std::cerr << "\t\t\t" << num_vertices(vg.second->graph) << " vertices" << std::endl;
-        std::cerr << "\t\t\t" << num_edges(vg.second->graph) << " edges" << std::endl;
-    }
     
     // Clear any eventual previous solutions
     base_columns = std::vector<std::pair<Column, double>>();
     sol_value = 0;
     auto mp_solv = MPSolver(prob);
     
-    if(PEDANTIC) {
-        check_for_duplicate_columns();
-    }
+    // if(PEDANTIC) {
+    //     check_for_duplicate_columns();
+    // }
     
     auto mp_start = clock();
     auto sol = mp_solv.solve_lp(local_pool);
@@ -138,13 +137,13 @@ void BBNode::solve(unsigned int node_number) {
 
     auto node_explored = false;
     while(!node_explored) {
-        for(const auto& vg : local_graphs) {
+        for(const auto& vg : prob->graphs) {
             vg.second->graph[graph_bundle].old_port_duals = vg.second->graph[graph_bundle].port_duals;
             vg.second->graph[graph_bundle].port_duals = sol.port_duals;
             vg.second->graph[graph_bundle].vc_dual = sol.vc_duals.at(vg.first);
         }
 
-        auto sp_solv = SPSolver(prob, local_graphs);
+        auto sp_solv = SPSolver(prob, local_erased_edges);
         auto sp_found_columns = 0;
         auto orig = ColumnOrigin::NONE;
         

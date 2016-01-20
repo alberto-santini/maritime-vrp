@@ -13,9 +13,10 @@
 
 class ExactSolver {
 public:
-    std::shared_ptr<Graph> g;
+    std::shared_ptr<const Graph> g;
+    const ErasedEdges& erased;
     
-    ExactSolver(std::shared_ptr<Graph> g) : g(g) {}
+    ExactSolver(std::shared_ptr<const Graph> g, const ErasedEdges& erased) : g(g), erased{erased} {}
     
     std::vector<Solution> solve(double& time_spent);
 };
