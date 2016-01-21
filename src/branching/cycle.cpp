@@ -22,14 +22,14 @@ Path Cycle::shortest_cycle(const Path& route, std::shared_ptr<const Graph> g) {
         auto closing_cycle = false;
         auto closing_port_position = -1;
         
-        auto current_node = *g->graph[target(route[i], g->graph)];
+        const Node& current_node = *g->graph[target(route[i], g->graph)];
         auto current_port = current_node.port;
-        auto current_pu = current_node.pu_type;
+        const PickupType& current_pu = current_node.pu_type;
         
         for(auto k = 0u; k < cycles[num_cycles].size(); k++) {
-            auto cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
+            const Node& cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
             auto cycle_port = cycle_node.port;
-            auto cycle_pu = cycle_node.pu_type;
+            const PickupType& cycle_pu = cycle_node.pu_type;
             
             if(current_port == cycle_port && current_pu == cycle_pu) {
                 cycles[num_cycles].push_back(route[i]);
@@ -66,10 +66,10 @@ Path Cycle::shortest_cycle(const Path& route, std::shared_ptr<const Graph> g) {
 
 void Cycle::print_cycle(const Path& cycle, std::shared_ptr<const Graph> g, std::ostream& out) {
     for(const auto& e : cycle) {
-        auto n = g->graph[source(e, g->graph)];
-        out << n->port->name << "(" << (n->pu_type == PickupType::PICKUP ? "pu" : "de") << ") -> ";
+        const Node& n = *g->graph[source(e, g->graph)];
+        out << n.port->name << "(" << (n.pu_type == PickupType::PICKUP ? "pu" : "de") << ") -> ";
     }
     
-    auto n = g->graph[target(cycle.back(), g->graph)];
-    out << n->port->name << "(" << (n->pu_type == PickupType::PICKUP ? "pu" : "de") << ")" << std::endl;
+    const Node& n = *g->graph[target(cycle.back(), g->graph)];
+    out << n.port->name << "(" << (n.pu_type == PickupType::PICKUP ? "pu" : "de") << ")" << std::endl;
 }

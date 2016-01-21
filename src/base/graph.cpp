@@ -16,37 +16,37 @@ void Graph::dump() const {
     gfile << num_vertices(graph) << " #" << vessel_class->name << std::endl;
     
     for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        auto node = graph[*vp.first];
+        const Node& node = *graph[*vp.first];
         
         auto desc = "reg";
-        if(node->n_type == NodeType::H1) { desc = "src"; }
-        if(node->n_type == NodeType::H2) { desc = "snk"; }
+        if(node.n_type == NodeType::H1) { desc = "src"; }
+        if(node.n_type == NodeType::H2) { desc = "snk"; }
         
         auto pickup = 0u;
-        if(node->pu_type == PickupType::PICKUP) { pickup = node->port->pickup_demand; }
+        if(node.pu_type == PickupType::PICKUP) { pickup = node.port->pickup_demand; }
         
         auto delivery = 0u;
-        if(node->pu_type == PickupType::DELIVERY) { delivery = node->port->delivery_demand; }
+        if(node.pu_type == PickupType::DELIVERY) { delivery = node.port->delivery_demand; }
         
         gfile <<
-            node->boost_vertex_id << "\t" <<
+            node.boost_vertex_id << "\t" <<
             desc << "\t" <<
             pickup << "\t" <<
             delivery << "\t" <<
-            dual_of(*node) << "\t" <<
-            node->pu_penalty() + node->de_penalty() << std::endl;
+            dual_of(node) << "\t" <<
+            node.pu_penalty() + node.de_penalty() << std::endl;
     }
     
     for(auto ep = edges(graph); ep.first != ep.second; ++ep.first) {
-        auto arc = graph[*ep.first];
-        auto src_n = graph[source(*ep.first, graph)];
-        auto dst_n = graph[target(*ep.first, graph)];
+        const Arc& arc = *graph[*ep.first];
+        const Node& src_n = *graph[source(*ep.first, graph)];
+        const Node& dst_n = *graph[target(*ep.first, graph)];
         
         gfile <<
-            arc->boost_edge_id << "\t" <<
-            src_n->boost_vertex_id << "\t" <<
-            dst_n->boost_vertex_id << "\t" <<
-            arc->cost << std::endl;
+            arc.boost_edge_id << "\t" <<
+            src_n.boost_vertex_id << "\t" <<
+            dst_n.boost_vertex_id << "\t" <<
+            arc.cost << std::endl;
     }
     
     gfile.close();
@@ -60,7 +60,7 @@ void Graph::print(bool detailed) const {
     if(detailed) {
         std::cout << "Vertices:" << std::endl;
         for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-            auto n = *graph[*vp.first];
+            const Node& n = *graph[*vp.first];
             std::string prize;
             try {
                 prize = std::to_string(dual_of(n));
@@ -137,14 +137,14 @@ ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const
         std::tie(n1, n2) = vr;
         
         for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-            auto v1 = *vp.first;
+            const Vertex& v1 = *vp.first;
         
             if(graph[v1]->same_row_as(*n1)) {
                 oeit ei, ei_end, ei_next;
                 std::tie(ei, ei_end) = out_edges(v1, graph);
                 for(ei_next = ei; ei != ei_end; ei = ei_next) {
                     ++ei_next;
-                    auto v2 = target(*ei, graph);
+                    const Vertex& v2 = target(*ei, graph);
                     if(!graph[v2]->same_row_as(*n2)) {
                         if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
                         erased[v1].insert(*ei);
@@ -155,7 +155,7 @@ ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const
                 std::tie(ei, ei_end) = in_edges(v1, graph);
                 for(ei_next = ei; ei != ei_end; ei = ei_next) {
                     ++ei_next;
-                    auto v2 = source(*ei, graph);
+                    const Vertex& v2 = source(*ei, graph);
                     if(!graph[v2]->same_row_as(*n1)) {
                         if(erased.find(v2) == erased.end()) { erased[v2] = std::set<Edge>(); }
                         erased[v2].insert(*ei);
@@ -170,14 +170,14 @@ ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const
         std::tie(n1, n2) = vr;
     
         for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-            auto v1 = *vp.first;
+            const Vertex& v1 = *vp.first;
         
             if(graph[v1]->same_row_as(*n1)) {
                 oeit ei, ei_end, ei_next;
                 std::tie(ei, ei_end) = out_edges(v1, graph);
                 for(ei_next = ei; ei != ei_end; ei = ei_next) {
                     ++ei_next;
-                    auto v2 = target(*ei, graph);
+                    const Vertex& v2 = target(*ei, graph);
                     if(graph[v2]->same_row_as(*n2)) {
                         if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
                         erased[v1].insert(*ei);
@@ -206,7 +206,7 @@ ErasedEdges Graph::reduce_graph(double percentage, ErasedEdges already_erased) c
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
         if(graph[*ei]->cost > cost_limit) {
-            auto src = source(*ei, graph);
+            const Vertex& src = source(*ei, graph);
             if(erased.find(src) == erased.end()) { erased[src] = std::set<Edge>(); }
             erased[src].insert(*ei);
         }
@@ -225,13 +225,13 @@ ErasedEdges Graph::smart_reduce_graph(double min_chance, double max_chance, Eras
     std::tie(ei, ei_end) = edges(graph);
     for(ei_next = ei; ei != ei_end; ei = ei_next) {
         ++ei_next;
-        auto trgt = graph[target(*ei, graph)];
-        if(trgt->n_type == NodeType::REGULAR_PORT) {
-            auto dual_prize = dual_of(*trgt);
+        const Node& trgt = *graph[target(*ei, graph)];
+        if(trgt.n_type == NodeType::REGULAR_PORT) {
+            auto dual_prize = dual_of(trgt);
             auto threshold = min_chance + (dual_prize - min_prize) * (max_chance - min_chance) / (max_prize - min_prize);
             auto rnd = static_cast<double> (rand()) / static_cast<double> (RAND_MAX);
             if(rnd > threshold) {
-                auto src = source(*ei, graph);
+                const Vertex& src = source(*ei, graph);
                 if(erased.find(src) == erased.end()) { erased[src] = std::set<Edge>(); }
                 erased[src].insert(*ei);
             }
@@ -265,7 +265,7 @@ double Graph::min_dual_prize() const {
 
 std::pair<bool, Vertex> Graph::get_vertex(const Port& p, PickupType pu, int t) const {
     for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-        auto n = *graph[*vp.first];
+        const Node& n = *graph[*vp.first];
         if(n.port.get() == &p && n.pu_type == pu && n.time_step == t) {
             return std::make_pair(true, *vp.first);
         }

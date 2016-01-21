@@ -73,8 +73,8 @@ bool Column::is_compatible_with_unite_rule(const VisitRule& vr) const {
     auto g = sol.g;
     
     for(const auto& e : sol.path) {
-        auto orig = *g->graph[source(e, g->graph)];
-        auto dest = *g->graph[target(e, g->graph)];
+        const Node& orig = *g->graph[source(e, g->graph)];
+        const Node& dest = *g->graph[target(e, g->graph)];
     
         /*  If orig~vr.first and !dest~vr.second OR
                !orig~vr.first and dest~vr.second
@@ -95,8 +95,8 @@ bool Column::is_compatible_with_separate_rule(const VisitRule& vr) const {
     auto g = sol.g;
     
     for(const auto& e : sol.path) {
-        auto orig = *g->graph[source(e, g->graph)];
-        auto dest = *g->graph[target(e, g->graph)];
+        const Node& orig = *g->graph[source(e, g->graph)];
+        const Node& dest = *g->graph[target(e, g->graph)];
         
         /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
         if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {

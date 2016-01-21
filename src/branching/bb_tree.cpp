@@ -439,27 +439,29 @@ void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
         });
     
     for(const auto& e : cc_it->first.sol.path) {
-        const auto g = cc_it->first.sol.g;
-        auto n = g->graph[target(e, g->graph)];
+        const Graph& g = *cc_it->first.sol.g;
+        auto n = g.graph[target(e, g.graph)];
         if(n->n_type != NodeType::REGULAR_PORT) {
             continue;
         }
         for(const auto& cc : current_node->base_columns) {
             for(const auto& e_inner : cc.first.sol.path) {
-                const auto g_inner = cc.first.sol.g;
-                auto n_inner = g_inner->graph[target(e_inner, g_inner->graph)];
-                if(n_inner->same_row_as(*n)) {
-                    auto n_src = g->graph[source(e, g->graph)];
-                    auto n_inner_src = g_inner->graph[source(e_inner, g_inner->graph)];
-                    if(!n_inner_src->same_row_as(*n_src)) {
-                        std::cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports - acting on graph for vc " << g->vessel_class->name << ":" << std::endl;
+                const Graph& g_inner = *cc.first.sol.g;
+                const Node& n_inner = *g_inner.graph[target(e_inner, g_inner.graph)];
+                if(n_inner.same_row_as(*n)) {
+                    auto n_src = g.graph[source(e, g.graph)];
+                    const Node& n_inner_src = *g_inner.graph[source(e_inner, g_inner.graph)];
+                    if(!n_inner_src.same_row_as(*n_src)) {
+                        std::cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports";
+                        std::cerr << " - acting on graph for vc " << g.vessel_class->name << ":" << std::endl;
                         
                         VisitRuleList unite_rules, separate_rules;
                         unite_rules.push_back(make_pair(n_src, n));
                         separate_rules.push_back(make_pair(n_src, n));
                         
                         std::cerr << "\t\t\tCreating child node 1:" << std::endl;
-                        std::cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> " << n->port->name << std::endl;
+                        std::cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> ";
+                        std::cerr << n->port->name << std::endl;
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,
@@ -474,7 +476,8 @@ void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
                         );  
                         
                         std::cerr << "\t\t\tCreating child node 2:" << std::endl;
-                        std::cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> " << n->port->name << std::endl;
+                        std::cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> ";
+                        std::cerr << n->port->name << std::endl;
                         unexplored_nodes.push(
                             std::make_shared<BBNode>(
                                 current_node->prob,

@@ -10,7 +10,7 @@ bool Solution::satisfies_capacity_constraints() const {
     auto qty_delivered = 0;
     
     for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
-        auto n = *g->graph[target(*pit, g->graph)];
+        const Node& n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             qty_delivered += n.de_demand();
         }
@@ -23,7 +23,7 @@ bool Solution::satisfies_capacity_constraints() const {
     auto used_capacity = qty_delivered;
     
     for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
-        auto n = *g->graph[target(*pit, g->graph)];
+        const Node& n = *g->graph[target(*pit, g->graph)];
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             used_capacity -= n.de_demand();
         }
@@ -74,10 +74,10 @@ std::vector<double> Solution::cargo_travel_distances() const {
     for(const auto & e : path) {
         current_distance += g->graph[e]->length;
         
-        auto dest = g->graph[target(e, g->graph)];
+        const Node& dest = *g->graph[target(e, g->graph)];
         
-        if(dest->n_type == NodeType::REGULAR_PORT) {
-            if(dest->pu_type == PickupType::PICKUP) {
+        if(dest.n_type == NodeType::REGULAR_PORT) {
+            if(dest.pu_type == PickupType::PICKUP) {
                 distances.push_back(l - current_distance);
             } else {
                 distances.push_back(current_distance);

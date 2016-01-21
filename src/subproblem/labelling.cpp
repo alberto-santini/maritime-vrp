@@ -38,9 +38,9 @@ std::ostream& operator<<(std::ostream& out, const Label& l) {
 }
 
 bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, const ElementaryLabel& label, const Edge& e) const {
-    auto arc = *graph[e];
-    auto src_vertex = source(e, graph);
-    auto dest_node = *graph[target(e, graph)];
+    const Arc& arc = *graph[e];
+    const Vertex& src_vertex = source(e, graph);
+    const Node& dest_node = *graph[target(e, graph)];
     auto dest_port = std::make_pair(dest_node.port, dest_node.pu_type);
     
     if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
@@ -61,9 +61,9 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
 }
 
 bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Label& label, const Edge& e) const {
-    auto arc = *graph[e];
-    auto src_vertex = source(e, graph);
-    auto dest_node = *graph[target(e, graph)];
+    const Arc& arc = *graph[e];
+    const Vertex& src_vertex = source(e, graph);
+    const Node& dest_node = *graph[target(e, graph)];
     
     if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
     
