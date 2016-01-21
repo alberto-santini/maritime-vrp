@@ -92,7 +92,7 @@ private:
         constraint coefficients and possibly different objective
         function coefficients */
     std::vector<int> column_coefficients(const Column& col);
-    void check_for_duplicate_columns();
+    void remove_duplicate_columns();
 };
 
 class BBNodeCompare {

@@ -95,24 +95,30 @@ std::vector<int> BBNode::column_coefficients(const Column& col) {
     return column_coeff;
 }
 
-void BBNode::check_for_duplicate_columns() {
-    for(auto oit = local_pool.begin(); oit != local_pool.end(); ++oit) {
-        auto o_column_cost = oit->obj_coeff;
-        auto o_column_coeff = column_coefficients(*oit);
-        
-        for(auto iit = oit + 1; iit != local_pool.end(); ++iit) {
-            auto i_column_cost = iit->obj_coeff;
-            auto i_column_coeff = column_coefficients(*iit);
+void BBNode::remove_duplicate_columns() {
+    ColumnPool new_pool;
+    
+    for(const auto& c : *pool) {
+        auto nc = std::find_if(
+            new_pool.begin(),
+            new_pool.end(),
+            [&] (const Column& c_in_new_pool) {
+                return column_coefficients(c) == column_coefficients(c_in_new_pool);
+            }
+        );
             
-            if(std::equal(o_column_coeff.begin(), o_column_coeff.end(), i_column_coeff.begin())) {
-                if(fabs(o_column_cost - i_column_cost) < 0.00001) {
-                    std::cerr << ">>> Duplicate column - same cost!" << std::endl;
-                } else {
-                    std::cerr << ">>> Duplicate column - different cost!" << std::endl;
-                }
+        if(nc == new_pool.end()) {
+            new_pool.push_back(c);
+        } else {
+            if(nc->obj_coeff > c.obj_coeff) {
+                *nc = c;
             }
         }
     }
+    
+    std::cerr << "\tRemoved " << pool->size() - new_pool.size() << " duplicate columns" << std::endl;
+    
+    *pool = new_pool;
 }
 
 void BBNode::solve(unsigned int node_number) {
@@ -134,7 +140,7 @@ void BBNode::solve(unsigned int node_number) {
     total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
     
     std::cerr << std::unitbuf << "\tMP: " << sol.obj_value << std::endl;
-
+ 
     auto node_explored = false;
     while(!node_explored) {
         for(const auto& vg : prob->graphs) {
@@ -200,6 +206,8 @@ void BBNode::solve(unsigned int node_number) {
     std::cerr << std::endl;
     auto node_end = clock();
     total_time_spent = (double(node_end - node_start) / CLOCKS_PER_SEC);
+    
+    remove_duplicate_columns();
 }
 
 bool BBNode::solve_integer(const ColumnPool& feasible_columns) {
