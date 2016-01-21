@@ -22,7 +22,7 @@ BBTree::BBTree(const std::string& program_params_file_name, const std::string& d
     pool = std::make_shared<ColumnPool>();
     pool->push_back(dummy);
     
-    auto root_node = std::make_shared<BBNode>(prob, ErasedEdgesMap(), pool, *pool, VisitRuleList(), VisitRuleList(), no_father_lb);
+    auto root_node = std::make_shared<BBNode>(prob, ErasedEdgesMap(), pool, *pool, VisitRuleList(), VisitRuleList(), boost::none);
 
     unexplored_nodes.push(root_node);
     
@@ -91,7 +91,7 @@ void BBTree::update_lb(std::shared_ptr<BBNode> current_node, unsigned int node_n
         return;
     }
     
-    lb = unexplored_nodes.top()->father_lb;
+    lb = *unexplored_nodes.top()->father_lb;
 }
 
 void BBTree::explore_tree() {

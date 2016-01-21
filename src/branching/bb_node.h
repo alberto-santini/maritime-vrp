@@ -9,24 +9,24 @@
 #include <utility>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include <base/problem.h>
 #include <branching/cycle.h>
 #include <column/column_pool.h>
 #include <masterproblem/mp_solver.h>
 #include <subproblem/sp_solver.h>
 
-static constexpr int no_father_lb = -999;
-
 class BBNode {
 public:
     std::shared_ptr<const Problem> prob;
-    ErasedEdgesMap                 local_erased_edges;
+    ErasedEdgesMap local_erased_edges;
     
     std::shared_ptr<ColumnPool> pool;
-    ColumnPool                  local_pool;
+    ColumnPool local_pool;
     
-    VisitRuleList               unite_rules;
-    VisitRuleList               separate_rules;
+    VisitRuleList unite_rules;
+    VisitRuleList separate_rules;
     
     /*  The optimal columns selected by the LP solver with the coefficient */
     std::vector<std::pair<Column, double>> base_columns;
@@ -34,28 +34,28 @@ public:
     std::vector<std::pair<Column, double>> mip_base_columns;
     
     /*  LP Solution */
-    double                      sol_value;
+    double sol_value;
     /*  MIP Solution */
-    double                      mip_sol_value;
-    /*  LB of father node, used to determine the most promising nodes in the queue */
-    double                      father_lb;
+    double mip_sol_value;
+    /*  LB of father node, used to determine the most promising nodes in the queue. The root node does not have any. */
+    boost::optional<double> father_lb;
     
     /* Depth in the BB tree */
-    int                         depth;
+    int depth;
     
     /*  Used to determine if a solution is integral, or with cost < 0 */
-    static constexpr double     cplex_epsilon = 0.000001;
+    static constexpr double cplex_epsilon = 0.000001;
     
     /* Should we still try to run the ESPPRC labelling at this node? */
-    bool                        try_elementary;
+    bool try_elementary;
     
     /* Time spent on SP vs MP (avg and total) */
-    std::vector<double>         all_times_spent_on_sp;
-    double                      avg_time_spent_on_sp;
-    double                      total_time_spent_on_sp;
-    double                      total_time_spent_on_mp;
-    double                      total_time_spent;
-    double                      max_time_spent_by_exact_solver;
+    std::vector<double> all_times_spent_on_sp;
+    double avg_time_spent_on_sp;
+    double total_time_spent_on_sp;
+    double total_time_spent_on_mp;
+    double total_time_spent;
+    double max_time_spent_by_exact_solver;
     
     BBNode() {}
     BBNode(std::shared_ptr<const Problem> prob,
@@ -64,7 +64,7 @@ public:
            const ColumnPool& local_pool,
            const VisitRuleList& unite_rules,
            const VisitRuleList& separate_rules,
-           double father_lb,
+           boost::optional<double> father_lb,
            int depth = 0,
            bool try_elementary = true,
            double avg_time_spent_on_sp = 0,
@@ -97,8 +97,10 @@ private:
 
 class BBNodeCompare {
 public:
-    bool operator()(const auto& n1, const auto& n2) const {
-        return (n1->father_lb > n2->father_lb);
+    bool operator()(const std::shared_ptr<BBNode>& n1, const std::shared_ptr<BBNode>& n2) const {
+        if(!n1->father_lb) { return true; }
+        if(!n2->father_lb) { return false; }
+        return (*n1->father_lb > *n2->father_lb);
     }
 };
 
