@@ -10,5 +10,6 @@
   "smart_min_chance":                   0.1,
   "smart_max_chance":                   0.6,
   "cplex_cores":                        2,
-  "time_limit_in_s":                    3600
+  "time_limit_in_s":                    3600,
+  "parallel_labelling":                 true
 }

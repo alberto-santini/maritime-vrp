@@ -24,4 +24,5 @@ ProgramParams::ProgramParams(const std::string& data_file_name) {
     smart_min_chance = pt.get<double>("smart_min_chance");
     smart_max_chance = pt.get<double>("smart_max_chance");
     time_limit_in_s = pt.get<int>("time_limit_in_s");
+    parallel_labelling = pt.get<bool>("parallel_labelling");
 }

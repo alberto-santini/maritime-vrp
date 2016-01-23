@@ -21,6 +21,7 @@ public:
     double  smart_min_chance;
     double  smart_max_chance;
     int     time_limit_in_s;
+    bool    parallel_labelling;
     
     ProgramParams(const std::string& data_file_name = "data/program_params.json");
 };
