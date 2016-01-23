@@ -6,8 +6,6 @@
 #include <list>
 #include <vector>
 
-#include <boost/graph/r_c_shortest_paths.hpp>
-
 #include <subproblem/heuristics_solver.h>
 
 std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
@@ -155,82 +153,98 @@ std::vector<Solution> HeuristicsSolver::solve_fast() const {
 }
 
 std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double percentage) const {
-    std::vector<Solution> sols;
-    auto local_erased = g->reduce_graph(percentage, erased);
-    
-    std::vector<Path> optimal_paths;
-    std::vector<ElementaryLabel> optimal_labels;
-    
-    NodeIdFunctor nf(g);
-    ArcIdFunctor af(g);
+    // std::vector<Solution> sols;
+    // auto local_erased = g->reduce_graph(percentage, erased);
+    //
+    // std::vector<Path> optimal_paths;
+    // std::vector<ElementaryLabel> optimal_labels;
+    //
+    // NodeIdFunctor nf(g);
+    // ArcIdFunctor af(g);
+    //
+    // auto vc = g->vessel_class;
+    // VisitablePorts pf = prob->data.get_ports_list();
+    //
+    // try {
+    //     r_c_shortest_paths(
+    //         g->graph,
+    //         make_property_map<Vertex>(nf),
+    //         make_property_map<Edge>(af),
+    //         g->h1().second,
+    //         g->h2().second,
+    //         optimal_paths,
+    //         optimal_labels,
+    //         ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
+    //         LabelExtender(local_erased),
+    //         Dominance(),
+    //         std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
+    //         default_r_c_shortest_paths_visitor()
+    //     );
+    // } catch(...) {
+    //     g->dump();
+    //     throw;
+    // }
+    //
+    // for(auto i = 0u; i < optimal_paths.size(); i++) {
+    //     sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+    // }
+    //
+    // return sols;
     
     auto vc = g->vessel_class;
-    VisitablePorts pf = prob->data.get_ports_list();
-        
-    try {
-        r_c_shortest_paths(
-            g->graph,
-            make_property_map<Vertex>(nf),
-            make_property_map<Edge>(af),
-            g->h1().second,
-            g->h2().second,
-            optimal_paths,
-            optimal_labels,
-            ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
-            LabelExtender(local_erased),
-            Dominance(),
-            std::allocator<r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
-            default_r_c_shortest_paths_visitor()
-        );
-    } catch(...) {
-        g->dump();
-        throw;
-    }
-            
-    for(auto i = 0u; i < optimal_paths.size(); i++) {
-        sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
-    }
-        
-    return sols;
+    auto local_erased = g->reduce_graph(percentage, erased);
+    LabelExtender extender(local_erased);
+    LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
+    
+    return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(g, vc->capacity, vc->capacity, 0, prob->data.get_ports_list()), extender);
 }
 
 std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage, bool smart) const {
-    std::vector<Solution> sols;
-    auto local_erased = smart ?
-        g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased) :
-        g->reduce_graph(percentage, erased);
-    
-    std::vector<Path> optimal_paths;
-    std::vector<Label> optimal_labels;
-    
-    NodeIdFunctor nf(g);
-    ArcIdFunctor af(g);
+    // std::vector<Solution> sols;
+    // auto local_erased = smart ?
+    //     g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased) :
+    //     g->reduce_graph(percentage, erased);
+    //
+    // std::vector<Path> optimal_paths;
+    // std::vector<Label> optimal_labels;
+    //
+    // NodeIdFunctor nf(g);
+    // ArcIdFunctor af(g);
+    //
+    // auto vc = g->vessel_class;
+    //
+    // try {
+    //     r_c_shortest_paths(
+    //         g->graph,
+    //         make_property_map<Vertex>(nf),
+    //         make_property_map<Edge>(af),
+    //         g->h1().second,
+    //         g->h2().second,
+    //         optimal_paths,
+    //         optimal_labels,
+    //         Label(g, vc->capacity, vc->capacity, 0),
+    //         LabelExtender(local_erased),
+    //         Dominance(),
+    //         std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
+    //         default_r_c_shortest_paths_visitor()
+    //     );
+    // } catch(...) {
+    //     g->dump();
+    //     throw;
+    // }
+    //
+    // for(auto i = 0u; i < optimal_paths.size(); i++) {
+    //     sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+    // }
+    //
+    // return sols;
     
     auto vc = g->vessel_class;
+    auto local_erased = smart ?
+            g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased) :
+            g->reduce_graph(percentage, erased);
+    LabelExtender extender(local_erased);
+    LabellingAlgorithm<Label, LabelExtender> alg(g);
     
-    try {
-        r_c_shortest_paths(
-            g->graph,
-            make_property_map<Vertex>(nf),
-            make_property_map<Edge>(af),
-            g->h1().second,
-            g->h2().second,
-            optimal_paths,
-            optimal_labels,
-            Label(g, vc->capacity, vc->capacity, 0),
-            LabelExtender(local_erased),
-            Dominance(),
-            std::allocator<r_c_shortest_paths_label<BGraph, Label>>(),
-            default_r_c_shortest_paths_visitor()
-        );
-    } catch(...) {
-        g->dump();
-        throw;
-    }
-    
-    for(auto i = 0u; i < optimal_paths.size(); i++) {
-        sols.push_back(Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
-    }
-        
-    return sols;
+    return alg.solve(g->h1().second, g->h2().second, Label(g, vc->capacity, vc->capacity, 0), extender);
 }

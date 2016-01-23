@@ -56,8 +56,8 @@ public:
 
 class Dominance {
 public:
-    bool operator()(const Label& l1, const Label& l2) const { return l1 < l2 || l1 == l2; }
-    bool operator()(const ElementaryLabel& l1, const ElementaryLabel& l2) const { return l1 < l2 || l1 == l2; }
+    bool operator()(const Label& l1, const Label& l2) const { return l1 == l2 || l1 < l2; }
+    bool operator()(const ElementaryLabel& l1, const ElementaryLabel& l2) const { return l1 == l2 || l1 < l2; }
 };
 
 #endif

@@ -15,8 +15,19 @@ bool operator==(const ElementaryLabel& lhs, const ElementaryLabel& rhs) {
 bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs) {
     if(rhs.cost < lhs.cost - Label::EPS) { return false; }
     if(rhs.del > lhs.del) { return false; }
-    for(const auto& vp : rhs.por) { if(std::find(lhs.por.begin(), lhs.por.end(), vp) == lhs.por.end()) { return false; } }
-    return true;
+    if(rhs.pic > lhs.pic) { return false; }
+    
+    // If there is any port visitable by RHS...
+    if(std::any_of(
+        rhs.por.begin(),
+        rhs.por.end(),
+        [&] (const auto& vp) {
+            // ...that is not visitable by LHS
+            return std::find(lhs.por.begin(), lhs.por.end(), vp) == lhs.por.end();
+        }
+    )) { return false; }
+    
+    return !(lhs == rhs);
 }
 
 bool operator==(const Label& lhs, const Label& rhs) {
@@ -29,7 +40,7 @@ bool operator<(const Label& lhs, const Label& rhs) {
     if(rhs.cost < lhs.cost - Label::EPS) { return false; }
     if(rhs.del > lhs.del) { return false; }
     if(rhs.pic > lhs.pic) { return false; }
-    return true;
+    return !(lhs == rhs);
 }
 
 std::ostream& operator<<(std::ostream& out, const Label& l) {

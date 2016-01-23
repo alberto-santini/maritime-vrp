@@ -19,11 +19,26 @@ public:
     std::shared_ptr<const Graph>    g;
     
     Solution() {}
-    Solution(const Path& path, 
+    
+    Solution(Path path,
+             double reduced_cost,
+             std::shared_ptr<const Graph> g) :
+             path{path},
+             cost{g->calculate_cost(path)},
+             reduced_cost{reduced_cost},
+             vessel_class{g->vessel_class},
+             g{g} {}
+             
+    Solution(Path path, 
              double cost,
              double reduced_cost,
              std::shared_ptr<VesselClass> vessel_class,
-             std::shared_ptr<const Graph> g) : path(path), cost(cost), reduced_cost(reduced_cost), vessel_class(vessel_class), g(g) {}
+             std::shared_ptr<const Graph> g) :
+             path{path},
+             cost{cost},
+             reduced_cost{reduced_cost},
+             vessel_class{vessel_class},
+             g{g} {}
     
     bool satisfies_capacity_constraints() const;
     bool operator==(const Solution& other) const;
