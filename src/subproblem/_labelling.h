@@ -141,8 +141,12 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         
         // Move the label from unprocessed to undominated
         const LblContainer<Lbl> cur_container = *any_cnt_it;
-        undominated[cur_vertex].insert(cur_container);
-        unprocessed[cur_vertex].erase(any_cnt_it);
+        if(undominated.find(cur_vertex) == undominated.end()) {
+            undominated[cur_vertex] = { cur_container };
+        } else {
+            undominated.at(cur_vertex).insert(cur_container);
+        }
+        unprocessed.at(cur_vertex).erase(any_cnt_it);
         
         // If there is no unprocessed label at the current vertex, clear the corresponding map entry
         if(unprocessed.at(cur_vertex).size() == 0u) {
@@ -214,10 +218,15 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             if(unprocessed.find(dest_vertex) == unprocessed.end()) {
                 unprocessed[dest_vertex] = { new_container };
             } else {
-                unprocessed[dest_vertex].insert(new_container);
+                unprocessed.at(dest_vertex).insert(new_container);
             }
             
         }
+    }
+    
+    // If there was no path leading to the end vertex, return an empty set of solutions
+    if(undominated.find(end_v) == undominated.end()) {
+        return std::vector<Solution>();
     }
     
     // We now get the undominated labels at the end vertex
