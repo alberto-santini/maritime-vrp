@@ -22,14 +22,14 @@ using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>
 
 class Label {
 public:
-    std::shared_ptr<const Graph> g;
+    const Graph& g;
     int pic;
     int del;
     double cost;
     
     static constexpr double EPS = 0.00001;
     
-    Label(  std::shared_ptr<const Graph> g,
+    Label(  const Graph& g,
             int pic,
             int del,
             double cost = 0) :
@@ -43,7 +43,7 @@ class ElementaryLabel : public Label {
 public:
     VisitablePorts por;
     
-    ElementaryLabel(std::shared_ptr<const Graph> g,
+    ElementaryLabel(const Graph& g,
                     int pic,
                     int del,
                     double cost,
@@ -67,19 +67,24 @@ class LblContainer {
 public:
     Lbl label;
     const LblContainer* pred_container;
-    const Edge* pred_edge;
+    const BGraph& g;
+    boost::optional<const Edge> pred_edge;
     
     LblContainer(   Lbl label,
                     const LblContainer* pred_container,
-                    const Edge* pred_edge) :
+                    const BGraph& g,
+                    const Edge pred_edge) :
                     label{label},
                     pred_container{pred_container},
+                    g{g},
                     pred_edge{pred_edge} {}
     
-    LblContainer(   Lbl label) :
+    LblContainer(   Lbl label,
+                    const BGraph& g) :
                     label{label},
                     pred_container{nullptr},
-                    pred_edge{nullptr} {}
+                    g{g},
+                    pred_edge{boost::none} {}
 };
 
 template<typename Lbl>
@@ -87,10 +92,20 @@ struct LblContainerHash {
     std::size_t operator()(const LblContainer<Lbl>& c) const {
         std::size_t seed = 0;
         boost::hash_combine(seed, std::hash<const LblContainer<Lbl>*>()(c.pred_container));
-        boost::hash_combine(seed, std::hash<const Edge*>()(c.pred_edge));
+        if(c.pred_edge) {
+            boost::hash_combine(seed, std::hash<int>()(c.g[*c.pred_edge]->boost_edge_id));
+        } else {
+            boost::hash_combine(seed, std::hash<int>()(-1));
+        }
         return seed;
     }
 };
+
+template<typename Lbl>
+using ContainersSet = std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>;
+
+template<typename Lbl>
+using VertexContainersMap = std::map<Vertex, ContainersSet<Lbl>>;
 
 template<typename Lbl>
 bool operator==(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) {
@@ -121,38 +136,58 @@ bool operator<=(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 std::ostream& operator<<(std::ostream& out, const ElementaryLabel& l);
 
+template<typename Lbl>
+void print_map(const VertexContainersMap<Lbl>& m, const Graph& g) {
+    for(const auto& vertex_set : m) {
+        const Vertex& v = vertex_set.first;
+        const ContainersSet<Lbl>& s = vertex_set.second;
+        
+        std::cout << *g.graph[v] << " => " << std::endl;
+        
+        for(const auto& container : s) {
+            std::cout << "\t" << container.label << std::endl;
+        }
+    }
+}
+
 template<typename Lbl, typename LblExt>
 std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Vertex end_v, Lbl start_label, LblExt extension) const {
-    std::map<Vertex, std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>> undominated;
-    std::map<Vertex, std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>> unprocessed;
+    VertexContainersMap<Lbl> undominated;
+    VertexContainersMap<Lbl> unprocessed;
     
     // In the beginning we only have the starting label, as an unprocessed label at the starting vertex
-    unprocessed[start_v] = { LblContainer<Lbl>(start_label) };
-    
+    unprocessed[start_v] = { LblContainer<Lbl>(start_label, g->graph) };
+        
     // While there are unprocessed labels...
     while(!unprocessed.empty()) {
         // Get the first vertex with unprocessed labels
         auto any_set_it = unprocessed.begin();
         const Vertex& cur_vertex = any_set_it->first;
-        const std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>& containers_at_cur_vertex = any_set_it->second;
+        const ContainersSet<Lbl>& containers_at_cur_vertex = any_set_it->second;
         
         // Get the first unprocessed label at the selected vertex
+        assert(!containers_at_cur_vertex.empty());
         auto any_cnt_it = containers_at_cur_vertex.begin();
         
-        // Move the label from unprocessed to undominated
-        const LblContainer<Lbl> cur_container = *any_cnt_it;
-        if(undominated.find(cur_vertex) == undominated.end()) {
-            undominated[cur_vertex] = { cur_container };
-        } else {
-            undominated.at(cur_vertex).insert(cur_container);
-        }
+        // Make a copy of the chosen label
+        auto cur_container = LblContainer<Lbl>(*any_cnt_it);
+        
+        typename ContainersSet<Lbl>::iterator cur_inserted_it;
+        bool cur_inserted;
+        
+        // Insert the label in undominated
+        if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
+        std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
+        assert(cur_inserted_it->pred_container == nullptr || cur_inserted_it->pred_edge);
+        
+        // Remove the label from unprocessed
         unprocessed.at(cur_vertex).erase(any_cnt_it);
         
         // If there is no unprocessed label at the current vertex, clear the corresponding map entry
-        if(unprocessed.at(cur_vertex).size() == 0u) {
+        if(unprocessed.at(cur_vertex).empty()) {
             unprocessed.erase(cur_vertex);
         }
-        
+                
         // Try to expand the current label along all out-edges departing from the current vertex
         for(auto oe = out_edges(cur_vertex, g->graph); oe.first != oe.second; ++oe.first) {
             const Edge& e = *oe.first;
@@ -165,7 +200,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             if(!new_label) { continue; }
             
             // Extension succeeded! Create a container for the new label
-            auto new_container = LblContainer<Lbl>(*new_label, &cur_container, &e);
+            auto new_container = LblContainer<Lbl>(*new_label, &(*cur_inserted_it), g->graph, e);
             bool new_container_dominated = false;
             
             // If there are unprocessed labels at the destination vertex,
@@ -187,6 +222,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                     }
                 }
                 
+                if(unprocessed.at(dest_vertex).empty()) { unprocessed.erase(dest_vertex); }
                 if(new_container_dominated) { continue; }
             }
             
@@ -209,18 +245,18 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                     }
                 }
                 
+                if(undominated.at(dest_vertex).empty()) { undominated.erase(dest_vertex); }
                 if(new_container_dominated) { continue; }
             }
             
             // If we arrived up to here, it means that the new label is not dominated
             // by any existing label at the destination vertex, so we can place it in
             // the set of unprocessed labels at the destination vertex.
-            if(unprocessed.find(dest_vertex) == unprocessed.end()) {
-                unprocessed[dest_vertex] = { new_container };
-            } else {
-                unprocessed.at(dest_vertex).insert(new_container);
-            }
-            
+            typename ContainersSet<Lbl>::iterator new_inserted_it;
+            bool new_inserted;
+            if(unprocessed.find(dest_vertex) == unprocessed.end()) { unprocessed[dest_vertex] = ContainersSet<Lbl>(); }
+            std::tie(new_inserted_it, new_inserted) = unprocessed.at(dest_vertex).insert(new_container);
+            assert(new_inserted_it->pred_edge);
         }
     }
     
@@ -230,7 +266,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
     }
     
     // We now get the undominated labels at the end vertex
-    const std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>& pareto_optimal_containers = undominated.at(end_v);
+    const ContainersSet<Lbl>& pareto_optimal_containers = undominated.at(end_v);
     std::vector<Solution> pareto_optimal_solutions;
     pareto_optimal_solutions.reserve(pareto_optimal_containers.size());
     
@@ -239,14 +275,29 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         Path p;
         double reduced_cost = 0;
         const LblContainer<Lbl>* current = &oc;
-        
+                
         while(current->pred_container != nullptr) {
-            assert(current->pred_edge != nullptr);
-            
+            if(current->pred_edge) {
+                std::cout << "Current container:" << std::endl;
+                std::cout << "\tLabel: " << current->label << std::endl;
+                std::cout << "\tEdge: " << *g->graph[source(*current->pred_edge, g->graph)];
+                std::cout << " -> " << *g->graph[target(*current->pred_edge, g->graph)] << std::endl;
+                std::cout << "\tPred label: " << current->pred_container->label << std::endl;
+            } else {
+                std::cout << "PROBLEM!" << std::endl;
+                std::cout << "Current container:" << std::endl;
+                std::cout << "\tLabel: " << current->label << std::endl;
+                std::cout << "\tEdge: boost::none" << std::endl;
+                std::cout << "\tPred label: " << current->pred_container->label << std::endl;
+                assert(false);
+            }
+                
             p.push_back(*current->pred_edge);
             reduced_cost += current->label.cost;
             current = current->pred_container;
         }
+        
+        std::cout << "==================" << std::endl << std::endl;
         
         // We reverse it, since we built it from the end to the start
         std::reverse(p.begin(), p.end());

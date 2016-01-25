@@ -57,5 +57,5 @@ std::vector<Solution> ExactSolver::solve(double& time_spent) {
     LabelExtender extender(erased);
     LabellingAlgorithm<Label, LabelExtender> alg(g);
     
-    return alg.solve(g->h1().second, g->h2().second, Label(g, vc->capacity, vc->capacity, 0), extender);
+    return alg.solve(g->h1().second, g->h2().second, Label(*g, vc->capacity, vc->capacity, 0), extender);
 }

@@ -63,9 +63,7 @@ bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& out, const ElementaryLabel& l) {
-    out << "(cost: " << l.cost << ", pic: " << l.pic << ", del: " << l.del << ", visitable: ";
-    for(auto i = 0u; i < l.por.size() - 1; i++) { out << l.por[i].first->name << ","; }
-    out << l.por.back().first->name << ")";
+    out << "(cost: " << l.cost << ", pic: " << l.pic << ", del: " << l.del << ", visitable: " << l.por.size() << " ports)";
     return out;
 }
 
@@ -92,7 +90,7 @@ boost::optional<Label> LabelExtender::operator()(const BGraph& graph, const Labe
     // Not enough delivery "space", sorry!
     if(new_label.del < 0) { return boost::none; }
     
-    new_label.cost = label.cost + arc.cost - label.g->dual_of(trg_node) - trg_node.penalty();
+    new_label.cost = label.cost + arc.cost - label.g.dual_of(trg_node) - trg_node.penalty();
     
     return new_label;
 }
@@ -128,7 +126,7 @@ boost::optional<ElementaryLabel> LabelExtender::operator()(const BGraph& graph, 
     // Not enough delivery "space", sorry!
     if(new_label.del < 0) { return boost::none; }
     
-    new_label.cost = label.cost + arc.cost - label.g->dual_of(trg_node) - trg_node.penalty();
+    new_label.cost = label.cost + arc.cost - label.g.dual_of(trg_node) - trg_node.penalty();
     
     return new_label;
 }
