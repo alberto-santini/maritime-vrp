@@ -178,15 +178,14 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         // Insert the label in undominated
         if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
         std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
-        assert(cur_inserted_it->pred_container == nullptr || cur_inserted_it->pred_edge);
+        
+        assert(!cur_inserted_it->pred_container || cur_inserted_it->pred_edge);
         
         // Remove the label from unprocessed
         unprocessed.at(cur_vertex).erase(any_cnt_it);
         
         // If there is no unprocessed label at the current vertex, clear the corresponding map entry
-        if(unprocessed.at(cur_vertex).empty()) {
-            unprocessed.erase(cur_vertex);
-        }
+        if(unprocessed.at(cur_vertex).empty()) { unprocessed.erase(cur_vertex); }
                 
         // Try to expand the current label along all out-edges departing from the current vertex
         for(auto oe = out_edges(cur_vertex, g->graph); oe.first != oe.second; ++oe.first) {
@@ -249,21 +248,22 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                 if(new_container_dominated) { continue; }
             }
             
+            typename ContainersSet<Lbl>::iterator new_inserted_it;
+            bool new_inserted;
+            
             // If we arrived up to here, it means that the new label is not dominated
             // by any existing label at the destination vertex, so we can place it in
             // the set of unprocessed labels at the destination vertex.
-            typename ContainersSet<Lbl>::iterator new_inserted_it;
-            bool new_inserted;
             if(unprocessed.find(dest_vertex) == unprocessed.end()) { unprocessed[dest_vertex] = ContainersSet<Lbl>(); }
             std::tie(new_inserted_it, new_inserted) = unprocessed.at(dest_vertex).insert(new_container);
+            
+            assert(new_inserted_it->pred_container);
             assert(new_inserted_it->pred_edge);
         }
     }
     
     // If there was no path leading to the end vertex, return an empty set of solutions
-    if(undominated.find(end_v) == undominated.end()) {
-        return std::vector<Solution>();
-    }
+    if(undominated.find(end_v) == undominated.end()) { return std::vector<Solution>(); }
     
     // We now get the undominated labels at the end vertex
     const ContainersSet<Lbl>& pareto_optimal_containers = undominated.at(end_v);
@@ -299,7 +299,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         
         std::cout << "==================" << std::endl << std::endl;
         
-        // We reverse it, since we built it from the end to the start
+        // We reverse it, since we built it from end to start
         std::reverse(p.begin(), p.end());
         
         // And we add it to the set of solutions to return
