@@ -5,15 +5,14 @@
 #ifndef LABELLING_H
 #define LABELLING_H
 
+#include <set>
 #include <map>
 #include <memory>
 #include <vector>
 #include <iostream>
 #include <algorithm>
 #include <functional>
-#include <unordered_set>
 #include <boost/optional.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <base/graph.h>
 #include <column/solution.h>
@@ -65,15 +64,21 @@ public:
 template<typename Lbl>
 class LblContainer {
 public:
+    uint32_t id;
+    uint32_t father_id;
     Lbl label;
     const LblContainer* pred_container;
     const BGraph& g;
     boost::optional<const Edge> pred_edge;
     
-    LblContainer(   Lbl label,
+    LblContainer(   uint32_t id,
+                    uint32_t father_id,
+                    Lbl label,
                     const LblContainer* pred_container,
                     const BGraph& g,
                     const Edge pred_edge) :
+                    id{id},
+                    father_id{father_id},
                     label{label},
                     pred_container{pred_container},
                     g{g},
@@ -81,6 +86,8 @@ public:
     
     LblContainer(   Lbl label,
                     const BGraph& g) :
+                    id{1u},
+                    father_id{0u},
                     label{label},
                     pred_container{nullptr},
                     g{g},
@@ -88,21 +95,14 @@ public:
 };
 
 template<typename Lbl>
-struct LblContainerHash {
-    std::size_t operator()(const LblContainer<Lbl>& c) const {
-        std::size_t seed = 0;
-        boost::hash_combine(seed, std::hash<const LblContainer<Lbl>*>()(c.pred_container));
-        if(c.pred_edge) {
-            boost::hash_combine(seed, std::hash<int>()(c.g[*c.pred_edge]->boost_edge_id));
-        } else {
-            boost::hash_combine(seed, std::hash<int>()(-1));
-        }
-        return seed;
-    }
+struct LblContainerComp {
+  bool operator()(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) const {
+      return c1.label.cost < c2.label.cost;
+  }  
 };
 
 template<typename Lbl>
-using ContainersSet = std::unordered_set<LblContainer<Lbl>, LblContainerHash<Lbl>>;
+using ContainersSet = std::set<LblContainer<Lbl>, LblContainerComp<Lbl>>;
 
 template<typename Lbl>
 using VertexContainersMap = std::map<Vertex, ContainersSet<Lbl>>;
@@ -157,12 +157,14 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
     
     // In the beginning we only have the starting label, as an unprocessed label at the starting vertex
     unprocessed[start_v] = { LblContainer<Lbl>(start_label, g->graph) };
+    
+    uint32_t container_id = 2u;
         
     // While there are unprocessed labels...
     while(!unprocessed.empty()) {
         // Get the first vertex with unprocessed labels
         auto any_set_it = unprocessed.begin();
-        const Vertex& cur_vertex = any_set_it->first;
+        Vertex cur_vertex = any_set_it->first;
         const ContainersSet<Lbl>& containers_at_cur_vertex = any_set_it->second;
         
         // Get the first unprocessed label at the selected vertex
@@ -171,26 +173,45 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         
         // Make a copy of the chosen label
         auto cur_container = LblContainer<Lbl>(*any_cnt_it);
+        bool cur_valid = true;
+        
+        // If the current label is not the initial one
+        if(cur_container.pred_container) {
+            // If it has predecessor label, but not edge, it's not valid
+            if(!cur_container.pred_edge) { cur_valid = false; }
+            else {
+                Vertex pred_vertex = source(*cur_container.pred_edge, g->graph);
+        
+                // Check that the current label does not stem from a deleted label
+                if(undominated.find(pred_vertex) == undominated.end() || std::none_of(
+                    undominated.at(pred_vertex).begin(),
+                    undominated.at(pred_vertex).end(),
+                    [&] (const LblContainer<Lbl>& pc) { return pc.id == cur_container.father_id; }
+                )) { cur_valid = false;}
+            }
+        }
         
         typename ContainersSet<Lbl>::iterator cur_inserted_it;
         bool cur_inserted;
         
-        // Insert the label in undominated
-        if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
-        std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
+        // If the current label is valid, insert it in undominated
+        if(cur_valid) {
+            if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
+            std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
+            assert(!cur_inserted_it->pred_container || cur_inserted_it->pred_edge);
+        }
         
-        assert(!cur_inserted_it->pred_container || cur_inserted_it->pred_edge);
-        
-        // Remove the label from unprocessed
+        // In any case, remove the label from unprocessed
         unprocessed.at(cur_vertex).erase(any_cnt_it);
-        
-        // If there is no unprocessed label at the current vertex, clear the corresponding map entry
         if(unprocessed.at(cur_vertex).empty()) { unprocessed.erase(cur_vertex); }
+        
+        // If the label was not valid, mode to the next one
+        if(!cur_valid) { continue; }
                 
         // Try to expand the current label along all out-edges departing from the current vertex
         for(auto oe = out_edges(cur_vertex, g->graph); oe.first != oe.second; ++oe.first) {
-            const Edge& e = *oe.first;
-            const Vertex& dest_vertex = target(e, g->graph);
+            Edge e = *oe.first;
+            Vertex dest_vertex = target(e, g->graph);
             
             // Call to the extension function
             auto new_label = extension(g->graph, cur_container.label, e);
@@ -199,7 +220,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             if(!new_label) { continue; }
             
             // Extension succeeded! Create a container for the new label
-            auto new_container = LblContainer<Lbl>(*new_label, &(*cur_inserted_it), g->graph, e);
+            auto new_container = LblContainer<Lbl>(container_id++, cur_container.id, *new_label, &(*cur_inserted_it), g->graph, e);
             bool new_container_dominated = false;
             
             // If there are unprocessed labels at the destination vertex,
@@ -275,35 +296,26 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         Path p;
         double reduced_cost = 0;
         const LblContainer<Lbl>* current = &oc;
+        bool valid_path = true;
                 
         while(current->pred_container != nullptr) {
-            if(current->pred_edge) {
-                std::cout << "Current container:" << std::endl;
-                std::cout << "\tLabel: " << current->label << std::endl;
-                std::cout << "\tEdge: " << *g->graph[source(*current->pred_edge, g->graph)];
-                std::cout << " -> " << *g->graph[target(*current->pred_edge, g->graph)] << std::endl;
-                std::cout << "\tPred label: " << current->pred_container->label << std::endl;
-            } else {
-                std::cout << "PROBLEM!" << std::endl;
-                std::cout << "Current container:" << std::endl;
-                std::cout << "\tLabel: " << current->label << std::endl;
-                std::cout << "\tEdge: boost::none" << std::endl;
-                std::cout << "\tPred label: " << current->pred_container->label << std::endl;
-                assert(false);
+            if(!current->pred_edge) {
+                valid_path = false;
+                break;
             }
-                
+            
             p.push_back(*current->pred_edge);
             reduced_cost += current->label.cost;
             current = current->pred_container;
         }
         
-        std::cout << "==================" << std::endl << std::endl;
+        if(valid_path) {
+            // We reverse it, since we built it from end to start
+            std::reverse(p.begin(), p.end());
         
-        // We reverse it, since we built it from end to start
-        std::reverse(p.begin(), p.end());
-        
-        // And we add it to the set of solutions to return
-        pareto_optimal_solutions.emplace_back(p, reduced_cost, g);
+            // And we add it to the set of solutions to return
+            pareto_optimal_solutions.emplace_back(p, reduced_cost, g);
+        }
     }
     
     return pareto_optimal_solutions;
