@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <subproblem/heuristics_solver.h>
+#include <subproblem/_labelling.h>
 
 std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
     auto sols = std::vector<Solution>();
@@ -195,7 +196,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
     auto local_erased = g->reduce_graph(percentage, erased);
     LabelExtender extender(local_erased);
     LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
-    
+
     return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(*g, vc->capacity, vc->capacity, 0, prob->data.get_ports_list()), extender);
 }
 
@@ -245,6 +246,6 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage
             g->reduce_graph(percentage, erased);
     LabelExtender extender(local_erased);
     LabellingAlgorithm<Label, LabelExtender> alg(g);
-    
+
     return alg.solve(g->h1().second, g->h2().second, Label(*g, vc->capacity, vc->capacity, 0), extender);
 }

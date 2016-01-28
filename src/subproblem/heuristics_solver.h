@@ -11,7 +11,6 @@
 #include <base/problem.h>
 #include <column/solution.h>
 #include <preprocessing/program_params.h>
-#include <subproblem/_labelling.h>
 
 class HeuristicsSolver {
 public:

@@ -136,6 +136,10 @@ void BBNode::solve(unsigned int node_number) {
     auto mp_start = clock();
     auto sol = mp_solv.solve_lp(local_pool);
     auto mp_end = clock();
+
+    auto n_explored = 0u;
+    auto rec_obj_value = sol.obj_value;
+    auto last_rec_obj_value = sol.obj_value;
     
     total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
     
@@ -177,16 +181,25 @@ void BBNode::solve(unsigned int node_number) {
 
         std::cerr << std::unitbuf << "\t\tSP found " << sp_found_columns << " columns" << std::endl;
 
-        if(sp_found_columns > 0) {
+        if( sp_found_columns > 0 && 
+            (
+                (last_rec_obj_value - rec_obj_value > BBNode::EPS) ||
+                (n_explored++ < 10)
+            )
+        ) {
             // If new columns are found, solve the LP again
             if(try_elementary && (orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) {
                 try_elementary = false;
             }
+            
             auto mp_start = clock();
             sol = mp_solv.solve_lp(local_pool);
             auto mp_end = clock();
             
             total_time_spent_on_mp += (double(mp_end - mp_start) / CLOCKS_PER_SEC);
+            
+            last_rec_obj_value = rec_obj_value;
+            rec_obj_value = sol.obj_value;
             
             std::cerr << "\tMP: " << sol.obj_value << std::endl;
         } else {

@@ -26,7 +26,7 @@ public:
     int del;
     double cost;
     
-    static constexpr double EPS = 0.00001;
+    static constexpr double EPS = 0.001;
     
     Label(  const Graph& g,
             int pic,
@@ -65,20 +65,21 @@ template<typename Lbl>
 class LblContainer {
 public:
     uint32_t id;
-    uint32_t father_id;
+    std::vector<uint32_t> predecessors;
+        
     Lbl label;
     const LblContainer* pred_container;
     const BGraph& g;
     boost::optional<const Edge> pred_edge;
     
     LblContainer(   uint32_t id,
-                    uint32_t father_id,
+                    std::vector<uint32_t> predecessors,
                     Lbl label,
                     const LblContainer* pred_container,
                     const BGraph& g,
                     const Edge pred_edge) :
                     id{id},
-                    father_id{father_id},
+                    predecessors{predecessors},
                     label{label},
                     pred_container{pred_container},
                     g{g},
@@ -87,7 +88,7 @@ public:
     LblContainer(   Lbl label,
                     const BGraph& g) :
                     id{1u},
-                    father_id{0u},
+                    predecessors{std::vector<uint32_t>()},
                     label{label},
                     pred_container{nullptr},
                     g{g},
@@ -154,6 +155,7 @@ template<typename Lbl, typename LblExt>
 std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Vertex end_v, Lbl start_label, LblExt extension) const {
     VertexContainersMap<Lbl> undominated;
     VertexContainersMap<Lbl> unprocessed;
+    std::vector<uint32_t> invalid;
     
     // In the beginning we only have the starting label, as an unprocessed label at the starting vertex
     unprocessed[start_v] = { LblContainer<Lbl>(start_label, g->graph) };
@@ -175,21 +177,12 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         auto cur_container = LblContainer<Lbl>(*any_cnt_it);
         bool cur_valid = true;
         
-        // If the current label is not the initial one
-        if(cur_container.pred_container) {
-            // If it has predecessor label, but not edge, it's not valid
-            if(!cur_container.pred_edge) { cur_valid = false; }
-            else {
-                Vertex pred_vertex = source(*cur_container.pred_edge, g->graph);
-        
-                // Check that the current label does not stem from a deleted label
-                if(undominated.find(pred_vertex) == undominated.end() || std::none_of(
-                    undominated.at(pred_vertex).begin(),
-                    undominated.at(pred_vertex).end(),
-                    [&] (const LblContainer<Lbl>& pc) { return pc.id == cur_container.father_id; }
-                )) { cur_valid = false;}
-            }
-        }
+        if( cur_container.pred_container &&
+                (!cur_container.pred_edge ||
+                std::find(invalid.begin(), invalid.end(), cur_container.pred_container->id) != invalid.end() ||
+                std::any_of(cur_container.predecessors.begin(), cur_container.predecessors.end(),
+                [&] (const auto& i) { return std::find(invalid.begin(), invalid.end(), i) != invalid.end(); }))
+        ) { cur_valid = false; }
         
         typename ContainersSet<Lbl>::iterator cur_inserted_it;
         bool cur_inserted;
@@ -220,9 +213,16 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             if(!new_label) { continue; }
             
             // Extension succeeded! Create a container for the new label
-            auto new_container = LblContainer<Lbl>(container_id++, cur_container.id, *new_label, &(*cur_inserted_it), g->graph, e);
+            auto new_container = LblContainer<Lbl>(
+                container_id++,
+                cur_container.predecessors, 
+                *new_label,
+                &(*cur_inserted_it),
+                g->graph,
+                e);
+            new_container.predecessors.push_back(cur_container.id);
             bool new_container_dominated = false;
-            
+                        
             // If there are unprocessed labels at the destination vertex,
             // if any of them dominates the new label, then discard the new label;
             // if the new label dominates any of them, then discard them.
@@ -232,9 +232,11 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                 while(dest_unp_cnt_it != unprocessed.at(dest_vertex).end()) {
                     const LblContainer<Lbl>& dest_container = *dest_unp_cnt_it;
                     
-                    if(cur_container.label < dest_container.label) {
+                    if(new_container.label < dest_container.label) {
+                        invalid.push_back(dest_container.id);
                         unprocessed.at(dest_vertex).erase(dest_unp_cnt_it++);
-                    } else if(dest_container.label < cur_container.label) {
+                    } else if(dest_container.label < new_container.label) {
+                        invalid.push_back(cur_container.id);
                         new_container_dominated = true;
                         break;
                     } else {
@@ -255,9 +257,11 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                 while(dest_und_cnt_it != undominated.at(dest_vertex).end()) {
                     const LblContainer<Lbl>& dest_container = *dest_und_cnt_it;
                     
-                    if(cur_container.label < dest_container.label) {
+                    if(new_container.label < dest_container.label) {
+                        invalid.push_back(dest_container.id);
                         undominated.at(dest_vertex).erase(dest_und_cnt_it++);
-                    } else if(dest_container.label < cur_container.label) {
+                    } else if(dest_container.label < new_container.label) {
+                        invalid.push_back(cur_container.id);
                         new_container_dominated = true;
                         break;
                     } else {
@@ -298,8 +302,11 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         const LblContainer<Lbl>* current = &oc;
         bool valid_path = true;
                 
-        while(current->pred_container != nullptr) {
-            if(!current->pred_edge) {
+        while(current->pred_container != nullptr) {            
+            if( !current->pred_edge ||
+                current->predecessors.back() != current->pred_container->id ||
+                std::find(invalid.begin(), invalid.end(), current->id) != invalid.end())
+            {
                 valid_path = false;
                 break;
             }

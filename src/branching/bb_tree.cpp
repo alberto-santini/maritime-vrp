@@ -320,7 +320,6 @@ void BBTree::print_results() const {
     results_file << rot_lengths / actual_base.size() << ",";
     
     // 3) Average travel distance of cargo
-    
     auto distance_sum = 0.0;
     auto distance_n = 0u;
     

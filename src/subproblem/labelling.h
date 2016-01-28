@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include <boost/functional/hash.hpp>
+#include <boost/graph/r_c_shortest_paths.hpp>
 
 #include <base/graph.h>
 #include <base/vessel_class.h>
@@ -25,7 +26,7 @@ public:
     int del;
     double cost;
     
-    static constexpr double EPS = 0.00001;
+    static constexpr double EPS = 0.001;
     
     Label(std::shared_ptr<const Graph> g, int p, int d, double c = 0) : g(g), pic(p), del(d), cost(c) {}
 };
