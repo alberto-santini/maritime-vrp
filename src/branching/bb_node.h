@@ -18,7 +18,7 @@
 #include <subproblem/sp_solver.h>
 
 class BBNode {
-    static constexpr double EPS = 1e-6;
+    static constexpr double EPS = 1e-9;
     
 public:
     std::shared_ptr<const Problem> prob;

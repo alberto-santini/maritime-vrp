@@ -9,8 +9,8 @@
 
 class ProgramParams {
 public:
-    int     delta;
-    int     theta;
+    int     greedy_max_outarcs;
+    int     greedy_reruns;
     int     max_cols_to_solve_mp;
     long    dummy_column_price;
     int     cplex_cores;
@@ -22,6 +22,8 @@ public:
     double  smart_max_chance;
     int     time_limit_in_s;
     bool    parallel_labelling;
+    bool    early_branching;
+    int     early_branching_timeout;
     
     ProgramParams(const std::string& data_file_name = "data/program_params.json");
 };

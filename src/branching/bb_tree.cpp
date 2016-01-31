@@ -110,7 +110,7 @@ void BBTree::explore_tree() {
         
         // Solve the master problem to obtain a lower bound
         current_node->solve(node_number++);
-        std::cerr << "\tNode LB: " << current_node->sol_value << std::endl;
+        std::cerr << "\tNode LB: " << std::setprecision(std::numeric_limits<double>::max_digits10) << current_node->sol_value << std::endl;
         
         if(current_node->depth > max_depth) {
             max_depth = current_node->depth;
@@ -514,7 +514,7 @@ void BBTree::try_to_obtain_ub(std::shared_ptr<BBNode> current_node) {
     
     if(feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp) {
         if(current_node->solve_integer(feasible_columns)) {
-            std::cerr << "\tNode UB: " << current_node->mip_sol_value << std::endl;
+            std::cerr << "\tNode UB: " << std::setprecision(std::numeric_limits<double>::max_digits10) << current_node->mip_sol_value << std::endl;
             if(ub - current_node->mip_sol_value > BBNode::cplex_epsilon) {
                 std::cerr << "\t\tImproving the UB" << std::endl;
                 ub = current_node->mip_sol_value;

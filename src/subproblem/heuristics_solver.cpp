@@ -15,7 +15,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
     auto h2 = g->h2().second;
     struct EdgeWithCost { Edge e; double c; double rc; };
 
-    for(auto i = 0; i < prob->params.theta; i++) {
+    for(auto i = 0; i < prob->params.greedy_reruns; i++) {
         auto current = h1;
         auto path = Path();
         auto tot_c = 0.0f, tot_rc = 0.0f;
@@ -54,7 +54,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
                 return (ewc1.rc > ewc2.rc);
             });
             
-            auto rnd_idx = (int) (rand() % (std::min(prob->params.delta, (int)out_e.size())));
+            auto rnd_idx = (int) (rand() % (std::min(prob->params.greedy_max_outarcs, (int)out_e.size())));
             auto chosen = out_e[rnd_idx];
 
             path.insert(path.begin(), chosen.e);
@@ -82,7 +82,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
     auto h2 = g->h2().second;
     struct EdgeWithCost { Edge e; double c; double rc; };
 
-    for(int i = 0; i < prob->params.theta; i++) {
+    for(int i = 0; i < prob->params.greedy_reruns; i++) {
         auto current = h2;
         Path path;
         auto tot_c = 0.0f, tot_rc = 0.0f;
@@ -122,7 +122,7 @@ std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
                 return (ewc1.rc > ewc2.rc);
             });
             
-            auto rnd_idx = (int) (rand() % (std::min(prob->params.delta, (int)in_e.size())));
+            auto rnd_idx = (int) (rand() % (std::min(prob->params.greedy_max_outarcs, (int)in_e.size())));
             auto chosen = in_e[rnd_idx];
             
             path.push_back(chosen.e);

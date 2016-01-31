@@ -1,6 +1,6 @@
 {
-  "delta":                              10,
-  "theta":                              100,
+  "greedy_max_outarcs":                 10,
+  "greedy_reruns":                      100,
   "max_cols_to_solve_mp":               100000,
   "dummy_column_price":                 1000000000000000,
   "try_elementary_labelling":           true,
@@ -11,5 +11,7 @@
   "smart_max_chance":                   0.6,
   "cplex_cores":                        4,
   "time_limit_in_s":                    3600,
-  "parallel_labelling":                 true
+  "parallel_labelling":                 true,
+  "early_branching":                    false,
+  "early_branching_timeout":            60
 }
