@@ -79,16 +79,16 @@ boost::optional<Label> LabelExtender::operator()(const BGraph& graph, const Labe
     if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return boost::none; }
     
     Label new_label = label;
+        
+    // Not enough pickup "space", sorry!
+    if(label.pic < trg_node.pu_demand()) { return boost::none; }
     
     new_label.pic = label.pic - trg_node.pu_demand();
     
-    // Not enough pickup "space", sorry!
-    if(new_label.pic < 0) { return boost::none; }
-    
-    new_label.del = std::min(label.pic- trg_node.pu_demand(), label.del - trg_node.de_demand());
-    
     // Not enough delivery "space", sorry!
-    if(new_label.del < 0) { return boost::none; }
+    if(label.del < trg_node.de_demand()) { return boost::none; }
+    
+    new_label.del = std::min(label.pic - trg_node.pu_demand(), label.del - trg_node.de_demand());
     
     new_label.cost = label.cost + arc.cost - label.g.dual_of(trg_node) - trg_node.penalty();
     
@@ -116,15 +116,15 @@ boost::optional<ElementaryLabel> LabelExtender::operator()(const BGraph& graph, 
     new_label.por = label.por;
     new_label.por.erase(std::remove(new_label.por.begin(), new_label.por.end(), dest_port), new_label.por.end());
     
+    // Not enough pickup "space", sorry!
+    if(label.pic < trg_node.pu_demand()) { return boost::none; }
+    
     new_label.pic = label.pic - trg_node.pu_demand();
     
-    // Not enough pickup "space", sorry!
-    if(new_label.pic < 0) { return boost::none; }
-    
-    new_label.del = std::min(label.pic- trg_node.pu_demand(), label.del - trg_node.de_demand());
-    
     // Not enough delivery "space", sorry!
-    if(new_label.del < 0) { return boost::none; }
+    if(label.del < trg_node.de_demand()) { return boost::none; }
+    
+    new_label.del = std::min(label.pic - trg_node.pu_demand(), label.del - trg_node.de_demand());
     
     new_label.cost = label.cost + arc.cost - label.g.dual_of(trg_node) - trg_node.penalty();
     

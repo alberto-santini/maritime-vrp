@@ -197,7 +197,7 @@ std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double perce
     LabelExtender extender(local_erased);
     LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
 
-    return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(*g, vc->capacity, vc->capacity, 0, prob->data.get_ports_list()), extender);
+    return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(*g, prob->data.get_ports_list()), extender);
 }
 
 std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage, bool smart) const {
@@ -247,5 +247,5 @@ std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage
     LabelExtender extender(local_erased);
     LabellingAlgorithm<Label, LabelExtender> alg(g);
 
-    return alg.solve(g->h1().second, g->h2().second, Label(*g, vc->capacity, vc->capacity, 0), extender);
+    return alg.solve(g->h1().second, g->h2().second, Label(*g), extender);
 }
