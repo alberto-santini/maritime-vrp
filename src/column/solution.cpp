@@ -3,6 +3,7 @@
 //
 
 #include <limits>
+#include <iostream>
 
 #include <column/solution.h>
 
@@ -24,6 +25,7 @@ bool Solution::satisfies_capacity_constraints() const {
     
     for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
         const Node& n = *g->graph[target(*pit, g->graph)];
+        
         if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
             used_capacity -= n.de_demand();
         }
