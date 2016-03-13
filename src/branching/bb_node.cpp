@@ -189,7 +189,7 @@ void BBNode::solve(unsigned int node_number) {
                     }
                     
                     std::cerr << "Over early branching time limit: stopping the exploration of this node." << std::endl;
-                    std::cerr << "Performing early branching with LB = Father's LB = " << sol_value << std::endl;
+                    std::cerr << "Performing early branching with LB = Father's LB = " << std::setprecision(std::numeric_limits<double>::max_digits10) << sol_value << std::endl;
                 }
             }
             
