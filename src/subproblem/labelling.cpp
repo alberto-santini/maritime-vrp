@@ -60,11 +60,11 @@ bool LabelExtender::operator()(const BGraph& graph, ElementaryLabel& new_label, 
     new_label.por = label.por;
     new_label.por.erase(std::remove(new_label.por.begin(), new_label.por.end(), dest_port), new_label.por.end());
     
+    if(label.pic < trg_node.pu_demand()) { return false; }
     new_label.pic = label.pic - dest_node.pu_demand();
-    if(new_label.pic < 0) { return false; }
     
+    if(label.del < trg_node.de_demand()) { return false; }
     new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
-    if(new_label.del < 0) { return false; }
     
     new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
     
@@ -78,11 +78,11 @@ bool LabelExtender::operator()(const BGraph& graph, Label& new_label, const Labe
     
     if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
     
+    if(label.pic < trg_node.pu_demand()) { return false; }
     new_label.pic = label.pic - dest_node.pu_demand();
-    if(new_label.pic < 0) { return false; }
     
+    if(label.del < trg_node.de_demand()) { return false; }
     new_label.del = std::min(label.pic- dest_node.pu_demand(), label.del - dest_node.de_demand());
-    if(new_label.del < 0) { return false; }
     
     new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
     
