@@ -11,10 +11,7 @@
 #include <subproblem/sp_solver.h>
 
 bool SPSolver::solution_in_pool(const Solution& s, const ColumnPool& pool) const {
-    return (find_if(pool.begin(), pool.end(),
-    [&s] (const Column& c) {
-        return (s == c.sol);
-    }) != pool.end());
+    return (std::find_if(pool.begin(), pool.end(), [&s] (const Column& c) { return (s == c.sol); }) != pool.end());
 }
 
 void SPSolver::print_report(int sols_found, int discarded_prc, int discarded_infeasible, int discarded_generated, int discarded_in_pool, std::ostream& out) const {
@@ -67,9 +64,7 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
         }
     }
     
-    if(PEDANTIC) {
-        print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-    }
+    if(PEDANTIC) { print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool); }
     
     if(valid_sols.size() > 0) {
         for(const auto& s : valid_sols) {
@@ -135,8 +130,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                         // s.g->print_path(s.path);
                     // }
                     discarded_prc++;
-                } else if(!s.satisfies_capacity_constraints()) {
-                    discarded_infeasible++;
                 } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
                     discarded_generated++;
                 } else if(solution_in_pool(s, node_pool)) {
@@ -147,13 +140,13 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                     // }
                     valid_sols.push_back(s);
                 }
-            }    
+                
+                if(PEDANTIC) { assert(s.satisfies_capacity_constraints()); }
+            }
             percentage += pct_increment;
         }
     
-        if(PEDANTIC) {
-            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-        }
+        if(PEDANTIC) { print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool); }
     
         if(valid_sols.size() > 0) {
             for(const auto& s : valid_sols) {
@@ -213,8 +206,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                     // s.g->print_path(s.path);
                 // }
                 discarded_prc++;
-            } else if(!s.satisfies_capacity_constraints()) {
-                discarded_infeasible++;
             } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
                 discarded_generated++;
             } else if(solution_in_pool(s, node_pool)) {
@@ -225,11 +216,11 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                 // }
                 valid_sols.push_back(s);
             }
+            
+            if(PEDANTIC) { assert(s.satisfies_capacity_constraints()); }
         }
 
-        if(PEDANTIC) {
-            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-        }
+        if(PEDANTIC) { print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool); }
        
         if(valid_sols.size() > 0) {
             for(const auto& s : valid_sols) {
@@ -290,8 +281,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                         // s.g->print_path(s.path);
                     // }
                     discarded_prc++;
-                } else if(!s.satisfies_capacity_constraints()) {
-                    discarded_infeasible++;
                 } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
                     discarded_generated++;
                 } else if(solution_in_pool(s, node_pool)) {
@@ -302,13 +291,13 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                     // }
                     valid_sols.push_back(s);
                 }
+                
+                if(PEDANTIC) { assert(s.satisfies_capacity_constraints()); }
             }    
             percentage += pct_increment;
         }
     
-        if(PEDANTIC) {
-            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool);
-        }
+        if(PEDANTIC) { print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated, discarded_in_pool); }
     
         if(valid_sols.size() > 0) {
             for(const auto& s : valid_sols) {
@@ -368,8 +357,6 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
                 // s.g->print_path(s.path);
             // }
             discarded_prc++;
-        } else if(!s.satisfies_capacity_constraints()) {
-            discarded_infeasible++;
         } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
             discarded_generated++;
         } else if(solution_in_pool(s, node_pool)) {
@@ -380,6 +367,8 @@ std::pair<int, ColumnOrigin> SPSolver::solve(ColumnPool& node_pool, std::shared_
             // }
             valid_sols.push_back(s);
         }
+        
+        if(PEDANTIC) { assert(s.satisfies_capacity_constraints()); }
     }
 
     if(PEDANTIC) {
