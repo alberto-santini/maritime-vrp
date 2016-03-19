@@ -96,7 +96,7 @@ public:
     const LblContainer* pred_container;
     const BGraph& g;
     boost::optional<const Edge> pred_edge;
-    bool dominated;
+    mutable bool dominated;
     
     LblContainer(   Lbl label,
                     const LblContainer* pred_container,
@@ -140,9 +140,9 @@ public:
     friend auto end(const ContainersSet& s) { return s.set.end(); }
     
     bool has_undominated_labels() const {
-        if(set.empty()) { return true; }
-        if(std::any_of(set.begin(), set.end(), [] (const LblContainer<Lbl>& c) { return !c.dominated; })) { return false; }
-        return true;
+        if(set.empty()) { return false; }
+        if(std::any_of(set.begin(), set.end(), [] (const LblContainer<Lbl>& c) { return !c.dominated; })) { return true; }
+        return false;
     }
     
     auto first_undominated_container() const {
@@ -150,8 +150,10 @@ public:
         return set.end();
     }
     
-    auto begin() const { return set.begin(); }
-    auto end() const { return set.end(); }
+    const iterator begin() const { return set.begin(); }
+    const iterator end() const { return set.end(); }
+    iterator begin() { return set.begin(); }
+    iterator end() { return set.end(); }
     auto insert(LblContainer<Lbl> l) { return set.insert(l); }
     auto erase(const iterator& l) { return set.erase(l); }
     auto size() const { return set.size(); }
@@ -167,13 +169,15 @@ class VertexContainersMap {
     std::map<Vertex, ContainersSet<Lbl>> map;
     
 public:
+    using iterator = typename std::map<Vertex, ContainersSet<Lbl>>::iterator;
+    
     friend auto begin(const VertexContainersMap& m) { return m.map.begin(); }
     friend auto end(const VertexContainersMap& m) { return m.map.end(); }
     
     bool has_undominated_labels() const {
-        if(map.empty()) { return true; }
-        for(const auto& vs : map) { if(!vs.second.empty()) { return false; } }
-        return true;
+        if(map.empty()) { return false; }
+        for(const auto& vs : map) { if(!vs.second.empty()) { return true; } }
+        return false;
     }
     
     auto first_with_undominated_container() const {
@@ -181,8 +185,10 @@ public:
         return map.end();
     }
     
-    auto begin() const { return map.begin(); }
-    auto end() const { return map.end(); }
+    const iterator begin() const { return map.begin(); }
+    const iterator end() const { return map.end(); }
+    iterator begin() { return map.begin(); }
+    iterator end() { return map.end(); }
     auto find(const Vertex& v) const { return map.find(v); }
     auto erase(const Vertex& v) { return map.erase(v); }
     auto empty() const { return map.empty(); }
@@ -240,7 +246,7 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         // Remove the label from unprocessed
         unprocessed.at(cur_vertex).erase(any_cnt_it);
         if(unprocessed.at(cur_vertex).empty()) { unprocessed.erase(cur_vertex); }
-                        
+                
         // Try to expand the current label along all out-edges departing from the current vertex
         for(auto oe = out_edges(cur_vertex, g->graph); oe.first != oe.second; ++oe.first) {
             Edge e = *oe.first;
