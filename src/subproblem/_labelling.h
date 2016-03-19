@@ -22,8 +22,9 @@ using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>
 class Label {
 public:
     const Graph& g;
-    int pic;
-    int del;
+    int pic; // Qty it's possible to pickup
+    int del; // Qty it's possible to deliver
+    int tdel; // Total qty delivered
     double cost;
     
     static constexpr double EPS = 0.001;
@@ -35,6 +36,7 @@ public:
             g{g},
             pic{pic},
             del{del},
+            tdel{tdel},
             cost{cost} {}
             
     Label(  const Graph& g) :
@@ -73,97 +75,6 @@ public:
     boost::optional<ElementaryLabel> operator()(const BGraph& graph, const ElementaryLabel& label, const Edge& e) const;
 };
 
-/* ============================================= */
-
-template<typename Lbl>
-class LblContainer {
-public:
-    uint32_t id;
-    std::vector<uint32_t> predecessors;
-        
-    Lbl label;
-    const LblContainer* pred_container;
-    const BGraph& g;
-    boost::optional<const Edge> pred_edge;
-    
-    LblContainer(   uint32_t id,
-                    std::vector<uint32_t> predecessors,
-                    Lbl label,
-                    const LblContainer* pred_container,
-                    const BGraph& g,
-                    const Edge pred_edge) :
-                    id{id},
-                    predecessors{predecessors},
-                    label{label},
-                    pred_container{pred_container},
-                    g{g},
-                    pred_edge{pred_edge} {}
-    
-    LblContainer(   Lbl label,
-                    const BGraph& g) :
-                    id{1u},
-                    predecessors{std::vector<uint32_t>()},
-                    label{label},
-                    pred_container{nullptr},
-                    g{g},
-                    pred_edge{boost::none} {}
-};
-
-template<typename Lbl>
-struct LblContainerComp {
-  bool operator()(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) const {
-      return c1.label.cost < c2.label.cost;
-  }  
-};
-
-template<typename Lbl>
-using ContainersSet = std::set<LblContainer<Lbl>, LblContainerComp<Lbl>>;
-
-template<typename Lbl>
-using VertexContainersMap = std::map<Vertex, ContainersSet<Lbl>>;
-
-template<typename Lbl>
-bool operator==(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) {
-    if(c1.pred_edge != c2.pred_edge) { return false; }
-    if(c1.pred_container != c2.pred_container) { return false; }
-    return c1.label == c2.label;
-}
-
-template<typename Lbl>
-struct OfflineContainer {
-    uint32_t id;
-    uint32_t fid;
-    uint32_t domby;
-    bool dom;
-    Vertex v;
-    Edge e;
-    Lbl l;
-
-    OfflineContainer(Vertex v, Lbl l) : id{1}, fid{0}, domby{0}, dom{false}, v{v}, e{Edge()} , l{l} {}
-    OfflineContainer(uint32_t id, uint32_t fid, uint32_t domby, bool dom, Vertex v, Edge e, Lbl l) : id{id}, fid{fid}, domby{domby}, dom{dom}, v{v}, e{e}, l{l} {}
-
-    void print(const Graph& g) const {
-        assert(dom || domby == 0u);
-        assert(!dom || domby > 0u);
-
-        std::cout << "\t" << *g.graph[v] << " {id: " << id << ", fid: " << fid << ", dom: ";
-        if(dom) { std::cout << domby; } else { std::cout << "no"; }
-        std::cout << ", l: " << l << "}" << std::endl;
-    }
-};
-
-template<typename Lbl, typename LblExt>
-class LabellingAlgorithm {
-    std::shared_ptr<const Graph> g;
-    
-    void diagnose_invalid(const std::vector<OfflineContainer<Lbl>>& c, const std::vector<uint32_t>& invalid, const LblContainer<Lbl>& container) const;
-    void set_dominated(std::vector<OfflineContainer<Lbl>>& c, uint32_t id, uint32_t domid) const;
-public:
-    LabellingAlgorithm(std::shared_ptr<const Graph> g) : g{g} {}
-    
-    std::vector<Solution> solve(Vertex start_v, Vertex end_v, Lbl start_label, LblExt extension) const;
-};
-
 bool operator==(const Label& lhs, const Label& rhs);
 bool operator!=(const Label& lhs, const Label& rhs);
 bool operator<=(const Label& lhs, const Label& rhs);
@@ -176,160 +87,160 @@ bool operator<=(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 bool operator<(const ElementaryLabel& lhs, const ElementaryLabel& rhs);
 std::ostream& operator<<(std::ostream& out, const ElementaryLabel& l);
 
+/* ============================================= */
+
 template<typename Lbl>
-void print_map(const VertexContainersMap<Lbl>& m, const Graph& g) {
-    for(const auto& vertex_set : m) {
-        const Vertex& v = vertex_set.first;
-        const ContainersSet<Lbl>& s = vertex_set.second;
-        std::cout << *g.graph[v] << " => " << std::endl;
-        for(const auto& container : s) { std::cout << "\t" << container.label << std::endl; }
+class LblContainer {
+public:
+    Lbl label;
+    const LblContainer* pred_container;
+    const BGraph& g;
+    boost::optional<const Edge> pred_edge;
+    bool dominated;
+    
+    LblContainer(   Lbl label,
+                    const LblContainer* pred_container,
+                    const BGraph& g,
+                    const Edge pred_edge) :
+                    label{label},
+                    pred_container{pred_container},
+                    g{g},
+                    pred_edge{pred_edge},
+                    dominated{false} {}
+    
+    LblContainer(   Lbl label,
+                    const BGraph& g) :
+                    label{label},
+                    pred_container{nullptr},
+                    g{g},
+                    pred_edge{boost::none},
+                    dominated{false} {}
+};
+
+template<typename Lbl>
+struct LblContainerComp {
+  bool operator()(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) const {
+      if(c1.label.pic > c1.label.pic) { return true; }
+      if(c1.label.del > c2.label.del) { return true; }
+      return (c1.label.cost < c2.label.cost);
+  }  
+};
+
+template<typename Lbl>
+class ContainersSet {
+    std::set<LblContainer<Lbl>, LblContainerComp<Lbl>> set;
+    
+public:
+    using iterator = typename std::set<LblContainer<Lbl>, LblContainerComp<Lbl>>::iterator;
+    
+    ContainersSet(std::initializer_list<LblContainer<Lbl>> l) : set{l} {}
+    ContainersSet() {}
+    
+    friend auto begin(const ContainersSet& s) { return s.set.begin(); }
+    friend auto end(const ContainersSet& s) { return s.set.end(); }
+    
+    bool has_undominated_labels() const {
+        if(set.empty()) { return true; }
+        if(std::any_of(set.begin(), set.end(), [] (const LblContainer<Lbl>& c) { return !c.dominated; })) { return false; }
+        return true;
     }
+    
+    auto first_undominated_container() const {
+        for(auto it = set.begin(); it != set.end(); ++it) { if(!it->dominated) { return it; } }
+        return set.end();
+    }
+    
+    auto begin() const { return set.begin(); }
+    auto end() const { return set.end(); }
+    auto insert(LblContainer<Lbl> l) { return set.insert(l); }
+    auto erase(const iterator& l) { return set.erase(l); }
+    auto size() const { return set.size(); }
+    auto empty() const { return set.empty(); }
+    void mark_dominated(iterator l) {
+        assert(l != set.end());
+        l->dominated = true;
+    }
+};
+
+template<typename Lbl>
+class VertexContainersMap {
+    std::map<Vertex, ContainersSet<Lbl>> map;
+    
+public:
+    friend auto begin(const VertexContainersMap& m) { return m.map.begin(); }
+    friend auto end(const VertexContainersMap& m) { return m.map.end(); }
+    
+    bool has_undominated_labels() const {
+        if(map.empty()) { return true; }
+        for(const auto& vs : map) { if(!vs.second.empty()) { return false; } }
+        return true;
+    }
+    
+    auto first_with_undominated_container() const {
+        for(auto it = map.begin(); it != map.end(); ++it) { if(!it->second.empty()) { return it; } }
+        return map.end();
+    }
+    
+    auto begin() const { return map.begin(); }
+    auto end() const { return map.end(); }
+    auto find(const Vertex& v) const { return map.find(v); }
+    auto erase(const Vertex& v) { return map.erase(v); }
+    auto empty() const { return map.empty(); }
+    const ContainersSet<Lbl>& at(const Vertex& v) const { return map.at(v); }
+    ContainersSet<Lbl>& at(const Vertex& v) { return map.at(v); }
+    ContainersSet<Lbl>& operator[](const Vertex& v) { return map[v]; }
+};
+
+template<typename Lbl>
+bool operator==(const LblContainer<Lbl>& c1, const LblContainer<Lbl>& c2) {
+    if(c1.pred_edge != c2.pred_edge) { return false; }
+    if(c1.pred_container != c2.pred_container) { return false; }
+    return c1.label == c2.label;
 }
 
 template<typename Lbl, typename LblExt>
-void LabellingAlgorithm<Lbl, LblExt>::set_dominated(std::vector<OfflineContainer<Lbl>>& c, uint32_t id, uint32_t domid) const {
-    for(auto& oc : c) { if(oc.id == id) { oc.dom = true; oc.domby = domid; return; } }
-}
-
-template<typename Lbl, typename LblExt>
-void LabellingAlgorithm<Lbl, LblExt>::diagnose_invalid(const std::vector<OfflineContainer<Lbl>>& c, const std::vector<uint32_t>& invalid, const LblContainer<Lbl>& container) const {
-    std::cout << "=======================================" << std::endl;
-
-    /*******************************************************/
-    std::cout << "Partial path:" << std::endl;
-    for(auto label_id : container.predecessors) {
-        auto it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == label_id; });
-        assert(it != c.end());
-        it->print(*g);
-    }
-    auto container_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == container.id; });
-    container_it->print(*g);
-    std::cout << std::endl;
-
-    /*******************************************************/
-    auto path_it = std::find_if(container.predecessors.begin(), container.predecessors.end(),
-        [&] (const auto& p) { return std::find(invalid.begin(), invalid.end(), p) != invalid.end(); });
-
-    auto invalid_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == *path_it; });
-
-    assert(invalid_it != c.end());
-    assert(invalid_it->dom);
-
-    auto dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == invalid_it->domby; });
-
-    assert(dominant_it != c.end());
-
-    std::cout << "=== Invalid" << std::endl;
-    invalid_it->print(*g);
-    std::cout << "=== Dominant" << std::endl;
-    dominant_it->print(*g);
-    std::cout << std::endl;
-
-    assert(invalid_it->v == dominant_it->v);
-
-    /*******************************************************/
-    while(true) {
-        uint32_t cur_id = 0;
-
-        if(cur_id == container.id) { break; }
-
-        if(++path_it == container.predecessors.end()) {
-            cur_id = container.id;
-        } else {
-            cur_id = *path_it;
-        }
-
-        auto prev_invalid_it = invalid_it;
-        auto prev_dominant_it = dominant_it;
-
-        invalid_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == cur_id; });
-
-        assert(invalid_it->fid == prev_invalid_it->id);
-
-        dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.fid == dominant_it->id && oc.v == invalid_it->v; });
-
-        assert(invalid_it->v == dominant_it->v);
-
-        std::cout << "=== [Prev] Invalid" << std::endl;
-        prev_invalid_it->print(*g);
-        std::cout << "=== [New] Invalid" << std::endl;
-        invalid_it->print(*g);
-
-        if(invalid_it->dom) {
-            auto new_dom_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == invalid_it->domby; });
-            std::cout << "=== [New] Invalid dominated by" << std::endl;
-            new_dom_it->print(*g);
-        }
-
-        std::cout << "=== [Prev] Dominant" << std::endl;
-        prev_dominant_it->print(*g);
-        std::cout << "=== [New] Dominant" << std::endl;
-        dominant_it->print(*g);
-
-        if(!invalid_it->dom) {
-            std::cout << "[New] Invalid not dominated. Quitting." << std::endl;
-            break;
-        }
-
-        std::cout << std::endl;
-    }
-}
+class LabellingAlgorithm {
+    std::shared_ptr<const Graph> g;
+    
+public:
+    LabellingAlgorithm(std::shared_ptr<const Graph> g) : g{g} {}    
+    std::vector<Solution> solve(Vertex start_v, Vertex end_v, Lbl start_label, LblExt extension) const;
+};
 
 template<typename Lbl, typename LblExt>
 std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Vertex end_v, Lbl start_label, LblExt extension) const {
     VertexContainersMap<Lbl> undominated;
     VertexContainersMap<Lbl> unprocessed;
-    std::vector<uint32_t> invalid;
-    /* DBG */ std::vector<OfflineContainer<Lbl>> c;
     
     // In the beginning we only have the starting label, as an unprocessed label at the starting vertex
     unprocessed[start_v] = { LblContainer<Lbl>(start_label, g->graph) };
     
-    /* DBG */ c.emplace_back(start_v, start_label);
-    
-    uint32_t container_id = 2u;
-        
     // While there are unprocessed labels...
-    while(!unprocessed.empty()) {
+    while(unprocessed.has_undominated_labels()) {
         // Get the first vertex with unprocessed labels
-        auto any_set_it = unprocessed.begin();
+        auto any_set_it = unprocessed.first_with_undominated_container();
         Vertex cur_vertex = any_set_it->first;
         const ContainersSet<Lbl>& containers_at_cur_vertex = any_set_it->second;
         
         // Get the first unprocessed label at the selected vertex
-        assert(!containers_at_cur_vertex.empty());
-        auto any_cnt_it = containers_at_cur_vertex.begin();
+        assert(containers_at_cur_vertex.has_undominated_labels());
+        auto any_cnt_it = containers_at_cur_vertex.first_undominated_container();
         
         // Make a copy of the chosen label
         auto cur_container = LblContainer<Lbl>(*any_cnt_it);
-        bool cur_valid = true;
-        
-        if( cur_container.pred_container &&
-                (!cur_container.pred_edge ||
-                std::any_of(cur_container.predecessors.begin(), cur_container.predecessors.end(),
-                    [&] (const auto& i) { return std::find(invalid.begin(), invalid.end(), i) != invalid.end(); }))
-        ) { cur_valid = false; }
         
         typename ContainersSet<Lbl>::iterator cur_inserted_it;
         bool cur_inserted;
         
-        // If the current label is valid, insert it in undominated
-        if(cur_valid) {
-            if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
-            std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
-            assert(!cur_inserted_it->pred_container || cur_inserted_it->pred_edge);
-        }
-        else {
-            diagnose_invalid(c, invalid, cur_container);
-        }
+        // Insert the current label in undominated
+        if(undominated.find(cur_vertex) == undominated.end()) { undominated[cur_vertex] = ContainersSet<Lbl>(); }
+        std::tie(cur_inserted_it, cur_inserted) = undominated.at(cur_vertex).insert(cur_container);
+        assert(!cur_inserted_it->pred_container || cur_inserted_it->pred_edge);
         
-        // In any case, remove the label from unprocessed
+        // Remove the label from unprocessed
         unprocessed.at(cur_vertex).erase(any_cnt_it);
         if(unprocessed.at(cur_vertex).empty()) { unprocessed.erase(cur_vertex); }
-        
-        // If the label was not valid, mode to the next one
-        if(!cur_valid) { continue; }
-                
+                        
         // Try to expand the current label along all out-edges departing from the current vertex
         for(auto oe = out_edges(cur_vertex, g->graph); oe.first != oe.second; ++oe.first) {
             Edge e = *oe.first;
@@ -342,18 +253,9 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             if(!new_label) { continue; }
             
             // Extension succeeded! Create a container for the new label
-            auto new_container = LblContainer<Lbl>(
-                container_id++,
-                cur_container.predecessors, 
-                *new_label,
-                &(*cur_inserted_it),
-                g->graph,
-                e);
-            new_container.predecessors.push_back(cur_container.id);
+            auto new_container = LblContainer<Lbl>(*new_label, &(*cur_inserted_it), g->graph, e);
             bool new_container_dominated = false;
             
-            /* DBG */ c.emplace_back(container_id - 1, cur_container.id, 0, false, dest_vertex, e, *new_label);
-                        
             // If there are unprocessed labels at the destination vertex,
             // if any of them dominates the new label, then discard the new label;
             // if the new label dominates any of them, then discard them.
@@ -364,24 +266,10 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                     const LblContainer<Lbl>& dest_container = *dest_unp_cnt_it;
                     
                     if(new_container.label < dest_container.label && !(dest_container.label < new_container.label)) {
-                        /* DBG */ {
-                            auto dominated_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == dest_container.id; });
-                            auto dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == new_container.id; });
-                            assert(dominated_it->v == dominant_it->v);
-                        }
-                        /* DBG */ set_dominated(c, dest_container.id, new_container.id);
                         assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
-                        invalid.push_back(dest_container.id);
                         unprocessed.at(dest_vertex).erase(dest_unp_cnt_it++);
                     } else if(dest_container.label < new_container.label && !(new_container.label < dest_container.label)) {
-                        /* DBG */ {
-                            auto dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == dest_container.id; });
-                            auto dominated_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == new_container.id; });
-                            assert(dominated_it->v == dominant_it->v);
-                        }
-                        /* DBG */ set_dominated(c, new_container.id, dest_container.id);
                         assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
-                        invalid.push_back(new_container.id);
                         new_container_dominated = true;
                         break;
                     } else {
@@ -403,24 +291,10 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
                     const LblContainer<Lbl>& dest_container = *dest_und_cnt_it;
                     
                     if(new_container.label < dest_container.label && !(dest_container.label < new_container.label)) {
-                        /* DBG */ {
-                            auto dominated_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == dest_container.id; });
-                            auto dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == new_container.id; });
-                            assert(dominated_it->v == dominant_it->v);
-                        }
-                        /* DBG */ set_dominated(c, dest_container.id, new_container.id);
                         assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
-                        invalid.push_back(dest_container.id);
-                        undominated.at(dest_vertex).erase(dest_und_cnt_it++);
+                        undominated.at(dest_vertex).mark_dominated(dest_und_cnt_it++);
                     } else if(dest_container.label < new_container.label && !(new_container.label < dest_container.label)) {
-                        /* DBG */ {
-                            auto dominant_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == dest_container.id; });
-                            auto dominated_it = std::find_if(c.begin(), c.end(), [&] (const auto& oc) { return oc.id == new_container.id; });
-                            assert(dominated_it->v == dominant_it->v);
-                        }
-                        /* DBG */ set_dominated(c, new_container.id, dest_container.id);
                         assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
-                        invalid.push_back(new_container.id);
                         new_container_dominated = true;
                         break;
                     } else {
@@ -459,17 +333,8 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
         Path p;
         double reduced_cost = 0;
         const LblContainer<Lbl>* current = &oc;
-        bool valid_path = true;
                 
         while(current->pred_container != nullptr) {            
-            if( !current->pred_edge ||
-                current->predecessors.back() != current->pred_container->id ||
-                std::find(invalid.begin(), invalid.end(), current->id) != invalid.end())
-            {
-                valid_path = false;
-                break;
-            }
-            
             p.push_back(*current->pred_edge);
             reduced_cost += current->label.cost;
             
@@ -478,14 +343,8 @@ std::vector<Solution> LabellingAlgorithm<Lbl, LblExt>::solve(Vertex start_v, Ver
             current = current->pred_container;
         }
         
-        if(valid_path) {            
-            // And we add it to the set of solutions to return
-            pareto_optimal_solutions.emplace_back(p, reduced_cost, g);
-            if(!pareto_optimal_solutions.back().satisfies_capacity_constraints()) {
-                std::cout << "VIOLATES CAPACITY CONSTRAINTS:" << std::endl;
-                g->print_path(p, std::cout);
-            }
-        }
+        // And we add it to the set of solutions to return
+        pareto_optimal_solutions.emplace_back(p, reduced_cost, g);
     }
     
     return pareto_optimal_solutions;
