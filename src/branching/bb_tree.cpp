@@ -274,10 +274,10 @@ void BBTree::print_results() const {
     results_file << elapsed_time << ",";
     results_file << total_time_on_master << ",";
     results_file << total_time_on_pricing << ",";
-    results_file << ub << ",";
-    results_file << lb << ",";
-    results_file << gap << ",";
-    results_file << gap_at_root << ",";
+    results_file << std::setprecision(12) << ub << ",";
+    results_file << std::setprecision(12) << lb << ",";
+    results_file << std::setprecision(12) << gap << ",";
+    results_file << std::setprecision(12) << gap_at_root << ",";
     results_file << bb_nodes_generated << ",";
     results_file << max_depth << ",";
     results_file << pool->size() << ",";
