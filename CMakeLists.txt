@@ -67,7 +67,7 @@ set(SOURCE_FILES
   src/subproblem/exact_solver.h
   src/subproblem/heuristics_solver.h
   src/subproblem/id_maps.h
-  src/subproblem/_labelling.h
+  src/subproblem/labelling.h
   src/subproblem/sp_solver.h
   src/base/graph.cpp
   src/base/node.cpp
@@ -85,7 +85,7 @@ set(SOURCE_FILES
   src/preprocessing/program_params.cpp
   src/subproblem/exact_solver.cpp
   src/subproblem/heuristics_solver.cpp
-  src/subproblem/_labelling.cpp
+  src/subproblem/labelling.cpp
   src/subproblem/sp_solver.cpp
 )
 
