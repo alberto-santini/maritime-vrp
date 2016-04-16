@@ -1,14 +1,9 @@
-Maritime VRP
-============
+#### Maritime VRP
 
-Intro
------
+##### Intro
 
-This project is part of my Master Thesis. The code has been written from scratch, but often in a hurry and lacks proper documentation.
 
-It is otherwise fully functional and can be used to validate the results obtained in the thesis.
-
-It is a solver for a quite particular case of maritime VRP with:
+A solver for a maritime version of the Vehicle Routing Problem  with:
 
 * Multiple time windows
 * Pickups and deliveries
@@ -16,7 +11,8 @@ It is a solver for a quite particular case of maritime VRP with:
 * Multiple sailing speeds (and costs)
 * Maximum transit times
 
-License
--------
+This problem is known in the literature as the Feeder Network Design Problem.
+
+##### License
 
 This software is distributed under the GNU General Public License v3, as detailed in `LICENSE.txt`.
