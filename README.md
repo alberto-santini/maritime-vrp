@@ -1,8 +1,5 @@
 #### Maritime VRP
 
-##### Intro
-
-
 A solver for a maritime version of the Vehicle Routing Problem  with:
 
 * Multiple time windows
