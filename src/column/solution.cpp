@@ -91,3 +91,28 @@ std::vector<double> Solution::cargo_travel_distances() const {
     
     return distances;
 }
+
+std::vector<double> Solution::legs_distance() const {
+    auto dist = std::vector<double>();
+    
+    for(const auto& e : path) {
+        dist.push_back(g->graph[e]->length);
+    }
+    
+    return dist;
+}
+
+std::vector<double> Solution::legs_speed() const {
+    auto speeds = std::vector<double>();
+    
+    for(const auto& e : path) {
+        auto s = source(e, g->graph);
+        auto t = target(e, g->graph);
+        auto l = g->graph[e]->length;
+        auto s_ti = g->graph[s]->time_step;
+        auto t_ti = g->graph[t]->time_step;
+        speeds.push_back(l / (t_ti - s_ti));
+    }
+    
+    return speeds;
+}

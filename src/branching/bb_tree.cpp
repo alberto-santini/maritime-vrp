@@ -310,6 +310,26 @@ void BBTree::print_results() const {
     
     results_file << ",";
     
+    auto total_used = std::accumulate(
+        vc_used.begin(),
+        vc_used.end(),
+        0u,
+        [&] (unsigned int cum, const auto& vc_n) {
+            return cum + vc_n.second;
+        }
+    );
+    
+    auto total_vessels = std::accumulate(
+        prob->data.vessel_classes.begin(),
+        prob->data.vessel_classes.end(),
+        0u,
+        [&] (unsigned int cum, const auto& vc) {
+            return cum + vc->num_vessels;
+        }
+    );
+    
+    results_file << total_used << "," << total_vessels << ",";
+    
     // 2) Average length of a rotation
     auto rot_lengths = 0.0;
     
@@ -329,7 +349,34 @@ void BBTree::print_results() const {
         distance_n += d.size();
     }
     
-    results_file << (distance_sum / distance_n);
+    results_file << (distance_sum / distance_n) << ",";
+    
+    // 4) Average speed
+    auto weighted_speed = 0.0;
+    auto total_distance = 0.0;
+    
+    for(const auto& col : actual_base) {
+        auto d = col.sol.legs_distance();
+        auto s = col.sol.legs_speed();
+        
+        assert(d.size() == s.size());
+        
+        for(auto i = 0u; i < d.size(); i++) {
+            weighted_speed += d[i] * s[i];
+            total_distance += d[i];
+        }
+    }
+    
+    results_file << (weighted_speed / total_distance) << ",";
+    
+    // 5) Served cargoes
+    auto served_cargoes = 0u;
+    
+    for(const auto& col : actual_base) {
+        served_cargoes += col.sol.path.size() - 1;
+    }
+    
+    results_file << served_cargoes;
     
     results_file << std::endl;
     results_file.close();

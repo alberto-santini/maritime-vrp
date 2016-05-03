@@ -44,6 +44,8 @@ public:
     bool operator==(const Solution& other) const;
     double length() const;
     std::vector<double> cargo_travel_distances() const;
+    std::vector<double> legs_distance() const;
+    std::vector<double> legs_speed() const;
 };
 
 #endif
