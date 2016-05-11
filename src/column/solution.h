@@ -18,7 +18,8 @@ struct SolutionCosts {
     double total_movement;
     double total_revenue;
     
-    SolutionCosts() {}
+    SolutionCosts()
+    total_costs(0.0), total_bunker(0.0), total_time_charter(0.0), total_ports(0.0), total_movement(0.0), total_revenue(0.0) {}
     SolutionCosts(double total_bunker, double total_time_charter, double total_ports, double total_movement, double total_revenue) :
         total_costs(2 * total_bunker + total_time_charter + total_ports + total_movement),
         total_bunker(2 * total_bunker),
