@@ -10,6 +10,32 @@
 #include <base/graph.h>
 #include <base/vessel_class.h>
 
+struct SolutionCosts {
+    double total_costs;
+    double total_bunker;
+    double total_time_charter;
+    double total_ports;
+    double total_movement;
+    double total_revenue;
+    
+    SolutionCosts() {}
+    SolutionCosts(double total_bunker, double total_time_charter, double total_ports, double total_movement, double total_revenue) :
+        total_costs(2 * total_bunker + total_time_charter + total_ports + total_movement),
+        total_bunker(2 * total_bunker),
+        total_time_charter(total_time_charter),
+        total_ports(total_ports),
+        total_revenue(total_revenue) {}
+        
+    void add(const SolutionCosts& other) {
+        total_costs += other.total_costs;
+        total_bunker += other.total_bunker;
+        total_time_charter += other.total_time_charter;
+        total_ports += other.total_ports;
+        total_movement += other.total_movement;
+        total_revenue += other.total_revenue;
+    }
+};
+
 class Solution {
 public:
     Path                            path;
@@ -46,6 +72,7 @@ public:
     std::vector<double> cargo_travel_distances() const;
     std::vector<double> legs_distance() const;
     std::vector<double> legs_speed() const;
+    SolutionCosts solution_costs() const;
 };
 
 #endif

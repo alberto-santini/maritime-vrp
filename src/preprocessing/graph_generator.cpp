@@ -92,16 +92,10 @@ namespace GraphGenerator {
                             // Normal arc: arrives at a time when it's allowed
                             auto time_charter_cost = (final_time_pu - 0) * vessel_class->time_charter_cost_per_time_unit;
                             auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
-
-                            auto cost = time_charter_cost +
-                                        hotel_cost +
-                                        bunker_cost +
-                                        movement_cost +
-                                        fixed_port_fee +
-                                        variable_port_fee -
-                                        revenue;
                         
-                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g, cost, distance);
+                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g,
+                                        bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                        fixed_port_fee + variable_port_fee, revenue, distance);
                         } else {
                             // Travel + wait arc: arrives at a time when it's not allowed
                             auto overall_final_time = data.num_times - 1 - p->pickup_transit;
@@ -109,15 +103,9 @@ namespace GraphGenerator {
                             auto time_charter_cost = (overall_final_time - 0) * vessel_class->time_charter_cost_per_time_unit;
                             auto hotel_cost = (overall_final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                            auto cost = time_charter_cost +
-                                        hotel_cost +
-                                        bunker_cost +
-                                        movement_cost +
-                                        fixed_port_fee +
-                                        variable_port_fee -
-                                        revenue;
-
-                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, overall_final_time, g, cost, distance);
+                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, overall_final_time, g,
+                                        bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                        fixed_port_fee + variable_port_fee, revenue, distance);
                         }
                     }
                 }
@@ -135,16 +123,10 @@ namespace GraphGenerator {
                         auto fixed_port_fee = p->fixed_fee;
                         auto variable_port_fee = p->variable_fee[vessel_class];
                         auto revenue = p->delivery_revenue;
-
-                        auto cost = time_charter_cost +
-                                    hotel_cost +
-                                    bunker_cost +
-                                    movement_cost +
-                                    fixed_port_fee +
-                                    variable_port_fee -
-                                    revenue;
                 
-                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g, cost, distance);
+                        create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g,
+                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                    fixed_port_fee + variable_port_fee, revenue, distance);
                     }
                 }
             }
@@ -201,10 +183,10 @@ namespace GraphGenerator {
                         auto fixed_port_fee = n_h2.port->fixed_fee;
                         auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
                         auto revenue = 0;
-
-                        auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
                     
-                        create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost, distance);
+                        create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g,
+                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                    fixed_port_fee + variable_port_fee, revenue, distance);
                     }
                 }
             }
@@ -246,9 +228,9 @@ namespace GraphGenerator {
                         auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
                         auto revenue = 0;
 
-                        auto cost = time_charter_cost + hotel_cost + bunker_cost + movement_cost + fixed_port_fee + variable_port_fee - revenue;
-
-                        create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g, cost, distance);
+                        create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY, data.num_times - 1, g,
+                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                    fixed_port_fee + variable_port_fee, revenue, distance);
                     }
                 }
             }
@@ -329,16 +311,10 @@ namespace GraphGenerator {
                                         auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
                                         auto movement_cost = q->pickup_movement_cost;
                                         auto revenue = q->pickup_revenue;
-
-                                        auto cost = time_charter_cost +
-                                                    hotel_cost +
-                                                    bunker_cost +
-                                                    movement_cost +
-                                                    fixed_port_fee +
-                                                    variable_port_fee -
-                                                    revenue;
                             
-                                        create_edge(*p, pu, t, *q, PickupType::PICKUP, final_time_pu, g, cost, distance);
+                                        create_edge(*p, pu, t, *q, PickupType::PICKUP, final_time_pu, g, 
+                                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                                    fixed_port_fee + variable_port_fee, revenue, distance);
                                     }
                                 }
                             }
@@ -357,15 +333,9 @@ namespace GraphGenerator {
                                         auto movement_cost = q->delivery_movement_cost;
                                         auto revenue = q->delivery_revenue;
 
-                                        auto cost = time_charter_cost +
-                                                    hotel_cost +
-                                                    bunker_cost +
-                                                    movement_cost +
-                                                    fixed_port_fee +
-                                                    variable_port_fee -
-                                                    revenue;
-                                                    
-                                        create_edge(*p, pu, t, *q, PickupType::DELIVERY, final_time_de, g, cost, distance);
+                                        create_edge(*p, pu, t, *q, PickupType::DELIVERY, final_time_de, g, 
+                                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                                    fixed_port_fee + variable_port_fee, revenue, distance);
                                     }
                                 }
                             }
@@ -396,15 +366,9 @@ namespace GraphGenerator {
                     auto variable_port_fee = 0;
                     auto revenue = n.port->pickup_revenue;
 
-                    auto cost = time_charter_cost +
-                                hotel_cost +
-                                bunker_cost +
-                                movement_cost +
-                                fixed_port_fee +
-                                variable_port_fee -
-                                revenue;
-
-                    create_edge(*n.port, n.pu_type, t, *n.port, PickupType::PICKUP, final_time_pu, g, cost, 0.0);
+                    create_edge(*n.port, n.pu_type, t, *n.port, PickupType::PICKUP, final_time_pu, g,
+                                bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                fixed_port_fee + variable_port_fee, revenue, 0.0);
                 }
             }
 
@@ -434,15 +398,9 @@ namespace GraphGenerator {
                                 auto variable_port_fee = 0;
                                 auto revenue = n2.port->pickup_revenue;
 
-                                auto cost = time_charter_cost +
-                                            hotel_cost +
-                                            bunker_cost +
-                                            movement_cost +
-                                            fixed_port_fee +
-                                            variable_port_fee -
-                                            revenue;
-
-                                create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::PICKUP, final_time_pu, g, cost, 0.0);
+                                create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::PICKUP, final_time_pu, g, 
+                                            bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                            fixed_port_fee + variable_port_fee, revenue, 0.0);
                             }
                         }
 
@@ -460,15 +418,9 @@ namespace GraphGenerator {
                                 auto variable_port_fee = 0;
                                 auto revenue = n2.port->delivery_revenue;
 
-                                auto cost = time_charter_cost +
-                                            hotel_cost +
-                                            bunker_cost +
-                                            movement_cost +
-                                            fixed_port_fee +
-                                            variable_port_fee -
-                                            revenue;
-
-                                create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::DELIVERY, final_time_de, g, cost, 0.0);
+                                create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::DELIVERY, final_time_de, g,
+                                            bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                            fixed_port_fee + variable_port_fee, revenue, 0.0);
                             }
                         }
                     }
@@ -556,7 +508,8 @@ namespace GraphGenerator {
 
     void create_edge(const Port& origin_p, PickupType origin_pu, int origin_type,
                      const Port& destination_p, PickupType destination_pu, int destination_type,
-                     std::shared_ptr<Graph> g, double cost, double length) {
+                     std::shared_ptr<Graph> g, double bunker_costs, double tc_costs,
+                     double movement_costs, double port_costs, double revenue, double length) {
         bool origin_found, destination_found;
         Vertex origin_v, destination_v;
 
@@ -573,6 +526,6 @@ namespace GraphGenerator {
         }
     
         Edge e = add_edge(origin_v, destination_v, g->graph).first;
-        g->graph[e] = std::make_shared<Arc>(cost, length);
+        g->graph[e] = std::make_shared<Arc>(bunker_costs, tc_costs, movement_costs, port_costs, revenue, length);
     }
 }

@@ -116,3 +116,19 @@ std::vector<double> Solution::legs_speed() const {
     
     return speeds;
 }
+
+SolutionCosts Solution::solution_costs() const {
+    SolutionCosts s;
+    
+    for(const auto& e : path) {
+        s.add(SolutionCosts(
+            g->graph[e]->bunker_costs,
+            g->graph[e]->tc_costs,
+            g->graph[e]->port_costs,
+            g->graph[e]->movement_costs,
+            g->graph[e]->revenue
+        ));
+    }
+    
+    return s;
+}

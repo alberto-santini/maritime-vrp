@@ -376,7 +376,15 @@ void BBTree::print_results() const {
         served_cargoes += col.sol.path.size() - 1;
     }
     
-    results_file << served_cargoes;
+    results_file << served_cargoes << ",";
+    
+    // 6) Bunker Cost Analysis
+    SolutionCosts global;
+    for(const auto& col : actual_base) {
+        global.add(col.sol.solution_costs());
+    }
+    
+    results_file << global.total_bunker / global.total_costs;
     
     results_file << std::endl;
     results_file.close();
