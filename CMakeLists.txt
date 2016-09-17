@@ -6,23 +6,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
     set(CPLEX_ROOT_DIR "/opt/ibm" CACHE FILEPATH "IBM Cplex install dir")
 endif()
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(CPLEX_ROOT_DIR "/opt/ibm/ILOG/CPLEX_Studio126" CACHE FILEPATH "IBM Cplex install dir")
+    set(CPLEX_ROOT_DIR "/opt/ibm/ILOG/CPLEX_Studio1263" CACHE FILEPATH "IBM Cplex install dir")
 endif()
 
 # BOOST ROOT DIR HINT (Linux only)
 if(CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(BOOST_ROOT "~/boost")
 endif()
-# if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
-#     set(Boost_NO_SYSTEM_PATHS TRUE)
-#     set(BOOST_ROOT "/opt/boost-1.58.0-beta")
-#     set(BOOST_INCLUDEDIR "/opt/boost-1.58.0-beta/include")
-# endif()
 
 # COMPILER: COMMON FLAGS
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -DIL_STD -m64 -Wall -Werror")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG=true -DPEDANTIC=true -DABO_BOOST_DEBUG=true -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -DDEBUG=false -DPEDANTIC=false -O3 -flto")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DPEDANTIC=true -Og -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DPEDANTIC=false -O3 -flto")
 
 # COMPILER: PLATFORM-DEPENDENT FLAGS
 if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
@@ -37,7 +32,6 @@ find_package(Boost)
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
 # INCLUDE DIRECTORIES
-include_directories("src")
 include_directories(SYSTEM ${CPLEX_INCLUDE_DIRS})
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 

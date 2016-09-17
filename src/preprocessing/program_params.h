@@ -7,25 +7,27 @@
 
 #include <string>
 
-class ProgramParams {
-public:
-    int     greedy_max_outarcs;
-    int     greedy_reruns;
-    int     max_cols_to_solve_mp;
-    long    dummy_column_price;
-    int     cplex_cores;
-    int     elementary_labelling_every_n_nodes;
-    bool    try_elementary_labelling;
-    bool    try_smart_graph_reduction;
-    bool    try_reduced_labelling;
-    double  smart_min_chance;
-    double  smart_max_chance;
-    int     time_limit_in_s;
-    bool    parallel_labelling;
-    bool    early_branching;
-    int     early_branching_timeout;
-    
-    ProgramParams(const std::string& data_file_name = "data/program_params.json");
-};
+namespace mvrp {
+    class ProgramParams {
+    public:
+        int greedy_max_outarcs;
+        int greedy_reruns;
+        int max_cols_to_solve_mp;
+        long dummy_column_price;
+        int cplex_cores;
+        int elementary_labelling_every_n_nodes;
+        bool try_elementary_labelling;
+        bool try_smart_graph_reduction;
+        bool try_reduced_labelling;
+        double smart_min_chance;
+        double smart_max_chance;
+        int time_limit_in_s;
+        bool parallel_labelling;
+        bool early_branching;
+        int early_branching_timeout;
+
+        ProgramParams(const std::string &data_file_name = "data/program_params.json");
+    };
+}
 
 #endif

@@ -6,10 +6,10 @@
 #define COLUMN_POOL_H
 
 #include <vector>
+#include "column.h"
 
-#include <column/column.h>
-
-/*  This might be temporary */
-typedef std::vector<Column> ColumnPool;
+namespace mvrp {
+    using ColumnPool = std::vector<Column>;
+}
 
 #endif

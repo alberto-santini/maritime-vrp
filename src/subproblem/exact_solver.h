@@ -8,17 +8,18 @@
 #include <memory>
 #include <vector>
 
-#include <base/graph.h>
-#include <column/solution.h>
+#include "../base/graph.h"
+#include "../column/solution.h"
 
-class ExactSolver {
-public:
-    std::shared_ptr<const Graph> g;
-    const ErasedEdges& erased;
-    
-    ExactSolver(std::shared_ptr<const Graph> g, const ErasedEdges& erased) : g(g), erased{erased} {}
-    
-    std::vector<Solution> solve(double& time_spent);
-};
+namespace mvrp {
+    struct ExactSolver {
+        std::shared_ptr<const Graph> g;
+        const ErasedEdges &erased;
+
+        ExactSolver(std::shared_ptr<const Graph> g, const ErasedEdges &erased) : g(g), erased{erased} {}
+
+        std::vector<Solution> solve(double &time_spent);
+    };
+}
 
 #endif

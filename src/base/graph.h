@@ -14,83 +14,182 @@
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
-using namespace boost;
 
-#include <base/arc.h>
-#include <base/graph_properties.h>
-#include <base/node.h>
-#include <base/vessel_class.h>
+#include "arc.h"
+#include "graph_properties.h"
+#include "node.h"
+#include "vessel_class.h"
 
-typedef adjacency_list<listS, listS, bidirectionalS, std::shared_ptr<Node>, std::shared_ptr<Arc>, GraphProperties> BGraph;
+namespace mvrp {
+    using BGraph = boost::adjacency_list<boost::listS, boost::listS, boost::bidirectionalS, std::shared_ptr<Node>, std::shared_ptr<Arc>, GraphProperties>;
 
-typedef graph_traits<BGraph>::vertex_iterator vit;
-typedef graph_traits<BGraph>::edge_iterator eit;
-typedef graph_traits<BGraph>::in_edge_iterator ieit;
-typedef graph_traits<BGraph>::out_edge_iterator oeit;
+    using vit = boost::graph_traits<BGraph>::vertex_iterator;
+    using eit = boost::graph_traits<BGraph>::edge_iterator;
+    using ieit = boost::graph_traits<BGraph>::in_edge_iterator;
+    using oeit = boost::graph_traits<BGraph>::out_edge_iterator;
 
-typedef graph_traits<BGraph>::vertex_descriptor Vertex;
-typedef graph_traits<BGraph>::edge_descriptor Edge;
+    using Vertex = boost::graph_traits<BGraph>::vertex_descriptor;
+    using Edge = boost::graph_traits<BGraph>::edge_descriptor;
 
-typedef std::vector<Edge> Path;
+    using Path = std::vector<Edge>;
 
-typedef std::pair<std::shared_ptr<Node>, std::shared_ptr<Node>> VisitRule;
-typedef std::vector<VisitRule> VisitRuleList;
+    // TODO: sholud these be moved?
+    using VisitRule = std::pair<std::shared_ptr<Node>, std::shared_ptr<Node>>;
+    using VisitRuleList = std::vector<VisitRule>;
 
-using ErasedEdges = std::map<Vertex, std::set<Edge>>;
+    // TODO: should this be moved?
+    using ErasedEdges = std::map<Vertex, std::set<Edge>>;
 
-class Graph {
-public:
-    BGraph                              graph;
-    std::shared_ptr<VesselClass>        vessel_class;
-    std::string                         name;
-    std::vector<std::shared_ptr<Arc>>   ordered_arcs;
+    struct Graph {
+        /**
+         * Underlying boost graph.
+         */
+        BGraph graph;
 
-    Graph() {}
-    Graph(const BGraph& graph, std::shared_ptr<VesselClass> vessel_class, const std::string& name) : graph(graph), vessel_class(vessel_class), name(name) {}
-    Graph(BGraph&& graph, std::shared_ptr<VesselClass> vessel_class, const std::string& name) : graph(graph), vessel_class(vessel_class), name(name) {}
-    
-    void print(bool detailed = false) const;
-    void print_path(const Path& p, std::ostream& out = std::cerr) const;
-    
-    /*  Order the arcs by cost (the most expensive first) and puts them in ordered_arcs */
-    void sort_arcs();
-    
-    /*  The first item is true if the H1/h2 vertex has been found or false otherwise
-        The second item is the vertex (in case it has been found) */
-    std::pair<bool, Vertex> h1() const;
-    std::pair<bool, Vertex> h2() const;
-    
-    /*  Add boost vertex/edge indices and computes upper bounds on the number
-        of pu/de ports that can be visited */
-    void prepare_for_labelling();
-    
-    /*  Used in branching when we want to enforce that n2->port is [not] visited just
-        after n1->port */
-    ErasedEdges get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules) const;
-    
-    /*  Remove edges to reduce the graphs */
-    ErasedEdges reduce_graph(double percentage, ErasedEdges already_erased) const;
-    ErasedEdges smart_reduce_graph(double min_chance, double max_chance, ErasedEdges already_erased) const;
+        /**
+         * Vessel class associated with the graph.
+         */
+        std::shared_ptr<VesselClass> vessel_class;
 
-    /*  The highest/lowest dual prize among all ports */
-    double max_dual_prize() const;
-    double min_dual_prize() const;
+        /**
+         * Vector used to keep an ordering of the arcs, e.g. by their cost.
+         * TODO: should these be simple pointers?
+         */
+        std::vector<std::shared_ptr<Arc>> ordered_arcs;
 
-    /*  The first item is true if the vertex has been found or false otherwise
-        The second item is the vertex (in case it has been found) */
-    std::pair<bool, Vertex> get_vertex(const Port& p, PickupType pu, int t) const;
-    
-    /*  Calculates the cost of a path as the sum of the cost of the edges */
-    double calculate_cost(const Path& p) const;
-    
-    /*  Gets the correct dual value */
-    double dual_of(const Node& n) const;
-    
-    /* Produces a text dump of the graph */
-    void dump() const;
-    
-private:
-    std::pair<bool, Vertex> get_vertex_by_node_type(NodeType n_type) const;
-};
+        Graph() {}
+
+        Graph(const BGraph& graph, std::shared_ptr<VesselClass> vessel_class) :
+            graph(graph), vessel_class(vessel_class) {}
+
+        // TODO: is this constructor really needed?!
+        Graph(BGraph&& graph, std::shared_ptr<VesselClass> vessel_class) :
+            graph(graph), vessel_class(vessel_class) {}
+
+        /**
+         * Prints basic information about the graph.
+         * @param detailed  If true, will also print the list of vertices and edges
+         */
+        void print(bool detailed = false) const;
+
+        /**
+         * Prints a path in the graph.
+         * @param p     The path
+         * @param out   The out-stream where to print
+         */
+        void print_path(const Path &p, std::ostream &out = std::cerr) const;
+
+        /**
+         * Orders the arcs by cost (the most expensive first) and puts them in ordered_arcs
+         */
+        void sort_arcs();
+
+        /**
+         * Finds the source vertex.
+         * @return  A pair where the first element is true iff the source vertex has been found
+         *          and, in this case, the second element is the required vertex descriptor.
+         */
+        std::pair<bool, Vertex> h1() const;
+
+        /**
+          * Finds the sink vertex.
+          * @return  A pair where the first element is true iff the sink vertex has been found
+          *          and, in this case, the second element is the required vertex descriptor.
+          */
+        std::pair<bool, Vertex> h2() const;
+
+        /**
+         * Finds the vertex corresponding to a certain port, with a certain type, at
+         * a certain time.
+         * @param p     The port
+         * @param pu    The type (pickup/delivery)
+         * @param t     The time instant
+         * @return      A pair where the first element is true iff the vertex has been found
+         *              and, in this case, the second element is the required vertex descriptor.
+         */
+        std::pair<bool, Vertex> get_vertex(const Port& p, PickupType pu, int t) const;
+
+        /**
+         * Prepares the graph for labelling: adds unique consecutive ids to vertices and edges
+         * and computes upper bounds on the number of pickup and delivery ports that the associated
+         * vessel can visit.
+         */
+        void prepare_for_labelling();
+
+        /*  Used in branching when we want to enforce that n2->port is [not] visited just
+            after n1->port */
+
+        /**
+         * Gives a list of edges that need to be removed, in order for the subproblem to be
+         * compliant with new branching rules.
+         * @param already_erased    A list of edges already removed.
+         * @param unite_rules       A "unite" branching rule.
+         * @param separate_rules    A "separate" branching rule.
+         * @return                  A list of edges to remove (including those given in input).
+         */
+        ErasedEdges get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules,
+                                                const VisitRuleList& separate_rules) const;
+
+        /**
+         * Gives a list of edges that need to be removed in order to reduce the graph. In particular,
+         * it will remove the ``radio'' (between 0 and 1) of remaining edges with the highest cost.
+         * By remaining edges we mean those that are not in ``already_erased''. For example, if half
+         * of the graph edges are in ``already_erased'' and ``ratio'' is 0.5, this method will give
+         * a list containing 75% of the edges: those that were in ``already_erased'' plus the most
+         * expensive half of the other edges.
+         * @param ratio             Share of remaining edges to remove
+         * @param already_erased    List of edges which have already been removed
+         * @return                  List of all edges to remove
+         * TODO: rename this method?
+         */
+        ErasedEdges reduce_graph(double ratio, ErasedEdges already_erased) const;
+
+        /**
+         * Similar to ``reduce_graph'', but each arc has a certain probability of being removed. The
+         * cheapest arc will have a probability of ``min_chance'' to be removed; the most expensive
+         * arc will have a probability of ``max_chance''. All other arcs will have probabilities
+         * linearly distributed between these two extremes, based on their cost.
+         * @param min_chance        Probability that the cheapest arc is removed
+         * @param max_chance        Probability that the most expensive arc is removed
+         * @param already_erased    List of edges which have already been removed
+         * @return                  List of all edges to remove
+         * TODO: rename this method?
+         */
+        ErasedEdges smart_reduce_graph(double min_chance, double max_chance, ErasedEdges already_erased) const;
+
+        /**
+         * Gives the maximum dual prize that can be collected at any port.
+         */
+        double max_dual_prize() const;
+
+        /**
+         * Gives the minimum dual prize that can be collected at any port.
+         */
+        double min_dual_prize() const;
+
+        /**
+         * Gives the cost of a path (as the sum of the cost of its edges).
+         * @param p The path
+         * @return  The path's cost
+         * TODO: rename this method?
+         */
+        double calculate_cost(const Path& p) const;
+
+        /**
+         * Gets the dual prize associated with a certain node.
+         * @param n The node
+         * @return  The dual prize
+         */
+        double dual_of(const Node &n) const;
+
+        /**
+         * Produces a text dump of the graph
+         */
+        void dump() const;
+
+    private:
+        std::pair<bool, Vertex> get_vertex_by_node_type(NodeType n_type) const;
+    };
+}
 
 #endif

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include <branching/bb_tree.h>
+#include "branching/bb_tree.h"
 
 int main(int argc, char* argv[]) {
     srand(12345);
@@ -13,6 +13,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Usage: ./feeder <params_file> <data_file>" << std::endl;
         return -1;
     }
+
+    using namespace mvrp;
     
     BBTree tree = BBTree(argv[1], argv[2]);
     tree.explore_tree();

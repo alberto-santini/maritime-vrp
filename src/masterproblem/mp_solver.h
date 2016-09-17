@@ -11,24 +11,24 @@
 
 #include <ilcplex/ilocplex.h>
 
-#include <base/problem.h>
-#include <column/column_pool.h>
-#include <masterproblem/mp_linear_solution.h>
-#include <masterproblem/mp_integer_solution.h>
+#include "../base/problem.h"
+#include "../column/column_pool.h"
+#include "mp_linear_solution.h"
+#include "mp_integer_solution.h"
 
-typedef std::tuple<IloEnv, IloNumVarArray, IloRangeArray, IloRangeArray, IloCplex> IloData;
+namespace mvrp {
+    struct MPSolver {
+        std::shared_ptr<const Problem> prob;
 
-class MPSolver {
-public:
-    std::shared_ptr<const Problem> prob;
+        MPSolver(std::shared_ptr<const Problem> prob) : prob(prob) {}
 
-    MPSolver(std::shared_ptr<const Problem> prob) : prob(prob) {}
-    
-    MPLinearSolution solve_lp(const ColumnPool& pool) const;
-    MPIntegerSolution solve_mip(const ColumnPool& pool) const;
-    
-private:
-    IloData solve(const ColumnPool& pool, bool linear) const;
-};
+        MPLinearSolution solve_lp(const ColumnPool &pool) const;
+        MPIntegerSolution solve_mip(const ColumnPool &pool) const;
+
+    private:
+        using IloData = std::tuple<IloEnv, IloNumVarArray, IloRangeArray, IloRangeArray, IloCplex>;
+        IloData solve(const ColumnPool &pool, bool linear) const;
+    };
+}
 
 #endif

@@ -6,17 +6,18 @@
 #define MP_LINEAR_SOLUTION
 
 #include <vector>
+#include "../base/graph_properties.h"
 
-#include <base/graph_properties.h>
+namespace mvrp {
+    struct MPLinearSolution {
+        double obj_value;
+        PortDuals port_duals;
+        VcDuals vc_duals;
+        std::vector<double> variables;
 
-class MPLinearSolution {
-public:
-    double              obj_value;
-    PortDuals           port_duals;
-    VcDuals             vc_duals;
-    std::vector<double>  variables;
-    
-    MPLinearSolution(double obj_value, const PortDuals& port_duals, const VcDuals& vc_duals, const std::vector<double>& variables) : obj_value(obj_value), port_duals(port_duals), vc_duals(vc_duals), variables(variables) {}
-};
+        MPLinearSolution(double obj_value, const PortDuals &port_duals, const VcDuals &vc_duals, const std::vector<double> &variables) :
+                         obj_value(obj_value), port_duals(port_duals), vc_duals(vc_duals), variables(variables) {}
+    };
+}
 
 #endif

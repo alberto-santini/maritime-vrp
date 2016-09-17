@@ -8,47 +8,108 @@
 #include <iostream>
 #include <memory>
 
-#include <base/vessel_class.h>
-#include <base/port.h>
+#include "vessel_class.h"
+#include "port.h"
 
-enum class PickupType { PICKUP, DELIVERY };
-enum class NodeType { H1, H2, REGULAR_PORT };
+namespace mvrp {
+    // TODO: rename into PortType
+    enum class PickupType {
+        PICKUP, DELIVERY
+    };
 
-class Node {
-public:
-    std::shared_ptr<Port>           port;
-    PickupType                      pu_type;
-    NodeType                        n_type;
-    int                             time_step;
-    std::shared_ptr<VesselClass>    vessel_class;
-    int                             boost_vertex_id;
-    
-    Node() {}
-    Node(std::shared_ptr<Port> port,
-         PickupType pu_type,
-         NodeType n_type,
-         int time_step,
-         std::shared_ptr<VesselClass> vessel_class) :
-            port(port),
-            pu_type(pu_type),
-            n_type(n_type),
-            time_step(time_step),
-            vessel_class(vessel_class)
-    {
-        boost_vertex_id = 0;
-    }
-    
-    double pu_demand() const;
-    double de_demand() const;
-    double pu_penalty() const;
-    double de_penalty() const;
-    double penalty() const;
-    bool same_row_as(const Node& other) const;
-    bool operator==(const Node& other) const;
-    bool operator!=(const Node& other) const { return !(*this == other); }
-};
+    enum class NodeType {
+        H1, H2, REGULAR_PORT
+    };
 
-std::ostream& operator<<(std::ostream& out, PickupType pu);
-std::ostream& operator<<(std::ostream& out, const Node& n);
- 
+    struct Node {
+        /**
+         * Pointer to the associated port.
+         */
+        std::shared_ptr<Port> port;
+
+        /**
+         * Associated port type.
+         */
+        PickupType pu_type;
+
+        /**
+         * Associated time step.
+         */
+        int time_step;
+
+        /**
+         * Node type: source, sink, or regular.
+         */
+        NodeType n_type;
+
+        /**
+         * Vessel class of the graph where the node resides.
+         */
+        std::shared_ptr<VesselClass> vessel_class;
+
+        /**
+         * Progressive id used by boost to identify the node.
+         */
+        int boost_vertex_id;
+
+        Node() {}
+
+        Node(std::shared_ptr<Port> port, PickupType pu_type, NodeType n_type, int time_step, std::shared_ptr<VesselClass> vessel_class) :
+            port(port), pu_type(pu_type), time_step(time_step), n_type(n_type), vessel_class(vessel_class)
+        {
+            boost_vertex_id = 0;
+        }
+
+        /**
+         * Pickup demand of the node, if it is a pickup-node, or otherwise 0.
+         */
+        double pu_demand() const;
+
+        /**
+         * Delivery demand of the node, if it is a delivery node, or otherwise 0.
+         */
+        double de_demand() const;
+
+        /**
+         * Penalty to pay if service at the underlying port is skipped, if it is a pickup-node, otherwise 0.
+         */
+        double pu_penalty() const;
+
+        /**
+         * Penalty to pay if service at the underlying port is skipped, if it is a delivery-node, otherwise 0.
+         */
+        double de_penalty() const;
+
+        /**
+         * Penalty to pay if service at the underlying port is skipped, if it is a regular node, otherwise 0.
+         */
+        double penalty() const;
+
+        /**
+         * Two nodes are in the same row if they have the same port and port type (but possibly different time steps).
+         * @param other Other node
+         * @return      True iff the current and the other now are in the same row
+         */
+        bool same_row_as(const Node &other) const;
+
+        /**
+         * Two nodes are equal if they have the same port, port type, and time step.
+         * @param other Other node
+         * @return      True iff the current and the other nodes are equal
+         */
+        bool operator==(const Node &other) const;
+
+        bool operator!=(const Node &other) const { return !(*this == other); }
+    };
+
+    /**
+     * Prints a human-readable version of a port type.
+     */
+    std::ostream &operator<<(std::ostream &out, PickupType pu);
+
+    /**
+     * Shortly prints info about a node.
+     */
+    std::ostream &operator<<(std::ostream &out, const Node &n);
+}
 #endif

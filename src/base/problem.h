@@ -9,21 +9,33 @@
 #include <string>
 #include <unordered_map>
 
-#include <base/graph.h>
-#include <base/vessel_class.h>
-#include <preprocessing/problem_data.h>
-#include <preprocessing/program_params.h>
+#include "graph.h"
+#include "vessel_class.h"
+#include "../preprocessing/problem_data.h"
+#include "../preprocessing/program_params.h"
 
-using GraphMap = std::unordered_map<std::shared_ptr<VesselClass>, std::shared_ptr<Graph>>;
-using ErasedEdgesMap = std::unordered_map<std::shared_ptr<VesselClass>, ErasedEdges>;
+namespace mvrp {
+    using GraphMap = std::unordered_map<std::shared_ptr<VesselClass>, std::shared_ptr<Graph>>;
+    using ErasedEdgesMap = std::unordered_map<std::shared_ptr<VesselClass>, ErasedEdges>;
 
-class Problem {
-public:
-    ProgramParams    params;
-    ProblemData      data;
-    GraphMap         graphs;
-    
-    Problem(const std::string& params_file, const std::string& data_file);
-};
+    struct Problem {
+        /**
+         * Algorithm parameters.
+         */
+        ProgramParams params;
+
+        /**
+         * Problem data.
+         */
+        ProblemData data;
+
+        /**
+         * List of graphs, one for each vessel class.
+         */
+        GraphMap graphs;
+
+        Problem(const std::string &params_file, const std::string &data_file);
+    };
+}
 
 #endif

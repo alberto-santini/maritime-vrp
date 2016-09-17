@@ -7,12 +7,13 @@
 
 #include <vector>
 
-class MPIntegerSolution {
-public:
-    double               obj_value;
-    std::vector<double>   variables;
-    
-    MPIntegerSolution(double obj_value, const std::vector<double>& variables) : obj_value(obj_value), variables(variables) {}
-};
+namespace mvrp {
+    struct MPIntegerSolution {
+        double obj_value;
+        std::vector<double> variables;
+
+        MPIntegerSolution(double obj_value, const std::vector<double> &variables) : obj_value(obj_value), variables(variables) {}
+    };
+}
 
 #endif

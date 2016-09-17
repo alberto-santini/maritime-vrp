@@ -10,13 +10,15 @@
 #include <utility>
 #include <vector>
 
-#include <base/graph.h>
+#include "../base/graph.h"
 
-typedef std::vector<std::pair<Path, std::shared_ptr<const Graph>>> Cycles;
+namespace mvrp {
+    using Cycles = std::vector<std::pair<Path, std::shared_ptr<const Graph>>>;
 
-namespace Cycle {
-    Path shortest_cycle(const Path& route, std::shared_ptr<const Graph> g);
-    void print_cycle(const Path& cycle, std::shared_ptr<const Graph> g, std::ostream& out = std::cerr);
+    namespace Cycle {
+        Path shortest_cycle(const Path &route, std::shared_ptr<const Graph> g);
+        void print_cycle(const Path &cycle, std::shared_ptr<const Graph> g, std::ostream &out = std::cerr);
+    }
 }
 
 #endif
