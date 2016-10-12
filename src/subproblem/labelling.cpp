@@ -62,8 +62,8 @@ namespace mvrp {
 
         if(dest_node.port->hub) {
             new_label.por = label.por;
-            new_label.pic = 0;
-            new_label.del = 0;
+            new_label.pic = label.g->vessel_class->capacity;
+            new_label.del = label.g->vessel_class->capacity;
             new_label.cost = label.cost + arc.cost;
         } else {
             new_label.por = label.por;
@@ -89,8 +89,8 @@ namespace mvrp {
         if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
 
         if(dest_node.port->hub) {
-            new_label.pic = 0;
-            new_label.del = 0;
+            new_label.pic = label.g->vessel_class->capacity;
+            new_label.del = label.g->vessel_class->capacity;
             new_label.cost = label.cost + arc.cost;
         } else {
             if(label.pic < dest_node.pu_demand()) { return false; }
