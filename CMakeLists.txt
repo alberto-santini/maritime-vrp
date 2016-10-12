@@ -81,7 +81,7 @@ set(SOURCE_FILES
   src/subproblem/heuristics_solver.cpp
   src/subproblem/labelling.cpp
   src/subproblem/sp_solver.cpp
-)
+        src/base/arc.cpp)
 
 add_executable(maritime_vrp ${SOURCE_FILES})
 target_link_libraries(maritime_vrp ${CPLEX_LIBRARIES})

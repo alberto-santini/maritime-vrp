@@ -24,10 +24,10 @@ namespace mvrp {
             if(node.n_type == NodeType::SINK_VERTEX) { desc = "snk"; }
 
             auto pickup = 0u;
-            if(node.pu_type == PickupType::PICKUP) { pickup = node.port->pickup_demand; }
+            if(node.pu_type == PortType::PICKUP) { pickup = node.port->pickup_demand; }
 
             auto delivery = 0u;
-            if(node.pu_type == PickupType::DELIVERY) { delivery = node.port->delivery_demand; }
+            if(node.pu_type == PortType::DELIVERY) { delivery = node.port->delivery_demand; }
 
             gfile <<
                   node.boost_vertex_id << "\t" <<
@@ -73,7 +73,7 @@ namespace mvrp {
             std::cout << "Edges:" << std::endl;
             for(auto ep = edges(graph); ep.first != ep.second; ++ep.first) {
                 std::cout << *graph[source(*ep.first, graph)] << " -> " << *graph[target(*ep.first, graph)];
-                std::cout << " - Cost: " << graph[*ep.first]->cost << std::endl;
+                std::cout << " - Cost: " << graph[*ep.first]->cost << " - " << graph[*ep.first]->type << std::endl;
             }
         }
     }
@@ -257,7 +257,7 @@ namespace mvrp {
         return min_prize;
     }
 
-    std::pair<bool, Vertex> Graph::get_vertex(const Port &p, PickupType pu, int t) const {
+    std::pair<bool, Vertex> Graph::get_vertex(const Port &p, PortType pu, int t) const {
         for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
             const Node &n = *graph[*vp.first];
             if(n.port.get() == &p && n.pu_type == pu && n.time_step == t) { return std::make_pair(true, *vp.first); }
@@ -276,7 +276,7 @@ namespace mvrp {
         if(n.n_type == NodeType::REGULAR_PORT) {
             auto it = graph[boost::graph_bundle].port_duals.find(n.port);
 
-            if(n.pu_type == PickupType::PICKUP) {
+            if(n.pu_type == PortType::PICKUP) {
                 return (it == graph[boost::graph_bundle].port_duals.end() ? 0 : it->second.first);
             } else {
                 return (it == graph[boost::graph_bundle].port_duals.end() ? 0 : it->second.second);

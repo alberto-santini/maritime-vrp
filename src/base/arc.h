@@ -5,7 +5,13 @@
 #ifndef ARC_H
 #define ARC_H
 
+#include <iostream>
+
 namespace mvrp {
+    enum class ArcType {
+        SOURCE_TO_PORT, PORT_TO_SINK, COMEBACK_HUB_TO_PORT, PORT_TO_COMEBACK_HUB, PORT_TO_PORT, DELIVERY_TO_PICKUP
+    };
+
     struct Arc {
         /**
          * Total cost of the arc.
@@ -47,16 +53,23 @@ namespace mvrp {
          */
         int boost_edge_id;
 
+        /**
+         * Arc type
+         */
+        ArcType type;
+
         Arc() {}
 
         Arc(double bunker_costs, double tc_costs, double movement_costs, double port_costs, double revenue,
-            double length) :
+            double length, ArcType type) :
             cost(bunker_costs + tc_costs + movement_costs + port_costs - revenue), bunker_costs(bunker_costs),
             tc_costs(tc_costs), movement_costs(movement_costs), port_costs(port_costs), revenue(revenue),
-            length(length) {
+            length(length), type(type) {
             boost_edge_id = 0;
         }
     };
+
+    std::ostream& operator<<(std::ostream& out, const ArcType& arctype);
 }
 
 #endif

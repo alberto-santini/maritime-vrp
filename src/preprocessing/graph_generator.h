@@ -31,10 +31,10 @@ namespace mvrp {
         int earliest_arrival(const ProblemData &data, std::shared_ptr<Port> p, std::shared_ptr<Port> h1,
                              const VesselClass &vessel_class);
 
-        void create_edge(const Port &origin_p, PickupType origin_pu, int origin_type,
-                         const Port &destination_p, PickupType destination_pu, int destination_type,
+        void create_edge(const Port &origin_p, PortType origin_pu, int origin_time,
+                         const Port &destination_p, PortType destination_pu, int destination_time,
                          std::shared_ptr<Graph> g, double bunker_costs, double tc_costs,
-                         double movement_costs, double port_costs, double revenue, double length);
+                         double movement_costs, double port_costs, double revenue, double length, ArcType type);
     }
 }
 

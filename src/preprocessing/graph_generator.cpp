@@ -33,18 +33,16 @@ namespace mvrp {
                     g->graph[v_h2] = std::make_shared<Node>(p, PortType::DELIVERY, NodeType::SINK_VERTEX, data.num_times - 1, vessel_class);
                     n_h2 = *g->graph[v_h2];
 
-                    continue;
-                }
-
-                /* Create come-back hub nodes */
-                if(p->hub) {
+                    /* Create come-back hub nodes */
                     for(auto t = 1; t < data.num_times - 1; t++) {
                         auto v = add_vertex(g->graph);
-                        g->graph[v] = std::make_shared<Node>(p, PickupType::BOTH, NodeType::COMEBACK_HUB, t, vessel_class);
+                        g->graph[v] = std::make_shared<Node>(p, PortType::BOTH, NodeType::COMEBACK_HUB, t, vessel_class);
                     }
 
                     assert(comeback_hub_port == nullptr);
                     comeback_hub_port = p.get();
+
+                    continue;
                 }
 
                 if(p->allowed[vessel_class]) {
@@ -112,7 +110,7 @@ namespace mvrp {
 
                                 create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::PICKUP, final_time_pu, g,
                                             bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                                            fixed_port_fee + variable_port_fee, revenue, distance, ArcType::SOURCE_TO_PORT);
                             } else {
                                 // Travel + wait arc: arrives at a time when it's not allowed
                                 auto overall_final_time = data.num_times - 1 - p->pickup_transit;
@@ -123,7 +121,7 @@ namespace mvrp {
                                 create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::PICKUP,
                                             overall_final_time, g,
                                             bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                                            fixed_port_fee + variable_port_fee, revenue, distance, ArcType::SOURCE_TO_PORT);
                             }
                         }
 
@@ -143,8 +141,9 @@ namespace mvrp {
                                     auto time_charter_cost = (comeback_final_time_pu - t) * vessel_class->time_charter_cost_per_time_unit;
                                     auto hotel_cost = (comeback_final_time_pu - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                                    create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::PICKUP, comeback_final_time_pu, g,
-                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                                    create_edge(*comeback_hub_port, PortType::BOTH, t, *p, PortType::PICKUP, comeback_final_time_pu,
+                                                g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                                fixed_port_fee + variable_port_fee, revenue, distance, ArcType::COMEBACK_HUB_TO_PORT);
                                 } else {
                                     // Travel + wait arc: arrives at a time when it's not allowed
                                     auto comeback_overall_final_time = data.num_times - 1 - p->pickup_transit;
@@ -152,8 +151,9 @@ namespace mvrp {
                                     auto time_charter_cost = (comeback_overall_final_time - t) * vessel_class->time_charter_cost_per_time_unit;
                                     auto hotel_cost = (comeback_overall_final_time - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                                    create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::PICKUP, comeback_overall_final_time, g,
-                                                bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                                    create_edge(*comeback_hub_port, PortType::BOTH, t, *p, PortType::PICKUP, comeback_overall_final_time,
+                                                g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                                fixed_port_fee + variable_port_fee, revenue, distance, ArcType::COMEBACK_HUB_TO_PORT);
                                 }
                             }
                         }
@@ -175,7 +175,7 @@ namespace mvrp {
 
                             create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::DELIVERY, final_time_de, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                        fixed_port_fee + variable_port_fee, revenue, distance);
+                                        fixed_port_fee + variable_port_fee, revenue, distance, ArcType::SOURCE_TO_PORT);
                         }
 
                         /* Create arcs from comeback-hub to port */
@@ -190,8 +190,9 @@ namespace mvrp {
                                 auto hotel_cost = (comeback_final_time_de - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
                                 auto bunker_cost = (comeback_arrival_time - t) * bunker_cost_per_time_unit;
 
-                                create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::DELIVERY, comeback_final_time_de, g,
-                                bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                                create_edge(*comeback_hub_port, PortType::BOTH, t, *p, PortType::DELIVERY, comeback_final_time_de,
+                                            g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                            fixed_port_fee + variable_port_fee, revenue, distance, ArcType::COMEBACK_HUB_TO_PORT);
                             }
                         }
                     }
@@ -250,14 +251,14 @@ namespace mvrp {
                             create_edge(*p, PortType::PICKUP, departure_time, *n_h2.port, PortType::DELIVERY,
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                        fixed_port_fee + variable_port_fee, revenue, distance);
+                                        fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_SINK);
 
                             /* Create arc from the port to the comeback-hub */
                             // We add an fixed slack of 2 time units for operations at the hub
                             if(arrival_time + 2 < data.num_times) {
                                 create_edge(*p, PortType::PICKUP, departure_time, *comeback_hub_port, PortType::BOTH,
                                             arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                                            fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_COMEBACK_HUB);
                             }
                         }
                     }
@@ -304,14 +305,14 @@ namespace mvrp {
                             create_edge(*p, PortType::DELIVERY, departure_time, *n_h2.port, PortType::DELIVERY,
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                        fixed_port_fee + variable_port_fee, revenue, distance);
+                                        fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_SINK);
 
                             /* Create arc from the port to the comeback-hub */
                             // We add an fixed slack of 2 time units for operations at the hub
                             if(arrival_time + 2 < data.num_times) {
                                 create_edge(*p, PortType::DELIVERY, departure_time, *comeback_hub_port, PortType::BOTH,
                                             arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                                            fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_COMEBACK_HUB);
                             }
                         }
                     }
@@ -397,7 +398,7 @@ namespace mvrp {
 
                                             create_edge(*p, pu, t, *q, PortType::PICKUP, final_time_pu, g,
                                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                                        fixed_port_fee + variable_port_fee, revenue, distance);
+                                                        fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_PORT);
                                         }
                                     }
                                 }
@@ -420,7 +421,7 @@ namespace mvrp {
 
                                             create_edge(*p, pu, t, *q, PortType::DELIVERY, final_time_de, g,
                                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                                        fixed_port_fee + variable_port_fee, revenue, distance);
+                                                        fixed_port_fee + variable_port_fee, revenue, distance, ArcType::PORT_TO_PORT);
                                         }
                                     }
                                 }
@@ -454,7 +455,7 @@ namespace mvrp {
 
                         create_edge(*n.port, n.pu_type, t, *n.port, PortType::PICKUP, final_time_pu, g,
                                     bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                    fixed_port_fee + variable_port_fee, revenue, 0.0);
+                                    fixed_port_fee + variable_port_fee, revenue, 0.0, ArcType::DELIVERY_TO_PICKUP);
                     }
                 }
 
@@ -486,7 +487,7 @@ namespace mvrp {
 
                                     create_edge(*n.port, n.pu_type, t, *n2.port, PortType::PICKUP, final_time_pu, g,
                                                 bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                                fixed_port_fee + variable_port_fee, revenue, 0.0);
+                                                fixed_port_fee + variable_port_fee, revenue, 0.0, ArcType::DELIVERY_TO_PICKUP);
                                 }
                             }
 
@@ -506,7 +507,7 @@ namespace mvrp {
 
                                     create_edge(*n.port, n.pu_type, t, *n2.port, PortType::DELIVERY, final_time_de, g,
                                                 bunker_cost + hotel_cost, time_charter_cost, movement_cost,
-                                                fixed_port_fee + variable_port_fee, revenue, 0.0);
+                                                fixed_port_fee + variable_port_fee, revenue, 0.0, ArcType::PORT_TO_PORT);
                                 }
                             }
                         }
@@ -598,7 +599,7 @@ namespace mvrp {
         void create_edge(const Port &origin_p, PortType origin_pu, int origin_time,
                          const Port &destination_p, PortType destination_pu, int destination_time,
                          std::shared_ptr<Graph> g, double bunker_costs, double tc_costs,
-                         double movement_costs, double port_costs, double revenue, double length) {
+                         double movement_costs, double port_costs, double revenue, double length, ArcType type) {
             bool origin_found, destination_found;
             Vertex origin_v, destination_v;
 
@@ -610,10 +611,12 @@ namespace mvrp {
 
             std::tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_time);
 
-            if(!destination_found) { return; }
+            if(!destination_found) {
+                return;
+            }
 
             Edge e = add_edge(origin_v, destination_v, g->graph).first;
-            g->graph[e] = std::make_shared<Arc>(bunker_costs, tc_costs, movement_costs, port_costs, revenue, length);
+            g->graph[e] = std::make_shared<Arc>(bunker_costs, tc_costs, movement_costs, port_costs, revenue, length, type);
         }
     }
 }
