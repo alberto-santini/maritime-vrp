@@ -132,5 +132,7 @@ namespace mvrp {
          */
         inline bool models_same_port_as(const Port &q) const { return q.name.substr(0, 5) == name.substr(0, 5); }
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const Port& port) { out << port.name; return out; }
 }
 #endif
