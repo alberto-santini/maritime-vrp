@@ -12,8 +12,7 @@
 #include "port.h"
 
 namespace mvrp {
-    // TODO: rename into PortType
-    enum class PickupType {
+    enum class PortType {
         PICKUP, DELIVERY, BOTH
     };
 
@@ -30,7 +29,7 @@ namespace mvrp {
         /**
          * Associated port type.
          */
-        PickupType pu_type;
+        PortType pu_type;
 
         /**
          * Associated time step.
@@ -54,7 +53,7 @@ namespace mvrp {
 
         Node() {}
 
-        Node(std::shared_ptr<Port> port, PickupType pu_type, NodeType n_type, int time_step, std::shared_ptr<VesselClass> vessel_class) :
+        Node(std::shared_ptr<Port> port, PortType pu_type, NodeType n_type, int time_step, std::shared_ptr<VesselClass> vessel_class) :
             port(port), pu_type(pu_type), time_step(time_step), n_type(n_type), vessel_class(vessel_class)
         {
             boost_vertex_id = 0;
@@ -105,7 +104,7 @@ namespace mvrp {
     /**
      * Prints a human-readable version of a port type.
      */
-    std::ostream &operator<<(std::ostream &out, PickupType pu);
+    std::ostream &operator<<(std::ostream &out, PortType pu);
 
     /**
      * Shortly prints info about a node.

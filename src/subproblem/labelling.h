@@ -18,7 +18,7 @@
 #include "id_maps.h"
 
 namespace mvrp {
-    using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>;
+    using VisitablePorts = std::vector<std::pair<std::shared_ptr<Port>, PortType>>;
 
     struct Label {
         std::shared_ptr<const Graph> g;

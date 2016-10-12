@@ -20,7 +20,7 @@ namespace mvrp {
         create_graph(const ProblemData &data, const ProgramParams &params, std::shared_ptr<VesselClass> vessel_class);
 
         /*  Time at which a vessel arriving at port ("p","pu") at time "arrival_time" can leave that port */
-        int final_time(const ProblemData &data, const Port &p, int arrival_time, PickupType pu);
+        int final_time(const ProblemData &data, const Port &p, int arrival_time, PortType pu);
 
         /*  Latest time at which a vessel of class "vessel_class" can leave port "p" to arrive at H2
             before the end of the planning horizon, supposing it travels as fast as possible */

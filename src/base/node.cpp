@@ -6,23 +6,23 @@
 
 namespace mvrp {
     double Node::pu_demand() const {
-        return (pu_type == PickupType::PICKUP ? port->pickup_demand : 0);
+        return (pu_type == PortType::PICKUP ? port->pickup_demand : 0);
     }
 
     double Node::de_demand() const {
-        return (pu_type == PickupType::DELIVERY ? port->delivery_demand : 0);
+        return (pu_type == PortType::DELIVERY ? port->delivery_demand : 0);
     }
 
     double Node::pu_penalty() const {
-        return (pu_type == PickupType::PICKUP ? port->pickup_penalty : 0);
+        return (pu_type == PortType::PICKUP ? port->pickup_penalty : 0);
     }
 
     double Node::de_penalty() const {
-        return (pu_type == PickupType::DELIVERY ? port->delivery_penalty : 0);
+        return (pu_type == PortType::DELIVERY ? port->delivery_penalty : 0);
     }
 
     double Node::penalty() const {
-        return (pu_type == PickupType::PICKUP ? port->pickup_penalty : port->delivery_penalty);
+        return (pu_type == PortType::PICKUP ? port->pickup_penalty : port->delivery_penalty);
     }
 
     bool Node::same_row_as(const Node &other) const {
@@ -33,14 +33,16 @@ namespace mvrp {
         return (same_row_as(other) && other.time_step == time_step);
     }
 
-    std::ostream &operator<<(std::ostream &out, PickupType pu) {
-        out << (pu == PickupType::PICKUP ? "pu" : "de");
+    std::ostream &operator<<(std::ostream &out, PortType pu) {
+        if(pu == PortType::PICKUP) { out << "pu"; }
+        if(pu == PortType::DELIVERY) { out << "de"; }
+        if(pu == PortType::BOTH) { out << "both"; }
         return out;
     }
 
     std::ostream &operator<<(std::ostream &out, const Node &n) {
         out << "[" << n.port->name << ", " << n.pu_type << ", " << n.time_step;
-        out << ", dem: " << (n.pu_type == PickupType::PICKUP ? n.pu_demand() : n.de_demand());
+        out << ", dem: " << (n.pu_type == PortType::PICKUP ? n.pu_demand() : n.de_demand());
         out << "]";
         return out;
     }

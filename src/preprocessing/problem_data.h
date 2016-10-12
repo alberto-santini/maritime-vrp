@@ -34,7 +34,7 @@ namespace mvrp {
 
         ProblemData(const std::string &data_file_name);
 
-        std::vector<std::pair<std::shared_ptr<Port>, PickupType>> get_ports_list() const;
+        std::vector<std::pair<std::shared_ptr<Port>, PortType>> get_ports_list() const;
     };
 }
 

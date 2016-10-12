@@ -107,7 +107,7 @@ namespace mvrp {
          * @return      A pair where the first element is true iff the vertex has been found
          *              and, in this case, the second element is the required vertex descriptor.
          */
-        std::pair<bool, Vertex> get_vertex(const Port& p, PickupType pu, int t) const;
+        std::pair<bool, Vertex> get_vertex(const Port& p, PortType pu, int t) const;
 
         /**
          * Prepares the graph for labelling: adds unique consecutive ids to vertices and edges
@@ -132,7 +132,7 @@ namespace mvrp {
 
         /**
          * Gives a list of edges that need to be removed in order to reduce the graph. In particular,
-         * it will remove the ``radio'' (between 0 and 1) of remaining edges with the highest cost.
+         * it will remove the ``ratio'' (between 0 and 1) of remaining edges with the highest cost.
          * By remaining edges we mean those that are not in ``already_erased''. For example, if half
          * of the graph edges are in ``already_erased'' and ``ratio'' is 0.5, this method will give
          * a list containing 75% of the edges: those that were in ``already_erased'' plus the most
@@ -140,7 +140,6 @@ namespace mvrp {
          * @param ratio             Share of remaining edges to remove
          * @param already_erased    List of edges which have already been removed
          * @return                  List of all edges to remove
-         * TODO: rename this method?
          */
         ErasedEdges reduce_graph(double ratio, ErasedEdges already_erased) const;
 
@@ -153,7 +152,6 @@ namespace mvrp {
          * @param max_chance        Probability that the most expensive arc is removed
          * @param already_erased    List of edges which have already been removed
          * @return                  List of all edges to remove
-         * TODO: rename this method?
          */
         ErasedEdges smart_reduce_graph(double min_chance, double max_chance, ErasedEdges already_erased) const;
 

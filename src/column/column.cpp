@@ -25,7 +25,7 @@ namespace mvrp {
             if(n.n_type == NodeType::REGULAR_PORT) {
                 for(auto i = 1; i < np; i++) {
                     if(n.port == prob->data.ports[i]) {
-                        auto constr_index = (n.pu_type == PickupType::PICKUP ? (i - 1) : (np - 1 + i - 1));
+                        auto constr_index = (n.pu_type == PortType::PICKUP ? (i - 1) : (np - 1 + i - 1));
                         port_coeff[constr_index]++;
                     }
                 }

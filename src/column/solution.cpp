@@ -77,9 +77,9 @@ namespace mvrp {
             auto v = target(e, g->graph);
             const auto& p = *g->graph[v];
 
-            if(p.pu_type == PickupType::PICKUP) {
+            if(p.pu_type == PortType::PICKUP) {
                 current += p.pu_demand();
-            } else if(p.pu_type == PickupType::DELIVERY) {
+            } else if(p.pu_type == PortType::DELIVERY) {
                 current -= p.de_demand();
             }
 
@@ -100,7 +100,7 @@ namespace mvrp {
             const Node &dest = *g->graph[target(e, g->graph)];
 
             if(dest.n_type == NodeType::REGULAR_PORT) {
-                if(dest.pu_type == PickupType::PICKUP) {
+                if(dest.pu_type == PortType::PICKUP) {
                     distances.push_back(l - current_distance);
                 } else {
                     distances.push_back(current_distance);

@@ -170,12 +170,12 @@ namespace mvrp {
         }
     }
 
-    std::vector<std::pair<std::shared_ptr<Port>, PickupType>> ProblemData::get_ports_list() const {
-        auto list = std::vector<std::pair<std::shared_ptr<Port>, PickupType>>();
+    std::vector<std::pair<std::shared_ptr<Port>, PortType>> ProblemData::get_ports_list() const {
+        auto list = std::vector<std::pair<std::shared_ptr<Port>, PortType>>();
 
         for(auto p : ports) {
-            list.push_back(std::make_pair(p, PickupType::PICKUP));
-            list.push_back(std::make_pair(p, PickupType::DELIVERY));
+            list.push_back(std::make_pair(p, PortType::PICKUP));
+            list.push_back(std::make_pair(p, PortType::DELIVERY));
         }
 
         return list;

@@ -23,12 +23,12 @@ namespace mvrp {
 
             const Node &current_node = *g->graph[target(route[i], g->graph)];
             auto current_port = current_node.port;
-            const PickupType &current_pu = current_node.pu_type;
+            const PortType &current_pu = current_node.pu_type;
 
             for(auto k = 0u; k < cycles[num_cycles].size(); k++) {
                 const Node &cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
                 auto cycle_port = cycle_node.port;
-                const PickupType &cycle_pu = cycle_node.pu_type;
+                const PortType &cycle_pu = cycle_node.pu_type;
 
                 if(current_port == cycle_port && current_pu == cycle_pu) {
                     cycles[num_cycles].push_back(route[i]);
@@ -67,10 +67,10 @@ namespace mvrp {
     void Cycle::print_cycle(const Path &cycle, std::shared_ptr<const Graph> g, std::ostream &out) {
         for(const auto &e : cycle) {
             const Node &n = *g->graph[source(e, g->graph)];
-            out << n.port->name << "(" << (n.pu_type == PickupType::PICKUP ? "pu" : "de") << ") -> ";
+            out << n.port->name << "(" << (n.pu_type == PortType::PICKUP ? "pu" : "de") << ") -> ";
         }
 
         const Node &n = *g->graph[target(cycle.back(), g->graph)];
-        out << n.port->name << "(" << (n.pu_type == PickupType::PICKUP ? "pu" : "de") << ")" << std::endl;
+        out << n.port->name << "(" << (n.pu_type == PortType::PICKUP ? "pu" : "de") << ")" << std::endl;
     }
 }

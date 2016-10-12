@@ -26,11 +26,11 @@ namespace mvrp {
                 /*  Create source and sink nodes */
                 if(p->hub) {
                     v_h1 = add_vertex(g->graph);
-                    g->graph[v_h1] = std::make_shared<Node>(p, PickupType::PICKUP, NodeType::SOURCE_VERTEX, 0, vessel_class);
+                    g->graph[v_h1] = std::make_shared<Node>(p, PortType::PICKUP, NodeType::SOURCE_VERTEX, 0, vessel_class);
                     n_h1 = *g->graph[v_h1];
 
                     v_h2 = add_vertex(g->graph);
-                    g->graph[v_h2] = std::make_shared<Node>(p, PickupType::DELIVERY, NodeType::SINK_VERTEX, data.num_times - 1, vessel_class);
+                    g->graph[v_h2] = std::make_shared<Node>(p, PortType::DELIVERY, NodeType::SINK_VERTEX, data.num_times - 1, vessel_class);
                     n_h2 = *g->graph[v_h2];
 
                     continue;
@@ -52,7 +52,7 @@ namespace mvrp {
                     if(p->pickup_demand > 0 && p->pickup_demand <= vessel_class->capacity) {
                         for(auto t = 0; t < data.num_times; t++) {
                             auto v = add_vertex(g->graph);
-                            g->graph[v] = std::make_shared<Node>(p, PickupType::PICKUP, NodeType::REGULAR_PORT, t, vessel_class);
+                            g->graph[v] = std::make_shared<Node>(p, PortType::PICKUP, NodeType::REGULAR_PORT, t, vessel_class);
                         }
 
                         created_pu[p] = true;
@@ -63,7 +63,7 @@ namespace mvrp {
                     if(p->delivery_demand > 0 && p->delivery_demand <= vessel_class->capacity) {
                         for(auto t = 0; t < data.num_times; t++) {
                             auto v = add_vertex(g->graph);
-                            g->graph[v] = std::make_shared<Node>(p, PickupType::DELIVERY, NodeType::REGULAR_PORT, t, vessel_class);
+                            g->graph[v] = std::make_shared<Node>(p, PortType::DELIVERY, NodeType::REGULAR_PORT, t, vessel_class);
                         }
 
                         created_de[p] = true;
@@ -96,7 +96,7 @@ namespace mvrp {
                     }
 
                     if(created_pu[p]) {
-                        auto final_time_pu = final_time(data, *p, arrival_time, PickupType::PICKUP);
+                        auto final_time_pu = final_time(data, *p, arrival_time, PortType::PICKUP);
                         auto movement_cost = p->pickup_movement_cost;
                         auto fixed_port_fee = p->fixed_fee;
                         auto variable_port_fee = p->variable_fee[vessel_class];
@@ -110,7 +110,7 @@ namespace mvrp {
                                 auto time_charter_cost = (final_time_pu - 0) * vessel_class->time_charter_cost_per_time_unit;
                                 auto hotel_cost = (final_time_pu - arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                                create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP, final_time_pu, g,
+                                create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::PICKUP, final_time_pu, g,
                                             bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                             fixed_port_fee + variable_port_fee, revenue, distance);
                             } else {
@@ -120,7 +120,7 @@ namespace mvrp {
                                 auto time_charter_cost = (overall_final_time - 0) * vessel_class->time_charter_cost_per_time_unit;
                                 auto hotel_cost = (overall_final_time - arrival_time) * vessel_class->hotel_cost_per_time_unit;
 
-                                create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::PICKUP,
+                                create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::PICKUP,
                                             overall_final_time, g,
                                             bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                             fixed_port_fee + variable_port_fee, revenue, distance);
@@ -133,7 +133,7 @@ namespace mvrp {
 
                             if(comeback_arrival_time >= data.num_times) { continue; }
 
-                            auto comeback_final_time_pu = final_time(data, *p, comeback_arrival_time, PickupType::PICKUP);
+                            auto comeback_final_time_pu = final_time(data, *p, comeback_arrival_time, PortType::PICKUP);
 
                             if(comeback_final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
                                 auto bunker_cost = (comeback_arrival_time - t) * bunker_cost_per_time_unit;
@@ -160,7 +160,7 @@ namespace mvrp {
                     }
 
                     if(created_de[p]) {
-                        auto final_time_de = final_time(data, *p, arrival_time, PickupType::DELIVERY);
+                        auto final_time_de = final_time(data, *p, arrival_time, PortType::DELIVERY);
                         auto movement_cost = p->delivery_movement_cost;
                         auto fixed_port_fee = p->fixed_fee;
                         auto variable_port_fee = p->variable_fee[vessel_class];
@@ -173,7 +173,7 @@ namespace mvrp {
                             auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
                             auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
 
-                            create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g,
+                            create_edge(*n_h1.port, PortType::PICKUP, 0, *p, PortType::DELIVERY, final_time_de, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
                         }
@@ -181,7 +181,7 @@ namespace mvrp {
                         /* Create arcs from comeback-hub to port */
                         for(auto t = 1; t < data.num_times - 1; t++) {
                             auto comeback_arrival_time = arrival_time + t;
-                            auto comeback_final_time_de = final_time(data, *p, comeback_arrival_time, PickupType::DELIVERY);
+                            auto comeback_final_time_de = final_time(data, *p, comeback_arrival_time, PortType::DELIVERY);
 
                             if((comeback_final_time_de <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
                                (comeback_final_time_de <= p->delivery_transit)) {
@@ -247,7 +247,7 @@ namespace mvrp {
                             auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
                             auto revenue = 0;
 
-                            create_edge(*p, PickupType::PICKUP, departure_time, *n_h2.port, PickupType::DELIVERY,
+                            create_edge(*p, PortType::PICKUP, departure_time, *n_h2.port, PortType::DELIVERY,
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
@@ -255,7 +255,7 @@ namespace mvrp {
                             /* Create arc from the port to the comeback-hub */
                             // We add an fixed slack of 2 time units for operations at the hub
                             if(arrival_time + 2 < data.num_times) {
-                                create_edge(*p, PickupType::PICKUP, departure_time, *comeback_hub_port, PickupType::BOTH,
+                                create_edge(*p, PortType::PICKUP, departure_time, *comeback_hub_port, PortType::BOTH,
                                             arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                             fixed_port_fee + variable_port_fee, revenue, distance);
                             }
@@ -301,7 +301,7 @@ namespace mvrp {
                             auto variable_port_fee = n_h2.port->variable_fee[vessel_class];
                             auto revenue = 0;
 
-                            create_edge(*p, PickupType::DELIVERY, departure_time, *n_h2.port, PickupType::DELIVERY,
+                            create_edge(*p, PortType::DELIVERY, departure_time, *n_h2.port, PortType::DELIVERY,
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
@@ -309,7 +309,7 @@ namespace mvrp {
                             /* Create arc from the port to the comeback-hub */
                             // We add an fixed slack of 2 time units for operations at the hub
                             if(arrival_time + 2 < data.num_times) {
-                                create_edge(*p, PickupType::DELIVERY, departure_time, *comeback_hub_port, PickupType::BOTH,
+                                create_edge(*p, PortType::DELIVERY, departure_time, *comeback_hub_port, PortType::BOTH,
                                             arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                             fixed_port_fee + variable_port_fee, revenue, distance);
                             }
@@ -341,11 +341,11 @@ namespace mvrp {
                         continue;
                     }
 
-                    for(auto pu : {PickupType::PICKUP, PickupType::DELIVERY}) {
-                        if(pu == PickupType::PICKUP && (!created_pu[p] || t < data.num_times - 1 - p->pickup_transit)) {
+                    for(auto pu : {PortType::PICKUP, PortType::DELIVERY}) {
+                        if(pu == PortType::PICKUP && (!created_pu[p] || t < data.num_times - 1 - p->pickup_transit)) {
                             continue;
                         }
-                        if(pu == PickupType::DELIVERY && (!created_de[p] || t > p->delivery_transit)) {
+                        if(pu == PortType::DELIVERY && (!created_de[p] || t > p->delivery_transit)) {
                             continue;
                         }
 
@@ -380,12 +380,12 @@ namespace mvrp {
                                 auto fixed_port_fee = q->fixed_fee;
                                 auto variable_port_fee = q->variable_fee[vessel_class];
 
-                                if((pu == PickupType::DELIVERY) ||
-                                   (pu == PickupType::PICKUP &&
+                                if((pu == PortType::DELIVERY) ||
+                                   (pu == PortType::PICKUP &&
                                     p->pickup_demand + q->pickup_demand <= vessel_class->capacity)) {
 
                                     if(created_pu[q]) {
-                                        auto final_time_pu = final_time(data, *q, arrival_time, PickupType::PICKUP);
+                                        auto final_time_pu = final_time(data, *q, arrival_time, PortType::PICKUP);
 
                                         if((final_time_pu <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
                                            (final_time_pu >= data.num_times - 1 - q->pickup_transit)) {
@@ -395,20 +395,20 @@ namespace mvrp {
                                             auto movement_cost = q->pickup_movement_cost;
                                             auto revenue = q->pickup_revenue;
 
-                                            create_edge(*p, pu, t, *q, PickupType::PICKUP, final_time_pu, g,
+                                            create_edge(*p, pu, t, *q, PortType::PICKUP, final_time_pu, g,
                                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                                         fixed_port_fee + variable_port_fee, revenue, distance);
                                         }
                                     }
                                 }
 
-                                if((pu == PickupType::DELIVERY &&
+                                if((pu == PortType::DELIVERY &&
                                     p->delivery_demand + q->delivery_demand <= vessel_class->capacity) ||
-                                   (pu == PickupType::PICKUP &&
+                                   (pu == PortType::PICKUP &&
                                     p->pickup_demand + q->delivery_demand <= vessel_class->capacity)) {
 
                                     if(created_de[q]) {
-                                        auto final_time_de = final_time(data, *q, arrival_time, PickupType::DELIVERY);
+                                        auto final_time_de = final_time(data, *q, arrival_time, PortType::DELIVERY);
 
                                         if((final_time_de <= latest_departure(data, q, n_h2.port, *vessel_class)) &&
                                            (final_time_de <= q->delivery_transit)) {
@@ -418,7 +418,7 @@ namespace mvrp {
                                             auto movement_cost = q->delivery_movement_cost;
                                             auto revenue = q->delivery_revenue;
 
-                                            create_edge(*p, pu, t, *q, PickupType::DELIVERY, final_time_de, g,
+                                            create_edge(*p, pu, t, *q, PortType::DELIVERY, final_time_de, g,
                                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                                         fixed_port_fee + variable_port_fee, revenue, distance);
                                         }
@@ -434,12 +434,12 @@ namespace mvrp {
             for(auto vp = vertices(g->graph); vp.first != vp.second; ++vp.first) {
                 auto n = *g->graph[*vp.first];
 
-                if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY && created_pu[n.port] &&
+                if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PortType::DELIVERY && created_pu[n.port] &&
                    created_de[n.port]) {
                     // 1) Create an arc from port delivery to port pickup
                     auto t = n.time_step;
                     auto arrival_time = n.time_step;
-                    auto final_time_pu = final_time(data, *n.port, arrival_time, PickupType::PICKUP);
+                    auto final_time_pu = final_time(data, *n.port, arrival_time, PortType::PICKUP);
 
                     if((final_time_pu <= latest_departure(data, n.port, n_h2.port, *vessel_class)) &&
                        (final_time_pu >= data.num_times - 1 - n.port->pickup_transit)) {
@@ -452,7 +452,7 @@ namespace mvrp {
                         auto variable_port_fee = 0;
                         auto revenue = n.port->pickup_revenue;
 
-                        create_edge(*n.port, n.pu_type, t, *n.port, PickupType::PICKUP, final_time_pu, g,
+                        create_edge(*n.port, n.pu_type, t, *n.port, PortType::PICKUP, final_time_pu, g,
                                     bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                     fixed_port_fee + variable_port_fee, revenue, 0.0);
                     }
@@ -470,8 +470,8 @@ namespace mvrp {
                             auto t = n.time_step;
                             auto arrival_time = n.time_step;
 
-                            if(n2.pu_type == PickupType::PICKUP) {
-                                auto final_time_pu = final_time(data, *n2.port, arrival_time, PickupType::PICKUP);
+                            if(n2.pu_type == PortType::PICKUP) {
+                                auto final_time_pu = final_time(data, *n2.port, arrival_time, PortType::PICKUP);
 
                                 if((final_time_pu <= latest_departure(data, n2.port, n_h2.port, *vessel_class)) &&
                                    (final_time_pu >= data.num_times - 1 - n2.port->pickup_transit)) {
@@ -484,14 +484,14 @@ namespace mvrp {
                                     auto variable_port_fee = 0;
                                     auto revenue = n2.port->pickup_revenue;
 
-                                    create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::PICKUP, final_time_pu, g,
+                                    create_edge(*n.port, n.pu_type, t, *n2.port, PortType::PICKUP, final_time_pu, g,
                                                 bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                                 fixed_port_fee + variable_port_fee, revenue, 0.0);
                                 }
                             }
 
-                            if(n2.pu_type == PickupType::DELIVERY) {
-                                auto final_time_de = final_time(data, *n2.port, arrival_time, PickupType::DELIVERY);
+                            if(n2.pu_type == PortType::DELIVERY) {
+                                auto final_time_de = final_time(data, *n2.port, arrival_time, PortType::DELIVERY);
 
                                 if((final_time_de <= latest_departure(data, n2.port, n_h2.port, *vessel_class)) &&
                                    (final_time_de <= n2.port->delivery_transit)) {
@@ -504,7 +504,7 @@ namespace mvrp {
                                     auto variable_port_fee = 0;
                                     auto revenue = n2.port->delivery_revenue;
 
-                                    create_edge(*n.port, n.pu_type, t, *n2.port, PickupType::DELIVERY, final_time_de, g,
+                                    create_edge(*n.port, n.pu_type, t, *n2.port, PortType::DELIVERY, final_time_de, g,
                                                 bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                                 fixed_port_fee + variable_port_fee, revenue, 0.0);
                                 }
@@ -564,8 +564,8 @@ namespace mvrp {
             return g;
         }
 
-        int final_time(const ProblemData &data, const Port &p, int arrival_time, PickupType pu) {
-            auto ft_handling = arrival_time + (pu == PickupType::PICKUP ? p.pickup_handling : p.delivery_handling);
+        int final_time(const ProblemData &data, const Port &p, int arrival_time, PortType pu) {
+            auto ft_handling = arrival_time + (pu == PortType::PICKUP ? p.pickup_handling : p.delivery_handling);
             auto ft = ft_handling;
             auto free_from_tw = false;
 
@@ -595,20 +595,20 @@ namespace mvrp {
             return std::min(data.num_times - 1.0, ceil(data.distances.at(std::make_pair(h1, p)) / top_speed));
         }
 
-        void create_edge(const Port &origin_p, PickupType origin_pu, int origin_type,
-                         const Port &destination_p, PickupType destination_pu, int destination_type,
+        void create_edge(const Port &origin_p, PortType origin_pu, int origin_time,
+                         const Port &destination_p, PortType destination_pu, int destination_time,
                          std::shared_ptr<Graph> g, double bunker_costs, double tc_costs,
                          double movement_costs, double port_costs, double revenue, double length) {
             bool origin_found, destination_found;
             Vertex origin_v, destination_v;
 
-            std::tie(origin_found, origin_v) = g->get_vertex(origin_p, origin_pu, origin_type);
+            std::tie(origin_found, origin_v) = g->get_vertex(origin_p, origin_pu, origin_time);
 
             if(!origin_found) {
                 return;
             }
 
-            std::tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_type);
+            std::tie(destination_found, destination_v) = g->get_vertex(destination_p, destination_pu, destination_time);
 
             if(!destination_found) { return; }
 
