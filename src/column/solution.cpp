@@ -9,33 +9,44 @@
 
 namespace mvrp {
     bool Solution::satisfies_capacity_constraints() const {
-        auto qty_delivered = 0;
+        auto current_start = path.rbegin();
 
-        for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
-            const Node &n = *g->graph[target(*pit, g->graph)];
-            if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
-                qty_delivered += n.de_demand();
-            }
-        }
+        while(current_start != path.rend()) {
+            auto qty_delivered = 0;
+            auto next_start = path.rend();
 
-        if(qty_delivered > vessel_class->capacity) {
-            return false;
-        }
+            for(auto pit = current_start; pit != path.rend(); ++pit) {
+                const Node &n = *g->graph[target(*pit, g->graph)];
 
-        auto used_capacity = qty_delivered;
-
-        for(auto pit = path.rbegin(); pit != path.rend(); ++pit) {
-            const Node &n = *g->graph[target(*pit, g->graph)];
-
-            if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::DELIVERY) {
-                used_capacity -= n.de_demand();
-            }
-            if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PickupType::PICKUP) {
-                if(used_capacity + n.pu_demand() > vessel_class->capacity) {
-                    return false;
+                if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PortType::DELIVERY) {
+                    qty_delivered += n.de_demand();
+                    if(qty_delivered > vessel_class->capacity) { return false; }
                 }
-                used_capacity += n.pu_demand();
+
+                if(n.n_type == NodeType::COMEBACK_HUB) {
+                    next_start = current_start + 1;
+                    break;
+                }
             }
+
+            auto used_capacity = qty_delivered;
+
+            for(auto pit = current_start; pit != next_start; ++pit) {
+                const Node &n = *g->graph[target(*pit, g->graph)];
+
+                if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PortType::DELIVERY) {
+                    used_capacity -= n.de_demand();
+                }
+
+                if(n.n_type == NodeType::REGULAR_PORT && n.pu_type == PortType::PICKUP) {
+                    if(used_capacity + n.pu_demand() > vessel_class->capacity) {
+                        return false;
+                    }
+                    used_capacity += n.pu_demand();
+                }
+            }
+
+            current_start = next_start;
         }
 
         return true;
