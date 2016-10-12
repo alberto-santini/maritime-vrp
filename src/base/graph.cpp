@@ -266,7 +266,7 @@ namespace mvrp {
         return std::make_pair(false, Vertex{});
     }
 
-    double Graph::calculate_cost(const Path &p) const {
+    double Graph::calculate_path_cost(const Path& p) const {
         auto cost = 0.0f;
         for(const auto &e : p) { cost += graph[e]->cost; }
         return cost;

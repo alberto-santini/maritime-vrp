@@ -201,7 +201,7 @@ namespace mvrp {
 
         for(auto i = 0u; i < optimal_paths.size(); i++) {
             sols.push_back(
-                Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+                Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
         }
 
         return sols;
@@ -251,7 +251,7 @@ namespace mvrp {
 
         for(auto i = 0u; i < optimal_paths.size(); i++) {
             sols.push_back(
-                Solution(optimal_paths[i], g->calculate_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+                Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
         }
 
         return sols;

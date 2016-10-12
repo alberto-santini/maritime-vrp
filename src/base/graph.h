@@ -171,9 +171,8 @@ namespace mvrp {
          * Gives the cost of a path (as the sum of the cost of its edges).
          * @param p The path
          * @return  The path's cost
-         * TODO: rename this method?
          */
-        double calculate_cost(const Path& p) const;
+        double calculate_path_cost(const Path& p) const;
 
         /**
          * Gets the dual prize associated with a certain node.

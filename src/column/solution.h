@@ -47,7 +47,7 @@ namespace mvrp {
         Solution() {}
 
         Solution(Path path, double reduced_cost, std::shared_ptr<const Graph> g) :
-            path{path}, cost{g->calculate_cost(path)}, reduced_cost{reduced_cost}, vessel_class{g->vessel_class}, g{g} {}
+            path{path}, cost{g->calculate_path_cost(path)}, reduced_cost{reduced_cost}, vessel_class{g->vessel_class}, g{g} {}
 
         Solution(Path path, double cost, double reduced_cost, std::shared_ptr<VesselClass> vessel_class, std::shared_ptr<const Graph> g) :
             path{path}, cost{cost}, reduced_cost{reduced_cost}, vessel_class{vessel_class}, g{g} {}
