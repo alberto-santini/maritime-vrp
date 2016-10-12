@@ -29,7 +29,7 @@ namespace mvrp {
          */
         double vc_dual;
 
-        GraphProperties() {}
+        GraphProperties() : vc_dual{0.0} {}
 
         GraphProperties(PortDuals port_duals, PortDuals old_port_duals, double vc_dual) :
             port_duals(port_duals), old_port_duals(old_port_duals), vc_dual(vc_dual) {}
