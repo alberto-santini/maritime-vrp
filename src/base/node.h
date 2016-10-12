@@ -14,11 +14,11 @@
 namespace mvrp {
     // TODO: rename into PortType
     enum class PickupType {
-        PICKUP, DELIVERY
+        PICKUP, DELIVERY, BOTH
     };
 
     enum class NodeType {
-        H1, H2, REGULAR_PORT
+        SOURCE_VERTEX, SINK_VERTEX, COMEBACK_HUB, REGULAR_PORT
     };
 
     struct Node {

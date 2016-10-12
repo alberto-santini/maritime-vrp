@@ -89,14 +89,14 @@ namespace mvrp {
          * @return  A pair where the first element is true iff the source vertex has been found
          *          and, in this case, the second element is the required vertex descriptor.
          */
-        std::pair<bool, Vertex> h1() const;
+        std::pair<bool, Vertex> get_source_vertex() const;
 
         /**
           * Finds the sink vertex.
           * @return  A pair where the first element is true iff the sink vertex has been found
           *          and, in this case, the second element is the required vertex descriptor.
           */
-        std::pair<bool, Vertex> h2() const;
+        std::pair<bool, Vertex> get_sink_vertex() const;
 
         /**
          * Finds the vertex corresponding to a certain port, with a certain type, at

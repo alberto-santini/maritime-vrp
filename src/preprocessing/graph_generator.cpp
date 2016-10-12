@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <unordered_map>
 #include <string>
 #include <utility>
 
@@ -16,22 +17,34 @@ namespace mvrp {
             auto g = std::make_shared<Graph>(BGraph(), vessel_class);
             auto created_pu = std::unordered_map<std::shared_ptr<Port>, bool>();
             auto created_de = std::unordered_map<std::shared_ptr<Port>, bool>();
+            const Port* comeback_hub_port = nullptr;
 
             /*  Add vertices */
             Vertex v_h1, v_h2;
             Node n_h1, n_h2;
             for(auto p : data.ports) {
-                /*  Create nodes H1 and H2 */
+                /*  Create source and sink nodes */
                 if(p->hub) {
                     v_h1 = add_vertex(g->graph);
-                    g->graph[v_h1] = std::make_shared<Node>(p, PickupType::PICKUP, NodeType::H1, 0, vessel_class);
+                    g->graph[v_h1] = std::make_shared<Node>(p, PickupType::PICKUP, NodeType::SOURCE_VERTEX, 0, vessel_class);
                     n_h1 = *g->graph[v_h1];
 
                     v_h2 = add_vertex(g->graph);
-                    g->graph[v_h2] = std::make_shared<Node>(p, PickupType::DELIVERY, NodeType::H2, data.num_times - 1, vessel_class);
+                    g->graph[v_h2] = std::make_shared<Node>(p, PickupType::DELIVERY, NodeType::SINK_VERTEX, data.num_times - 1, vessel_class);
                     n_h2 = *g->graph[v_h2];
 
                     continue;
+                }
+
+                /* Create come-back hub nodes */
+                if(p->hub) {
+                    for(auto t = 1; t < data.num_times - 1; t++) {
+                        auto v = add_vertex(g->graph);
+                        g->graph[v] = std::make_shared<Node>(p, PickupType::BOTH, NodeType::COMEBACK_HUB, t, vessel_class);
+                    }
+
+                    assert(comeback_hub_port == nullptr);
+                    comeback_hub_port = p.get();
                 }
 
                 if(p->allowed[vessel_class]) {
@@ -60,6 +73,8 @@ namespace mvrp {
                 }
             }
 
+            assert(comeback_hub_port != nullptr);
+
             /*  Add hub-to-port edges */
             for(auto p : data.ports) {
                 if(p->hub) {
@@ -82,13 +97,13 @@ namespace mvrp {
 
                     if(created_pu[p]) {
                         auto final_time_pu = final_time(data, *p, arrival_time, PickupType::PICKUP);
+                        auto movement_cost = p->pickup_movement_cost;
+                        auto fixed_port_fee = p->fixed_fee;
+                        auto variable_port_fee = p->variable_fee[vessel_class];
+                        auto revenue = p->pickup_revenue;
 
                         if(final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
                             auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
-                            auto movement_cost = p->pickup_movement_cost;
-                            auto fixed_port_fee = p->fixed_fee;
-                            auto variable_port_fee = p->variable_fee[vessel_class];
-                            auto revenue = p->pickup_revenue;
 
                             if(final_time_pu >= data.num_times - 1 - p->pickup_transit) {
                                 // Normal arc: arrives at a time when it's allowed
@@ -111,10 +126,45 @@ namespace mvrp {
                                             fixed_port_fee + variable_port_fee, revenue, distance);
                             }
                         }
+
+                        /* Create arcs from comeback-hub to port */
+                        for(auto t = 1; t < data.num_times - 1; t++) {
+                            auto comeback_arrival_time = t + arrival_time;
+
+                            if(comeback_arrival_time >= data.num_times) { continue; }
+
+                            auto comeback_final_time_pu = final_time(data, *p, comeback_arrival_time, PickupType::PICKUP);
+
+                            if(comeback_final_time_pu <= latest_departure(data, p, n_h2.port, *vessel_class)) {
+                                auto bunker_cost = (comeback_arrival_time - t) * bunker_cost_per_time_unit;
+
+                                if(comeback_final_time_pu >= data.num_times - 1 - p->pickup_transit) {
+                                    // Normal arc: arrives at a time when it's allowed
+                                    auto time_charter_cost = (comeback_final_time_pu - t) * vessel_class->time_charter_cost_per_time_unit;
+                                    auto hotel_cost = (comeback_final_time_pu - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
+
+                                    create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::PICKUP, comeback_final_time_pu, g,
+                                    bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                                } else {
+                                    // Travel + wait arc: arrives at a time when it's not allowed
+                                    auto comeback_overall_final_time = data.num_times - 1 - p->pickup_transit;
+
+                                    auto time_charter_cost = (comeback_overall_final_time - t) * vessel_class->time_charter_cost_per_time_unit;
+                                    auto hotel_cost = (comeback_overall_final_time - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
+
+                                    create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::PICKUP, comeback_overall_final_time, g,
+                                                bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                                }
+                            }
+                        }
                     }
 
                     if(created_de[p]) {
                         auto final_time_de = final_time(data, *p, arrival_time, PickupType::DELIVERY);
+                        auto movement_cost = p->delivery_movement_cost;
+                        auto fixed_port_fee = p->fixed_fee;
+                        auto variable_port_fee = p->variable_fee[vessel_class];
+                        auto revenue = p->delivery_revenue;
 
                         if((final_time_de <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
                            (final_time_de <= p->delivery_transit)) {
@@ -122,14 +172,27 @@ namespace mvrp {
                             auto time_charter_cost = (final_time_de - 0) * vessel_class->time_charter_cost_per_time_unit;
                             auto hotel_cost = (final_time_de - arrival_time) * vessel_class->hotel_cost_per_time_unit;
                             auto bunker_cost = (arrival_time - 0) * bunker_cost_per_time_unit;
-                            auto movement_cost = p->delivery_movement_cost;
-                            auto fixed_port_fee = p->fixed_fee;
-                            auto variable_port_fee = p->variable_fee[vessel_class];
-                            auto revenue = p->delivery_revenue;
 
                             create_edge(*n_h1.port, PickupType::PICKUP, 0, *p, PickupType::DELIVERY, final_time_de, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
+                        }
+
+                        /* Create arcs from comeback-hub to port */
+                        for(auto t = 1; t < data.num_times - 1; t++) {
+                            auto comeback_arrival_time = arrival_time + t;
+                            auto comeback_final_time_de = final_time(data, *p, comeback_arrival_time, PickupType::DELIVERY);
+
+                            if((comeback_final_time_de <= latest_departure(data, p, n_h2.port, *vessel_class)) &&
+                               (comeback_final_time_de <= p->delivery_transit)) {
+
+                                auto time_charter_cost = (comeback_final_time_de - t) * vessel_class->time_charter_cost_per_time_unit;
+                                auto hotel_cost = (comeback_final_time_de - comeback_arrival_time) * vessel_class->hotel_cost_per_time_unit;
+                                auto bunker_cost = (comeback_arrival_time - t) * bunker_cost_per_time_unit;
+
+                                create_edge(*comeback_hub_port, PickupType::BOTH, t, *p, PickupType::DELIVERY, comeback_final_time_de, g,
+                                bunker_cost + hotel_cost, time_charter_cost, movement_cost, fixed_port_fee + variable_port_fee, revenue, distance);
+                            }
                         }
                     }
                 }
@@ -141,9 +204,6 @@ namespace mvrp {
                     continue;
                 }
 
-                // auto pickup_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit), 1);
-                // auto delivery_departure_time = std::max(std::min(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit), 1);
-
                 auto pickup_departure_time = std::max(earliest_arrival(data, p, n_h1.port, *vessel_class), data.num_times - 1 - p->pickup_transit);
                 auto delivery_departure_time = std::max(earliest_arrival(data, p, n_h1.port, *vessel_class), p->delivery_transit);
 
@@ -152,8 +212,7 @@ namespace mvrp {
 
                 if(created_pu[p]) {
                     // For pickup nodes:
-                    for(auto departure_time = pickup_departure_time;
-                        departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
+                    for(auto departure_time = pickup_departure_time; departure_time < latest_departure(data, p, n_h2.port, *vessel_class); ++departure_time) {
                         auto falls_in_tw = false;
                         for(const auto &tw : p->closing_time_windows) {
                             if(departure_time > tw.first && departure_time <= tw.second) {
@@ -192,6 +251,14 @@ namespace mvrp {
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
+
+                            /* Create arc from the port to the comeback-hub */
+                            // We add an fixed slack of 2 time units for operations at the hub
+                            if(arrival_time + 2 < data.num_times) {
+                                create_edge(*p, PickupType::PICKUP, departure_time, *comeback_hub_port, PickupType::BOTH,
+                                            arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                            }
                         }
                     }
                 }
@@ -238,6 +305,14 @@ namespace mvrp {
                                         data.num_times - 1, g,
                                         bunker_cost + hotel_cost, time_charter_cost, movement_cost,
                                         fixed_port_fee + variable_port_fee, revenue, distance);
+
+                            /* Create arc from the port to the comeback-hub */
+                            // We add an fixed slack of 2 time units for operations at the hub
+                            if(arrival_time + 2 < data.num_times) {
+                                create_edge(*p, PickupType::DELIVERY, departure_time, *comeback_hub_port, PickupType::BOTH,
+                                            arrival_time + 2, g, bunker_cost + hotel_cost, time_charter_cost, movement_cost,
+                                            fixed_port_fee + variable_port_fee, revenue, distance);
+                            }
                         }
                     }
                 }
@@ -253,8 +328,7 @@ namespace mvrp {
                     continue;
                 }
 
-                for(auto t = earliest_arrival(data, p, n_h1.port, *vessel_class);
-                    t <= latest_departure(data, p, n_h2.port, *vessel_class); t++) {
+                for(auto t = earliest_arrival(data, p, n_h1.port, *vessel_class); t <= latest_departure(data, p, n_h2.port, *vessel_class); t++) {
                     auto falls_in_tw = false;
                     for(const auto &tw : p->closing_time_windows) {
                         if(t > tw.first && t <= tw.second) {

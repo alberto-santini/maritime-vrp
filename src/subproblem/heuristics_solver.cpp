@@ -12,8 +12,8 @@
 namespace mvrp {
     std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
         auto sols = std::vector<Solution>();
-        auto h1 = g->h1().second;
-        auto h2 = g->h2().second;
+        auto h1 = g->get_source_vertex().second;
+        auto h2 = g->get_sink_vertex().second;
         struct EdgeWithCost {
             Edge e;
             double c;
@@ -85,8 +85,8 @@ namespace mvrp {
 
     std::vector<Solution> HeuristicsSolver::solve_fast_backward() const {
         std::vector<Solution> sols;
-        auto h1 = g->h1().second;
-        auto h2 = g->h2().second;
+        auto h1 = g->get_source_vertex().second;
+        auto h2 = g->get_sink_vertex().second;
         struct EdgeWithCost {
             Edge e;
             double c;
@@ -184,8 +184,8 @@ namespace mvrp {
                 g->graph,
                 make_property_map<Vertex>(nf),
                 make_property_map<Edge>(af),
-                g->h1().second,
-                g->h2().second,
+                g->get_source_vertex().second,
+                g->get_sink_vertex().second,
                 optimal_paths,
                 optimal_labels,
                 ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
@@ -234,8 +234,8 @@ namespace mvrp {
                 g->graph,
                 make_property_map<Vertex>(nf),
                 make_property_map<Edge>(af),
-                g->h1().second,
-                g->h2().second,
+                g->get_source_vertex().second,
+                g->get_sink_vertex().second,
                 optimal_paths,
                 optimal_labels,
                 Label(g, vc->capacity, vc->capacity, 0),

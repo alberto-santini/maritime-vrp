@@ -20,8 +20,8 @@ namespace mvrp {
             const Node &node = *graph[*vp.first];
 
             std::string desc = "reg";
-            if(node.n_type == NodeType::H1) { desc = "src"; }
-            if(node.n_type == NodeType::H2) { desc = "snk"; }
+            if(node.n_type == NodeType::SOURCE_VERTEX) { desc = "src"; }
+            if(node.n_type == NodeType::SINK_VERTEX) { desc = "snk"; }
 
             auto pickup = 0u;
             if(node.pu_type == PickupType::PICKUP) { pickup = node.port->pickup_demand; }
@@ -96,12 +96,12 @@ namespace mvrp {
         }
     }
 
-    std::pair<bool, Vertex> Graph::h1() const {
-        return get_vertex_by_node_type(NodeType::H1);
+    std::pair<bool, Vertex> Graph::get_source_vertex() const {
+        return get_vertex_by_node_type(NodeType::SOURCE_VERTEX);
     }
 
-    std::pair<bool, Vertex> Graph::h2() const {
-        return get_vertex_by_node_type(NodeType::H2);
+    std::pair<bool, Vertex> Graph::get_sink_vertex() const {
+        return get_vertex_by_node_type(NodeType::SINK_VERTEX);
     }
 
     std::pair<bool, Vertex> Graph::get_vertex_by_node_type(NodeType n_type) const {
@@ -281,7 +281,7 @@ namespace mvrp {
             } else {
                 return (it == graph[boost::graph_bundle].port_duals.end() ? 0 : it->second.second);
             }
-        } else if (n.n_type == NodeType::H2) {
+        } else if (n.n_type == NodeType::SINK_VERTEX) {
             return graph[boost::graph_bundle].vc_dual;
         }
 

@@ -60,16 +60,23 @@ namespace mvrp {
            erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
         if(std::find(label.por.begin(), label.por.end(), dest_port) == label.por.end()) { return false; }
 
-        new_label.por = label.por;
-        new_label.por.erase(std::remove(new_label.por.begin(), new_label.por.end(), dest_port), new_label.por.end());
+        if(dest_node.port->hub) {
+            new_label.por = label.por;
+            new_label.pic = 0;
+            new_label.del = 0;
+            new_label.cost = label.cost + arc.cost;
+        } else {
+            new_label.por = label.por;
+            new_label.por.erase(std::remove(new_label.por.begin(), new_label.por.end(), dest_port), new_label.por.end());
 
-        if(label.pic < dest_node.pu_demand()) { return false; }
-        new_label.pic = label.pic - dest_node.pu_demand();
+            if(label.pic < dest_node.pu_demand()) { return false; }
+            new_label.pic = label.pic - dest_node.pu_demand();
 
-        if(label.del < dest_node.de_demand()) { return false; }
-        new_label.del = std::min(label.pic - dest_node.pu_demand(), label.del - dest_node.de_demand());
+            if(label.del < dest_node.de_demand()) { return false; }
+            new_label.del = std::min(label.pic - dest_node.pu_demand(), label.del - dest_node.de_demand());
 
-        new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+            new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+        }
 
         return true;
     }
@@ -81,13 +88,19 @@ namespace mvrp {
 
         if(erased.find(src_vertex) != erased.end() && erased.at(src_vertex).find(e) != erased.at(src_vertex).end()) { return false; }
 
-        if(label.pic < dest_node.pu_demand()) { return false; }
-        new_label.pic = label.pic - dest_node.pu_demand();
+        if(dest_node.port->hub) {
+            new_label.pic = 0;
+            new_label.del = 0;
+            new_label.cost = label.cost + arc.cost;
+        } else {
+            if(label.pic < dest_node.pu_demand()) { return false; }
+            new_label.pic = label.pic - dest_node.pu_demand();
 
-        if(label.del < dest_node.de_demand()) { return false; }
-        new_label.del = std::min(label.pic - dest_node.pu_demand(), label.del - dest_node.de_demand());
+            if(label.del < dest_node.de_demand()) { return false; }
+            new_label.del = std::min(label.pic - dest_node.pu_demand(), label.del - dest_node.de_demand());
 
-        new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+            new_label.cost = label.cost + arc.cost - label.g->dual_of(dest_node) - dest_node.penalty();
+        }
 
         return true;
     }
