@@ -55,6 +55,8 @@ namespace mvrp {
         bool satisfies_capacity_constraints() const;
         bool operator==(const Solution &other) const;
         double length() const;
+        double highest_load_efficiency() const;
+        uint32_t n_ports_visited() const;
         std::vector<double> cargo_travel_distances() const;
         std::vector<double> legs_distance() const;
         std::vector<double> legs_speed() const;

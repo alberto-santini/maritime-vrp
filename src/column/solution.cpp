@@ -69,6 +69,26 @@ namespace mvrp {
         return l;
     }
 
+    double Solution::highest_load_efficiency() const {
+        auto highest = 0.0;
+        auto current = 0.0;
+
+        for(const auto &e : path) {
+            auto v = target(e, g->graph);
+            const auto& p = *g->graph[v];
+
+            if(p.pu_type == PickupType::PICKUP) {
+                current += p.pu_demand();
+            } else if(p.pu_type == PickupType::DELIVERY) {
+                current -= p.de_demand();
+            }
+
+            if(current > highest) { highest = current; }
+        }
+
+        return highest / vessel_class->capacity;
+    }
+
     std::vector<double> Solution::cargo_travel_distances() const {
         auto l = length();
         auto current_distance = 0.0;
@@ -101,6 +121,20 @@ namespace mvrp {
         }
 
         return dist;
+    }
+
+    uint32_t Solution::n_ports_visited() const {
+        auto n_ports = 0u;
+
+        for(const auto& e : path) {
+            auto v = target(e, g->graph);
+
+            if(g->graph[v]->n_type == NodeType::REGULAR_PORT) {
+                n_ports++;
+            }
+        }
+
+        return n_ports;
     }
 
     std::vector<double> Solution::legs_speed() const {

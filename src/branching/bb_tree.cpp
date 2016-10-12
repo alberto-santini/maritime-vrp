@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <fstream>
 #include <limits>
 #include <utility>
 #include <chrono>
@@ -337,7 +338,7 @@ namespace mvrp {
 
         results_file << total_used << "," << total_vessels << ",";
 
-        // 2) Average length of a rotation
+        // 2.a) Average length of a rotation
         auto rot_lengths = 0.0;
 
         for(const auto &col : actual_base) {
@@ -345,6 +346,24 @@ namespace mvrp {
         }
 
         results_file << rot_lengths / actual_base.size() << ",";
+
+        // 2.b) Average number of ports visited
+        auto n_ports_visited = 0.0;
+
+        for(const auto& col : actual_base) {
+            n_ports_visited += col.sol.n_ports_visited();
+        }
+
+        results_file << (n_ports_visited / actual_base.size()) << ",";
+
+        // 2.c) Average highest load efficiency
+        auto tot_highest_load_efficiency = 0.0;
+
+        for(const auto& col : actual_base) {
+            tot_highest_load_efficiency += col.sol.highest_load_efficiency();
+        }
+
+        results_file << (tot_highest_load_efficiency / actual_base.size()) << ",";
 
         // 3) Average travel distance of cargo
         auto distance_sum = 0.0;
