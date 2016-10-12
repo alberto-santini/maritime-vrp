@@ -1,47 +1,29 @@
 #!/bin/bash
 
-scenario="Example"
+scenario="ButterflyExample"
 hub="DEBRV"
 discretisation=2
 at_hub=6
 
 weeks=(
-  1
   2
 )
 
 min_handling=(
   2
-  3
 )
 max_handling=(
-  4
-  5
+  2
 )
 
 min_tr=60
 max_tr=78
 
 bunker_price=(
-  250
-  375
   500
 )
 penalty=(
-  0
-  1
-  2
-  5
-  10
-  20
-  30
-  40
-  50
-  60
-  70
-  80
-  90
-  100
+  10000
 )
 
 min_tw=(
@@ -49,7 +31,6 @@ min_tw=(
 )
 max_tw=(
   0
-  1
 )
 
 for wk in "${weeks[@]}"

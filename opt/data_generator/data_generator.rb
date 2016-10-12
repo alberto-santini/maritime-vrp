@@ -26,7 +26,7 @@ class DataGenerator
   def read_requests
     @requests = Array.new
 
-    File.open("../data/linerlib/Demand_#{@options[:scenario]}.csv").each_with_index do |line, index|
+    File.open("../../data/linerlib/Demand_#{@options[:scenario]}.csv").each_with_index do |line, index|
       @requests << Request.new(*(line.split("\t")[0..3])) unless index == 0
     end
   end
@@ -36,7 +36,7 @@ class DataGenerator
 
     @requests.each do |r|
       unless @ports.collect(&:name).include? r.origin
-        File.open("../data/linerlib/ports.csv").each_with_index do |line, index|
+        File.open("../../data/linerlib/ports.csv").each_with_index do |line, index|
           unless index == 0
             name, city, country, cabotage, region, lon, lat, draught, container_cost, transhipment_cost, fee_fixed, fee_variable = line.split("\t")
             if name == r.origin
@@ -47,7 +47,7 @@ class DataGenerator
       end
   
       unless @ports.collect(&:name).include? r.destination
-        File.open("../data/linerlib/ports.csv").each_with_index do |line, index|
+        File.open("../../data/linerlib/ports.csv").each_with_index do |line, index|
           unless index == 0
             name, city, country, cabotage, region, lon, lat, draught, container_cost, transhipment_cost, fee_fixed, fee_variable = line.split("\t")
             if name == r.destination
@@ -94,7 +94,7 @@ class DataGenerator
   def read_vessel_classes
     @vessel_class_names_and_quantities = Hash.new
 
-    File.open("../data/linerlib/fleet_#{@options[:scenario]}.csv").each_with_index do |line, index|
+    File.open("../../data/linerlib/fleet_#{@options[:scenario]}.csv").each_with_index do |line, index|
       @vessel_class_names_and_quantities.store(*line.split("\t")) unless index == 0
     end
   end
@@ -103,7 +103,7 @@ class DataGenerator
     @vessel_classes = Array.new
     @max_capacity = 0
 
-    File.open("../data/linerlib/fleet_data.csv").each_with_index do |line, index|
+    File.open("../../data/linerlib/fleet_data.csv").each_with_index do |line, index|
       unless index == 0
         vessel_class = VesselClass.new(@options, *(line.split("\t")[0..8]))
     
@@ -122,7 +122,7 @@ class DataGenerator
     @distances = Array.new(@ports.size) {Array.new(@ports.size) {0.0}}
     port_names = @ports.collect(&:name)
 
-    File.open("../data/linerlib/dist_dense.csv").each_with_index do |line, index|
+    File.open("../../data/linerlib/dist_dense.csv").each_with_index do |line, index|
       unless index == 0
         from, to, distance, draught, panama, suez = line.split("\t")
         if port_names.include? from and port_names.include? to
@@ -137,8 +137,14 @@ class DataGenerator
     ddem = [p.delivery_demand, @max_capacity].min
     minreq = [@min_req, @max_capacity].min
     maxreq = [@max_req, @max_capacity].min
-    p.pickup_handling = (((pdem - minreq) * (@options[:max_handling] - @options[:min_handling])).to_f / (maxreq - minreq).to_f + @options[:min_handling]).round
-    p.delivery_handling = (((ddem - minreq) * (@options[:max_handling] - @options[:min_handling])).to_f / (maxreq - minreq).to_f + @options[:min_handling]).round
+
+    if maxreq == minreq
+      p.pickup_handling = @options[:min_handling]
+      p.delivery_handling = @options[:min_handling]
+    else
+      p.pickup_handling = (((pdem - minreq) * (@options[:max_handling] - @options[:min_handling])).to_f / (maxreq - minreq).to_f + @options[:min_handling]).round
+      p.delivery_handling = (((ddem - minreq) * (@options[:max_handling] - @options[:min_handling])).to_f / (maxreq - minreq).to_f + @options[:min_handling]).round
+    end
   end
 
   def calculate_port_data
