@@ -9,7 +9,7 @@
   "elementary_labelling_every_n_nodes": 5,
   "smart_min_chance":                   0.1,
   "smart_max_chance":                   0.6,
-  "cplex_cores":                        4,
+  "cplex_cores":                        2,
   "time_limit_in_s":                    3600,
   "parallel_labelling":                 true,
   "early_branching":                    false,
