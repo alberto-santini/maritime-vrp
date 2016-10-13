@@ -3,6 +3,7 @@
   "greedy_reruns":                      100,
   "max_cols_to_solve_mp":               100000,
   "dummy_column_price":                 1000000000000000,
+  "try_fast_heuristics":                true,
   "try_elementary_labelling":           true,
   "try_smart_graph_reduction":          true,
   "try_reduced_labelling":              false,

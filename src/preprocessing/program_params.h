@@ -16,6 +16,7 @@ namespace mvrp {
         long dummy_column_price;
         int cplex_cores;
         int elementary_labelling_every_n_nodes;
+        bool try_fast_heuristics;
         bool try_elementary_labelling;
         bool try_smart_graph_reduction;
         bool try_reduced_labelling;

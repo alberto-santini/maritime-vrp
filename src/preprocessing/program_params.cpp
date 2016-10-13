@@ -20,6 +20,7 @@ namespace mvrp {
         dummy_column_price = pt.get<long>("dummy_column_price");
         cplex_cores = pt.get<int>("cplex_cores");
         elementary_labelling_every_n_nodes = pt.get<int>("elementary_labelling_every_n_nodes");
+        try_fast_heuristics = pt.get<bool>("try_fast_heuristics");
         try_elementary_labelling = pt.get<bool>("try_elementary_labelling");
         try_smart_graph_reduction = pt.get<bool>("try_smart_graph_reduction");
         try_reduced_labelling = pt.get<bool>("try_reduced_labelling");

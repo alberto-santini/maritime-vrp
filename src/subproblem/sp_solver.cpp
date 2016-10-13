@@ -42,53 +42,55 @@ namespace mvrp {
 
         if(PEDANTIC) { std::cerr << "\t\tFast heuristic" << std::endl; }
 
-        for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
-            auto g = prob->graphs.at(*vcit);
-            const auto &erased = local_erased_edges.at(*vcit);
+        if(prob->params.try_fast_heuristics) {
+          for(auto vcit = prob->data.vessel_classes.begin(); vcit != prob->data.vessel_classes.end(); ++vcit) {
+              auto g = prob->graphs.at(*vcit);
+              const auto &erased = local_erased_edges.at(*vcit);
 
-            HeuristicsSolver hsolv(prob, g, erased);
+              HeuristicsSolver hsolv(prob, g, erased);
 
-            auto total = hsolv.solve_fast();
+              auto total = hsolv.solve_fast();
 
-            for(const auto &s : total) {
-                if(s.reduced_cost > 0.0) {
-                    // if(PEDANTIC) {
-                    // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
-                    // g->print_path(s.path);
-                    // }
-                    discarded_prc++;
-                } else if(!s.satisfies_capacity_constraints()) {
-                    discarded_infeasible++;
-                } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
-                    discarded_generated++;
-                } else if(solution_in_pool(s, node_pool)) {
-                    discarded_in_pool++;
-                } else {
-                    // if(PEDANTIC) {
-                    // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
-                    // }
-                    valid_sols.push_back(s);
-                }
-            }
-        }
+              for(const auto &s : total) {
+                  if(s.reduced_cost > 0.0) {
+                      // if(PEDANTIC) {
+                      // std::cerr << "\t\t\tDiscarded: reduced cost = " << s.reduced_cost << std::endl;
+                      // g->print_path(s.path);
+                      // }
+                      discarded_prc++;
+                  } else if(!s.satisfies_capacity_constraints()) {
+                      discarded_infeasible++;
+                  } else if(find(valid_sols.begin(), valid_sols.end(), s) != valid_sols.end()) {
+                      discarded_generated++;
+                  } else if(solution_in_pool(s, node_pool)) {
+                      discarded_in_pool++;
+                  } else {
+                      // if(PEDANTIC) {
+                      // std::cerr << "\t\t\tAccepted: reduced cost = " << s.reduced_cost << std::endl;
+                      // }
+                      valid_sols.push_back(s);
+                  }
+              }
+          }
 
-        if(PEDANTIC) {
-            print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated,
-                         discarded_in_pool);
-        }
+          if(PEDANTIC) {
+              print_report(valid_sols.size(), discarded_prc, discarded_infeasible, discarded_generated,
+                           discarded_in_pool);
+          }
 
-        if(valid_sols.size() > 0) {
-            for(const auto &s : valid_sols) {
-                Column col(prob, s, "fast heuristic", ColumnOrigin::FAST_H);
-                node_pool.push_back(col);
-                global_pool->push_back(col);
-            }
-            return std::make_pair(valid_sols.size(), ColumnOrigin::FAST_H);
-        } else {
-            discarded_prc = 0;
-            discarded_infeasible = 0;
-            discarded_generated = 0;
-            discarded_in_pool = 0;
+          if(valid_sols.size() > 0) {
+              for(const auto &s : valid_sols) {
+                  Column col(prob, s, "fast heuristic", ColumnOrigin::FAST_H);
+                  node_pool.push_back(col);
+                  global_pool->push_back(col);
+              }
+              return std::make_pair(valid_sols.size(), ColumnOrigin::FAST_H);
+          } else {
+              discarded_prc = 0;
+              discarded_infeasible = 0;
+              discarded_generated = 0;
+              discarded_in_pool = 0;
+          }
         }
 
         auto percentage = pct_start;
