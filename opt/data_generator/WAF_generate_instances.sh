@@ -90,7 +90,7 @@ do
             --transfer="${trn}" \
             --min-transfer="${min_tr}" \
             --max-transfer="${max_tr}" \
-            --penalty-coefficient="${pen}" > "../data/new/${scenario}_${wk}_${min_handling[hdl_id]}_${max_handling[hdl_id]}_${bnk}_${pen}_no_no_${trn_str}.json"
+            --penalty-coefficient="${pen}" > "../../data/new/${scenario}_${wk}_${min_handling[hdl_id]}_${max_handling[hdl_id]}_${bnk}_${pen}_no_no_${trn_str}.json"
 
           for mtiw in "${min_tw[@]}"
           do
@@ -113,7 +113,7 @@ do
                 --transfer="${trn}" \
                 --min-transfer="${min_tr}" \
                 --max-transfer="${max_tr}" \
-                --penalty-coefficient="${pen}" > "../data/new/${scenario}_${wk}_${min_handling[hdl_id]}_${max_handling[hdl_id]}_${bnk}_${pen}_${mtiw}_${Mtiw}_${trn_str}.json"
+                --penalty-coefficient="${pen}" > "../../data/new/${scenario}_${wk}_${min_handling[hdl_id]}_${max_handling[hdl_id]}_${bnk}_${pen}_${mtiw}_${Mtiw}_${trn_str}.json"
             
             done
           
