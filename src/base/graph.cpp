@@ -2,6 +2,7 @@
 //  Copyright (c) 2013 Alberto Santini. All rights reserved.
 //
 
+#include <numeric>
 #include <algorithm>
 #include <limits>
 #include <stdexcept>
