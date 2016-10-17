@@ -87,9 +87,11 @@ end
 j = tune_for('greedy_max_outarcs')
 
 j.each do |jparams|
-  File.write('tuning_params.json', jparams.to_json)
+  rnd = rand(100000)
+  tuning_params = "tuning_params_#{rnd}.json"
+  File.write(tuning_params, jparams.to_json)
   Dir.glob("#{Dir.home}/src/maritime-vrp/data/tuning/*.json") do |instance|
-    system("cd ~/src/maritime-vrp/build && oarsub -n \"tuning\" -O \"#{File.basename(instance, '.json')}.out\" -E \"#{File.basename(instance, '.json')}.err\" -p \"network_address!='drbl10-201-201-21'\" -l /nodes=1/core=2,walltime=5 \"LD_LIBRARY_PATH=~/local/lib64 ~/src/maritime-vrp/build/maritime_vrp ../opt/tuning_params.json #{instance}\"")
+    system("cd ~/src/maritime-vrp/build && oarsub -n \"tuning\" -O \"#{File.basename(instance, '.json')}.out\" -E \"#{File.basename(instance, '.json')}.err\" -p \"network_address!='drbl10-201-201-21'\" -l /nodes=1/core=2,walltime=5 \"LD_LIBRARY_PATH=~/local/lib64 ~/src/maritime-vrp/build/maritime_vrp ../opt/#{tuning_params} #{instance}\"")
   end
-  File.unlink('tuning_params.json')
+  File.unlink(tuning_params)
 end
