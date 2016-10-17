@@ -278,8 +278,6 @@ namespace mvrp {
         // Max transit
         results_file << elements[9] << ",";
 
-        results_file << ",";
-
         results_file << prob->params.greedy_max_outarcs << ",";
         results_file << prob->params.greedy_reruns << ",";
         results_file << prob->params.max_cols_to_solve_mp << ",";
@@ -300,8 +298,6 @@ namespace mvrp {
         results_file << bb_nodes_generated << ",";
         results_file << max_depth << ",";
         results_file << pool->size() << ",";
-
-        results_file << ",";
 
         // 1) Ships used
         auto vc_used = std::unordered_map<std::shared_ptr<VesselClass>, unsigned int>();
