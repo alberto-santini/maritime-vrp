@@ -93,5 +93,4 @@ j.each do |jparams|
   Dir.glob("#{Dir.home}/src/maritime-vrp/data/tuning/*.json") do |instance|
     system("cd ~/src/maritime-vrp/build && oarsub -n \"tuning\" -O \"#{File.basename(instance, '.json')}.out\" -E \"#{File.basename(instance, '.json')}.err\" -p \"network_address!='drbl10-201-201-21'\" -l /nodes=1/core=2,walltime=5 \"LD_LIBRARY_PATH=~/local/lib64 ~/src/maritime-vrp/build/maritime_vrp ../opt/#{tuning_params} #{instance}\"")
   end
-  File.unlink(tuning_params)
 end
