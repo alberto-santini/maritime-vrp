@@ -280,15 +280,14 @@ namespace mvrp {
 
         results_file << ",";
 
+        results_file << std::boolalpha << prob->params.enable_cost_prize_acceleration << ",";
+        results_file << std::boolalpha << prob->params.enable_prize_acceleration << ",";
         results_file << prob->params.greedy_max_outarcs << ",";
         results_file << prob->params.greedy_reruns << ",";
-        results_file << prob->params.max_cols_to_solve_mp << ",";
         results_file << prob->params.elementary_labelling_every_n_nodes << ",";
-        results_file << std::boolalpha << prob->params.try_elementary_labelling << ",";
-        results_file << std::boolalpha << prob->params.try_smart_graph_reduction << ",";
-        results_file << std::boolalpha << prob->params.try_reduced_labelling << ",";
-        results_file << prob->params.smart_min_chance << ",";
-        results_file << prob->params.smart_max_chance << ",";
+        results_file << prob->params.max_cols_to_solve_mp << ",";
+        results_file << prob->params.cp_acceleration_arcs_share << ",";
+        results_file << prob->params.p_acceleration_max_arcs_share << ",";
 
         results_file << elapsed_time << ",";
         results_file << total_time_on_master << ",";

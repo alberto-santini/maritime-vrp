@@ -166,9 +166,10 @@ namespace mvrp {
         return fast_fwd_sols;
     }
 
-    std::vector<Solution> HeuristicsSolver::solve_elem_on_reduced_graph(double percentage) const {
+    std::vector<Solution> HeuristicsSolver::solve_elem_on_generic_graph(bool smart) const {
         std::vector<Solution> sols;
-        auto local_erased = g->reduce_graph(percentage, erased);
+        auto local_erased = smart ? g->smart_reduce_graph(0, prob->params.p_acceleration_max_arcs_share, erased)
+                                  : g->reduce_graph(prob->params.cp_acceleration_arcs_share, erased);
 
         std::vector<Path> optimal_paths;
         std::vector<ElementaryLabel> optimal_labels;
@@ -206,20 +207,16 @@ namespace mvrp {
 
         return sols;
 
-        // auto vc = g->vessel_class;
-        // auto local_erased = g->reduce_graph(percentage, erased);
+        // ...
         // LabelExtender extender(local_erased);
         // LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
-        //
         // return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(*g, prob->data.get_ports_list()), extender);
     }
 
-    std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(double percentage, bool smart) const {
+    std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(bool smart) const {
         std::vector<Solution> sols;
-        auto local_erased = smart ?
-                            g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased)
-                                  :
-                            g->reduce_graph(percentage, erased);
+        auto local_erased = smart ? g->smart_reduce_graph(0, prob->params.p_acceleration_max_arcs_share, erased)
+                                  : g->reduce_graph(prob->params.cp_acceleration_arcs_share, erased);
 
         std::vector<Path> optimal_paths;
         std::vector<Label> optimal_labels;
@@ -256,13 +253,9 @@ namespace mvrp {
 
         return sols;
 
-        // auto vc = g->vessel_class;
-        // auto local_erased = smart ?
-        //         g->smart_reduce_graph(prob->params.smart_min_chance, prob->params.smart_max_chance, erased) :
-        //         g->reduce_graph(percentage, erased);
+        // ...
         // LabelExtender extender(local_erased);
         // LabellingAlgorithm<Label, LabelExtender> alg(g);
-        //
         // return alg.solve(g->h1().second, g->h2().second, Label(*g), extender);
     }
 }

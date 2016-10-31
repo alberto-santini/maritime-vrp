@@ -10,22 +10,20 @@
 namespace mvrp {
     class ProgramParams {
     public:
-        int greedy_max_outarcs;
-        int greedy_reruns;
-        int max_cols_to_solve_mp;
-        long dummy_column_price;
-        int cplex_cores;
-        int elementary_labelling_every_n_nodes;
-        bool try_fast_heuristics;
-        bool try_elementary_labelling;
-        bool try_smart_graph_reduction;
-        bool try_reduced_labelling;
-        double smart_min_chance;
-        double smart_max_chance;
-        int time_limit_in_s;
         bool parallel_labelling;
         bool early_branching;
+        bool enable_cost_prize_acceleration;
+        bool enable_prize_acceleration;
+        int greedy_max_outarcs;
+        int greedy_reruns;
+        int elementary_labelling_every_n_nodes;
+        int max_cols_to_solve_mp;
+        int cplex_cores;
+        int time_limit_in_s;
         int early_branching_timeout;
+        long dummy_column_price;
+        double cp_acceleration_arcs_share;
+        double p_acceleration_max_arcs_share;
 
         ProgramParams(const std::string &data_file_name = "data/program_params.json");
     };

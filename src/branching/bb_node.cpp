@@ -31,8 +31,7 @@ namespace mvrp {
 
     void BBNode::make_local_erased_edges() {
         for(const auto &vg : prob->graphs) {
-            local_erased_edges[vg.first] = vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first],
-                                                                                  unite_rules, separate_rules);
+            local_erased_edges[vg.first] = vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first], unite_rules, separate_rules);
         }
     }
 
