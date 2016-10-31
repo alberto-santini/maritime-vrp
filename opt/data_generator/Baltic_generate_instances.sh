@@ -7,7 +7,6 @@ at_hub=6
 
 weeks=(
   1
-  2
 )
 
 min_handling=(
@@ -29,19 +28,6 @@ bunker_price=(
 )
 penalty=(
   0
-  1
-  2
-  5
-  10
-  20
-  30
-  40
-  50
-  60
-  70
-  80
-  90
-  100
 )
 
 min_tw=(
@@ -60,22 +46,22 @@ do
 
     for bnk in "${bunker_price[@]}"
     do
-    
+
       for pen in "${penalty[@]}"
       do
-      
+
         for trn in {true,false}
         do
-        
+
           trn_str=""
-                
+
           if [[ "$trn" = false ]]
           then
             trn_str="no_no"
           else
             trn_str="${min_tr}_${max_tr}"
           fi
-        
+
           ./data_generator.rb \
             --scenario="${scenario}" \
             --hub="${hub}" \
@@ -115,11 +101,11 @@ do
                 --min-transfer="${min_tr}" \
                 --max-transfer="${max_tr}" \
                 --penalty-coefficient="${pen}" > "../../data/new/${scenario}_${wk}_${min_handling[hdl_id]}_${max_handling[hdl_id]}_${bnk}_${pen}_${mtiw}_${Mtiw}_${trn_str}.json"
-            
+
             done
-          
+
           done
-  
+
         done
 
       done
@@ -127,5 +113,5 @@ do
     done
 
   done
-  
+
 done

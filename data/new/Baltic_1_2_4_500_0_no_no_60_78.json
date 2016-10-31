@@ -47,8 +47,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 65,
-      "delivery_max_transit_time_in_time_intervals": 74,
+      "pickup_max_transit_time_in_time_intervals": 62,
+      "delivery_max_transit_time_in_time_intervals": 62,
       "distances": [1060.0,0.0,776.0,961.0,678.0,1190.0,608.0,782.0,1045.0,832.0,541.0,616.0,616.0]
     },
     {
@@ -71,8 +71,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 71,
-      "delivery_max_transit_time_in_time_intervals": 78,
+      "pickup_max_transit_time_in_time_intervals": 62,
+      "delivery_max_transit_time_in_time_intervals": 71,
       "distances": [447.0,776.0,0.0,348.0,456.0,577.0,406.0,139.0,432.0,219.0,796.0,819.0,819.0]
     },
     {
@@ -95,8 +95,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 76,
-      "delivery_max_transit_time_in_time_intervals": 68,
+      "pickup_max_transit_time_in_time_intervals": 74,
+      "delivery_max_transit_time_in_time_intervals": 61,
       "distances": [366.0,961.0,348.0,0.0,733.0,278.0,663.0,263.0,111.0,142.0,976.0,1079.0,1079.0]
     },
     {
@@ -119,8 +119,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 72,
-      "delivery_max_transit_time_in_time_intervals": 65,
+      "pickup_max_transit_time_in_time_intervals": 64,
+      "delivery_max_transit_time_in_time_intervals": 68,
       "distances": [832.0,678.0,456.0,733.0,0.0,962.0,70.0,533.0,817.0,604.0,475.0,580.0,580.0]
     },
     {
@@ -143,8 +143,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 62,
-      "delivery_max_transit_time_in_time_intervals": 65,
+      "pickup_max_transit_time_in_time_intervals": 64,
+      "delivery_max_transit_time_in_time_intervals": 60,
       "distances": [545.0,1190.0,577.0,278.0,962.0,0.0,892.0,453.0,167.0,393.0,1178.0,1291.0,1291.0]
     },
     {
@@ -167,8 +167,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 76,
-      "delivery_max_transit_time_in_time_intervals": 68,
+      "pickup_max_transit_time_in_time_intervals": 61,
+      "delivery_max_transit_time_in_time_intervals": 60,
       "distances": [762.0,608.0,406.0,663.0,70.0,892.0,0.0,463.0,747.0,534.0,514.0,578.0,578.0]
     },
     {
@@ -191,8 +191,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 68,
-      "delivery_max_transit_time_in_time_intervals": 70,
+      "pickup_max_transit_time_in_time_intervals": 71,
+      "delivery_max_transit_time_in_time_intervals": 72,
       "distances": [362.0,782.0,139.0,263.0,533.0,453.0,463.0,0.0,347.0,134.0,725.0,838.0,838.0]
     },
     {
@@ -215,8 +215,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 68,
-      "delivery_max_transit_time_in_time_intervals": 67,
+      "pickup_max_transit_time_in_time_intervals": 60,
+      "delivery_max_transit_time_in_time_intervals": 66,
       "distances": [447.0,1045.0,432.0,111.0,817.0,167.0,747.0,347.0,0.0,226.0,1060.0,1163.0,1163.0]
     },
     {
@@ -239,8 +239,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 73,
-      "delivery_max_transit_time_in_time_intervals": 62,
+      "pickup_max_transit_time_in_time_intervals": 74,
+      "delivery_max_transit_time_in_time_intervals": 60,
       "distances": [292.0,832.0,219.0,142.0,604.0,393.0,534.0,134.0,226.0,0.0,847.0,950.0,950.0]
     },
     {
@@ -263,8 +263,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 63,
-      "delivery_max_transit_time_in_time_intervals": 78,
+      "pickup_max_transit_time_in_time_intervals": 74,
+      "delivery_max_transit_time_in_time_intervals": 68,
       "distances": [1075.0,541.0,796.0,976.0,475.0,1178.0,514.0,725.0,1060.0,847.0,0.0,113.0,113.0]
     },
     {
@@ -287,8 +287,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 64,
-      "delivery_max_transit_time_in_time_intervals": 77,
+      "pickup_max_transit_time_in_time_intervals": 76,
+      "delivery_max_transit_time_in_time_intervals": 67,
       "distances": [1178.0,616.0,819.0,1079.0,580.0,1291.0,578.0,838.0,1163.0,950.0,113.0,0.0,0.0]
     },
     {
@@ -311,8 +311,8 @@
       "number_of_time_windows": 0,
       "time_windows_start_time_intervals": [],
       "time_windows_end_time_intervals": [],
-      "pickup_max_transit_time_in_time_intervals": 64,
-      "delivery_max_transit_time_in_time_intervals": 77,
+      "pickup_max_transit_time_in_time_intervals": 76,
+      "delivery_max_transit_time_in_time_intervals": 67,
       "distances": [1178.0,616.0,819.0,1079.0,580.0,1291.0,578.0,838.0,1163.0,950.0,113.0,0.0,0.0]
     }
   ],
