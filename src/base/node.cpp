@@ -5,6 +5,22 @@
 #include "node.h"
 
 namespace mvrp {
+    int Node::handling_time() const {
+        if(n_type == NodeType::REGULAR_PORT) {
+            if(pu_type == PortType::PICKUP) {
+                return port->pickup_handling;
+            } else if(pu_type == PortType::DELIVERY) {
+                return port->delivery_handling;
+            } else {
+                return 0;
+            }
+        } else if(n_type == NodeType::COMEBACK_HUB) {
+            return 2;
+        } else {
+            return 0;
+        }
+    }
+
     double Node::pu_demand() const {
         return (pu_type == PortType::PICKUP ? port->pickup_demand : 0);
     }

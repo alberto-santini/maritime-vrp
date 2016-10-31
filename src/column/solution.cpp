@@ -157,7 +157,9 @@ namespace mvrp {
             auto l = g->graph[e]->length;
             auto s_ti = g->graph[s]->time_step;
             auto t_ti = g->graph[t]->time_step;
-            speeds.push_back(l / (t_ti - s_ti));
+            auto h = g->graph[t]->handling_time();
+
+            speeds.push_back(l / (t_ti - h - s_ti));
         }
 
         return speeds;

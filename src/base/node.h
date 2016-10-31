@@ -60,6 +60,12 @@ namespace mvrp {
         }
 
         /**
+         * Pickup handling if pickup port; delivery handling if delivery port;
+         * Hub handling if hub; 0 otherwise.
+         */
+        int handling_time() const;
+
+        /**
          * Pickup demand of the node, if it is a pickup-node, or otherwise 0.
          */
         double pu_demand() const;

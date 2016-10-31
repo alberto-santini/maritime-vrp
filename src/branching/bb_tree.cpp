@@ -399,8 +399,11 @@ namespace mvrp {
             assert(d.size() == s.size());
 
             for(auto i = 0u; i < d.size(); i++) {
-                weighted_speed += d[i] * s[i];
-                total_distance += d[i];
+                // Exclude delivery-to-pickup arcs
+                if(d[i] > 0.0001) {
+                  weighted_speed += d[i] * s[i];
+                  total_distance += d[i];
+                }
             }
         }
 
