@@ -44,7 +44,7 @@ PARAMETERS = [
 
 BASIC_PARAMS = {
   :greedy_max_outarcs => 10,
-  :greedy_reruns => 100,
+  :greedy_reruns => 10,
   :max_cols_to_solve_mp => 10000,
   :try_fast_heuristics => true,
   :try_elementary_labelling => true,
@@ -75,7 +75,7 @@ def tune_for(param_name)
 
     if val < 0
       new_params[param[:disable_via].to_sym] = false
-      new_params[param[:disable_also].to_sym] = val
+      new_params[param[:disable_also].to_sym] = val if param.has_key?(:disable_also)
     end
 
     json_params << new_params
@@ -84,7 +84,7 @@ def tune_for(param_name)
   return json_params
 end
 
-j = tune_for('greedy_max_outarcs')
+j = tune_for('elementary_labelling_every_n_nodes')
 
 j.each do |jparams|
   rnd = rand(100000)
