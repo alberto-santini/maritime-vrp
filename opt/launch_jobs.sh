@@ -12,7 +12,7 @@ do
   if [[ "${return_code}" == "1" ]]
   then
     echo "Launching job for ${file}"
-    oarsub -n "${base_name}" -O "${base_name}.out" -E "${base_name}.err" --p "network_address!='drbl10-201-201-21'" -l /nodes=1/core=2,walltime=5 "LD_LIBRARY_PATH=~/local/lib64 ${base_dir}/build/maritime_vrp ${base_dir}/data/program_params.json ${base_dir}/data/new/${base_name}"
+    oarsub -n "${base_name}" -O "${base_name}.out" -E "${base_name}.err" --p "network_address!='drbl10-201-201-21'" -l /nodes=1/core=2,walltime=10 "LD_LIBRARY_PATH=~/local/lib64 ${base_dir}/build/maritime_vrp ${base_dir}/data/program_params.json ${base_dir}/data/new/${base_name}"
   else
     echo "Skipping job for ${file}"
   fi
