@@ -6,7 +6,7 @@ discretisation=2
 at_hub=6
 
 weeks=(
-  1
+  2
 )
 
 min_handling=(
