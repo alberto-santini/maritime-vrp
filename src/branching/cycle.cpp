@@ -24,26 +24,29 @@ namespace mvrp {
             const Node &current_node = *g->graph[target(route[i], g->graph)];
             auto current_port = current_node.port;
             const PortType &current_pu = current_node.pu_type;
+            const NodeType &current_nt = current_node.n_type;
+            
+            if(current_nt == NodeType::REGULAR_PORT) {
+                for(auto k = 0u; k < cycles[num_cycles].size(); k++) {
+                    const Node &cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
+                    auto cycle_port = cycle_node.port;
+                    const PortType &cycle_pu = cycle_node.pu_type;
 
-            for(auto k = 0u; k < cycles[num_cycles].size(); k++) {
-                const Node &cycle_node = *g->graph[source(cycles[num_cycles][k], g->graph)];
-                auto cycle_port = cycle_node.port;
-                const PortType &cycle_pu = cycle_node.pu_type;
+                    if(current_port == cycle_port && current_pu == cycle_pu) {
+                        cycles[num_cycles].push_back(route[i]);
+                        closing_cycle = true;
+                        closing_port_position = k;
 
-                if(current_port == cycle_port && current_pu == cycle_pu) {
-                    cycles[num_cycles].push_back(route[i]);
-                    closing_cycle = true;
-                    closing_port_position = k;
+                        auto length = cycles[num_cycles].size() - k;
+                        if(length < shortest_cycle_length) {
+                            shortest_cycle_length = length;
+                            shortest_cycle_idx = num_cycles;
+                        }
 
-                    auto length = cycles[num_cycles].size() - k;
-                    if(length < shortest_cycle_length) {
-                        shortest_cycle_length = length;
-                        shortest_cycle_idx = num_cycles;
+                        num_cycles++;
+                        cycles.push_back(Path{});
+                        break;
                     }
-
-                    num_cycles++;
-                    cycles.push_back(Path{});
-                    break;
                 }
             }
 
