@@ -239,15 +239,10 @@ namespace mvrp {
             elements.push_back(item);
         }
 
+        // Remove .json
+        for(auto i = 0u; i < 5u; ++i) { elements.back().pop_back(); }
+
         ss = std::stringstream(std::string(elements.back()));
-        elements = std::vector<std::string>();
-        item = std::string();
-
-        while(std::getline(ss, item, '.')) {
-            elements.push_back(item);
-        }
-
-        ss = std::stringstream(std::string(elements[0]));
         elements = std::vector<std::string>();
         item = std::string();
 
@@ -255,28 +250,34 @@ namespace mvrp {
             elements.push_back(item);
         }
 
-        assert(elements.size() == 10u);
+        assert(elements.size() == 13u);
 
         // Scenario name
         results_file << elements[0] << ",";
-        // Number of weeks
+        // Discretisation
         results_file << elements[1] << ",";
-        // Min handling
+        // Number of weeks
         results_file << elements[2] << ",";
-        // Max handling
+        // Min handling
         results_file << elements[3] << ",";
-        // Bunker price
+        // Max handling
         results_file << elements[4] << ",";
-        // Penalty coefficient
+        // Num of speeds
         results_file << elements[5] << ",";
-        // Min time window
+        // Bunker price
         results_file << elements[6] << ",";
-        // Max time window
+        // Penalty coefficient
         results_file << elements[7] << ",";
-        // Min transit
+        // Demand coefficient
         results_file << elements[8] << ",";
-        // Max transit
+        // Min time window
         results_file << elements[9] << ",";
+        // Max time window
+        results_file << elements[10] << ",";
+        // Min transit
+        results_file << elements[11] << ",";
+        // Max transit
+        results_file << elements[12] << ",";
 
         results_file << std::boolalpha << prob->params.enable_cost_prize_acceleration << ",";
         results_file << std::boolalpha << prob->params.enable_prize_acceleration << ",";
