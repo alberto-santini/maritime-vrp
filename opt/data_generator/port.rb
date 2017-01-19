@@ -6,7 +6,7 @@ class Port
                 :num_tw, :tw_start, :tw_end, :pickup_transfer, :delivery_transfer,
                 :pickup_unit_revenue, :delivery_unit_revenue,
                 :penalty_if_not_served_pickup, :penalty_if_not_served_delivery
-  
+
   def initialize(options, name, draught, cost_per_container, call_fee_fixed, call_fee_variable)
     @options = options
     @name = name
@@ -16,11 +16,11 @@ class Port
     @call_fee_variable = call_fee_variable.to_f
     @is_hub = (name == @options[:hub_name])
   end
-  
+
   def is_same_as(other)
     @name[0..4] == other.name[0..4]
   end
-  
+
   def to_json(*opt)
     "{
       \"unlo_code\": \"#{@name}\",
