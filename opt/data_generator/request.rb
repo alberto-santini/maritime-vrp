@@ -4,7 +4,7 @@ class Request
   def initialize(options, origin, destination, quantity, unit_revenue)
     @origin = origin
     @destination = destination
-    @quantity = (quantity * options[:demand_coefficient]).to_i
+    @quantity = (quantity.to_f * options[:demand_coefficient].to_f).to_i
     @unit_revenue = unit_revenue.to_f
   end
 
