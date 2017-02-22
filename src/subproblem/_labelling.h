@@ -135,15 +135,21 @@ namespace mvrp {
        void prepare_to_be_erased() const {
            if(pred_container != nullptr) {
                auto& c = pred_container->succ_containers;
-               assert(std::find(c.begin(), c.end(), this) != c.end());
+               
+               if(std::find(c.begin(), c.end(), this) == c.end()) {
+                   std::cout << "Container: " << this << std::endl;
+                   std::cout << "List of successors of my predecessor: ";
+                   for(const auto& p : c) { std::cout << p << " "; }
+                   std::cout << std::endl;
+               }
+               
                c.erase(std::remove(c.begin(), c.end(), this), c.end());
-               assert(std::find(c.begin(), c.end(), this) == c.end());
            }
        }
        
        void prepare_to_be_repaced_by(const LblContainer* replacement) const {
            if(pred_container != nullptr) {
-               auto& c = pred_container->succ_containers;               
+               auto& c = pred_container->succ_containers;
                auto myself_in_parent = std::find(c.begin(), c.end(), this);
                assert(myself_in_parent != c.end());
                *myself_in_parent = replacement;
@@ -225,9 +231,7 @@ namespace mvrp {
             for(auto it = map.begin(); it != map.end(); ++it) {
                 if(std::any_of(it->second.begin(), it->second.end(),
                     [] (const auto& container) -> bool { return !container.dominated; }
-                )) {
-                    return it;
-                }
+                )) { return it; }
             }
             return map.end();
         }
@@ -345,10 +349,10 @@ namespace mvrp {
                     while(dest_und_cnt_it != undominated.at(dest_vertex).end()) {
                         const LblContainer<Lbl>& dest_container = *dest_und_cnt_it;
                     
-                        if(new_container.label < dest_container.label && !(dest_container.label < new_container.label)) {
+                        if(!dest_container.dominated && new_container.label < dest_container.label && !(dest_container.label < new_container.label)) {
                             assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
                             undominated.at(dest_vertex).mark_dominated(dest_und_cnt_it++);
-                        } else if(dest_container.label < new_container.label && !(new_container.label < dest_container.label)) {
+                        } else if(!dest_container.dominated && dest_container.label < new_container.label && !(new_container.label < dest_container.label)) {
                             assert(target(*new_container.pred_edge, g->graph) == target(*dest_container.pred_edge, g->graph));
                             new_container_dominated = true;
                             break;
