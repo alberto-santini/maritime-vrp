@@ -142,10 +142,12 @@ namespace mvrp {
        }
        
        void prepare_to_be_repaced_by(const LblContainer* replacement) const {
-           auto& c = pred_container->succ_containers;               
-           auto myself_in_parent = std::find(c.begin(), c.end(), this);
-           assert(myself_in_parent != c.end());
-           *myself_in_parent = replacement;
+           if(pred_container != nullptr) {
+               auto& c = pred_container->succ_containers;               
+               auto myself_in_parent = std::find(c.begin(), c.end(), this);
+               assert(myself_in_parent != c.end());
+               *myself_in_parent = replacement;
+           }
        }
        
         void recursive_mark_dominated() const {
@@ -220,7 +222,13 @@ namespace mvrp {
         }
     
         auto first_with_undominated_container() const {
-            for(auto it = map.begin(); it != map.end(); ++it) { if(!it->second.empty()) { return it; } }
+            for(auto it = map.begin(); it != map.end(); ++it) {
+                if(std::any_of(it->second.begin(), it->second.end(),
+                    [] (const auto& container) -> bool { return !container.dominated; }
+                )) {
+                    return it;
+                }
+            }
             return map.end();
         }
     
