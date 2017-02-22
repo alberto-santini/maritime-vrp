@@ -7,7 +7,8 @@
 #include <vector>
 
 #include "heuristics_solver.h"
-#include "labelling.h"
+// #include "labelling.h"
+#include "_labelling.h"
 
 namespace mvrp {
     std::vector<Solution> HeuristicsSolver::solve_fast_forward() const {
@@ -167,95 +168,93 @@ namespace mvrp {
     }
 
     std::vector<Solution> HeuristicsSolver::solve_elem_on_generic_graph(bool smart) const {
-        std::vector<Solution> sols;
+        // std::vector<Solution> sols;
         auto local_erased = smart ? g->smart_reduce_graph(0, prob->params.p_acceleration_max_arcs_share, erased)
-                                  : g->reduce_graph(prob->params.cp_acceleration_arcs_share, erased);
+                                  : g->reduce_graph(prob->params.cp_acceleration_arcs_share, erased);        
+        //
+        // std::vector<Path> optimal_paths;
+        // std::vector<ElementaryLabel> optimal_labels;
+        //
+        // NodeIdFunctor nf(g);
+        // ArcIdFunctor af(g);
+        //
+        // auto vc = g->vessel_class;
+        // VisitablePorts pf = prob->data.get_ports_list();
+        //
+        // try {
+        //     boost::r_c_shortest_paths(
+        //         g->graph,
+        //         make_property_map<Vertex>(nf),
+        //         make_property_map<Edge>(af),
+        //         g->get_source_vertex().second,
+        //         g->get_sink_vertex().second,
+        //         optimal_paths,
+        //         optimal_labels,
+        //         ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
+        //         LabelExtender(local_erased),
+        //         Dominance(),
+        //         std::allocator<boost::r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
+        //         boost::default_r_c_shortest_paths_visitor()
+        //     );
+        // } catch(...) {
+        //     g->dump();
+        //     throw;
+        // }
+        //
+        // for(auto i = 0u; i < optimal_paths.size(); i++) {
+        //     sols.push_back(
+        //         Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+        // }
+        //
+        // return sols;
 
-        std::vector<Path> optimal_paths;
-        std::vector<ElementaryLabel> optimal_labels;
-
-        NodeIdFunctor nf(g);
-        ArcIdFunctor af(g);
-
-        auto vc = g->vessel_class;
-        VisitablePorts pf = prob->data.get_ports_list();
-
-        try {
-            boost::r_c_shortest_paths(
-                g->graph,
-                make_property_map<Vertex>(nf),
-                make_property_map<Edge>(af),
-                g->get_source_vertex().second,
-                g->get_sink_vertex().second,
-                optimal_paths,
-                optimal_labels,
-                ElementaryLabel(g, vc->capacity, vc->capacity, 0, pf),
-                LabelExtender(local_erased),
-                Dominance(),
-                std::allocator<boost::r_c_shortest_paths_label<BGraph, ElementaryLabel>>(),
-                boost::default_r_c_shortest_paths_visitor()
-            );
-        } catch(...) {
-            g->dump();
-            throw;
-        }
-
-        for(auto i = 0u; i < optimal_paths.size(); i++) {
-            sols.push_back(
-                Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
-        }
-
-        return sols;
-
-        // ...
-        // LabelExtender extender(local_erased);
-        // LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
-        // return alg.solve(g->h1().second, g->h2().second, ElementaryLabel(*g, prob->data.get_ports_list()), extender);
+        LabelExtender extender(local_erased);
+        LabellingAlgorithm<ElementaryLabel, LabelExtender> alg(g);
+        return alg.solve(g->get_source_vertex().second, g->get_sink_vertex().second, ElementaryLabel(*g, prob->data.get_ports_list()), extender);
     }
 
     std::vector<Solution> HeuristicsSolver::solve_on_generic_graph(bool smart) const {
-        std::vector<Solution> sols;
+        // std::vector<Solution> sols;
         auto local_erased = smart ? g->smart_reduce_graph(0, prob->params.p_acceleration_max_arcs_share, erased)
                                   : g->reduce_graph(prob->params.cp_acceleration_arcs_share, erased);
+        //
+        // std::vector<Path> optimal_paths;
+        // std::vector<Label> optimal_labels;
+        //
+        // NodeIdFunctor nf(g);
+        // ArcIdFunctor af(g);
+        //
+        // auto vc = g->vessel_class;
+        //
+        // try {
+        //     boost::r_c_shortest_paths(
+        //         g->graph,
+        //         make_property_map<Vertex>(nf),
+        //         make_property_map<Edge>(af),
+        //         g->get_source_vertex().second,
+        //         g->get_sink_vertex().second,
+        //         optimal_paths,
+        //         optimal_labels,
+        //         Label(g, vc->capacity, vc->capacity, 0),
+        //         LabelExtender(local_erased),
+        //         Dominance(),
+        //         std::allocator<boost::r_c_shortest_paths_label<BGraph, Label>>(),
+        //         boost::default_r_c_shortest_paths_visitor()
+        //     );
+        // } catch(...) {
+        //     g->dump();
+        //     throw;
+        // }
+        //
+        // for(auto i = 0u; i < optimal_paths.size(); i++) {
+        //     sols.push_back(
+        //         Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
+        // }
+        //
+        // return sols;
 
-        std::vector<Path> optimal_paths;
-        std::vector<Label> optimal_labels;
-
-        NodeIdFunctor nf(g);
-        ArcIdFunctor af(g);
-
-        auto vc = g->vessel_class;
-
-        try {
-            boost::r_c_shortest_paths(
-                g->graph,
-                make_property_map<Vertex>(nf),
-                make_property_map<Edge>(af),
-                g->get_source_vertex().second,
-                g->get_sink_vertex().second,
-                optimal_paths,
-                optimal_labels,
-                Label(g, vc->capacity, vc->capacity, 0),
-                LabelExtender(local_erased),
-                Dominance(),
-                std::allocator<boost::r_c_shortest_paths_label<BGraph, Label>>(),
-                boost::default_r_c_shortest_paths_visitor()
-            );
-        } catch(...) {
-            g->dump();
-            throw;
-        }
-
-        for(auto i = 0u; i < optimal_paths.size(); i++) {
-            sols.push_back(
-                Solution(optimal_paths[i], g->calculate_path_cost(optimal_paths[i]), optimal_labels[i].cost, vc, g));
-        }
-
-        return sols;
-
-        // ...
-        // LabelExtender extender(local_erased);
-        // LabellingAlgorithm<Label, LabelExtender> alg(g);
-        // return alg.solve(g->h1().second, g->h2().second, Label(*g), extender);
+        LabelExtender extender(local_erased);
+        LabellingAlgorithm<Label, LabelExtender> alg(g);
+        return alg.solve(g->get_source_vertex().second, g->get_sink_vertex().second, Label(*g), extender);
     }
 }
