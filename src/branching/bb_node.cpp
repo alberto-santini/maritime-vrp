@@ -126,7 +126,8 @@ namespace mvrp {
             auto orig = ColumnOrigin::NONE;
 
             // Remember we only even try with elemntary labelling every n nodes
-            if(node_number % prob->params.elementary_labelling_every_n_nodes != 0) { try_elementary = false; }
+            if(prob->params.elementary_labelling_every_n_nodes == 0 ||
+               node_number % prob->params.elementary_labelling_every_n_nodes != 0) { try_elementary = false; }
 
             // Solve the pricing subproblem
             auto sp_start = high_resolution_clock::now();

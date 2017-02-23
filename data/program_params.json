@@ -7,7 +7,7 @@
   "enable_prize_acceleration":          true,
   "cp_acceleration_arcs_share":         0.25,
   "p_acceleration_max_arcs_share":      1.0,
-  "elementary_labelling_every_n_nodes": 1,
+  "elementary_labelling_every_n_nodes": 0,
   "cplex_cores":                        2,
   "time_limit_in_s":                    3600,
   "parallel_labelling":                 true,
