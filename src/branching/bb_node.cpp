@@ -11,46 +11,91 @@
 #include <chrono>
 
 namespace mvrp {
-    BBNode::BBNode(std::shared_ptr<const Problem> prob, const ErasedEdgesMap& local_erased_edges,
-                   std::shared_ptr<ColumnPool> pool, const ColumnPool &local_pool, const VisitRuleList &unite_rules,
-                   const VisitRuleList &separate_rules, boost::optional<double> father_lb, int depth,
-                   bool try_elementary, double avg_time_spent_on_sp, double total_time_spent_on_sp,
-                   double total_time_spent_on_mp, double total_time_spent, double max_time_spent_by_exact_solver) :
-                   prob(prob), local_erased_edges(local_erased_edges), pool(pool), local_pool(local_pool),
-                   unite_rules(unite_rules), separate_rules(separate_rules), father_lb(father_lb), depth(depth),
-                   try_elementary(try_elementary), avg_time_spent_on_sp(avg_time_spent_on_sp),
-                   total_time_spent_on_sp(total_time_spent_on_sp), total_time_spent_on_mp(total_time_spent_on_mp),
-                   total_time_spent(total_time_spent), max_time_spent_by_exact_solver(max_time_spent_by_exact_solver)
+    BBNode::BBNode( std::shared_ptr<const Problem> prob,
+                    const ErasedEdgesMap& local_erased_edges,
+                    std::shared_ptr<ColumnPool> pool,
+                    const ColumnPool &local_pool,
+                    std::vector<std::shared_ptr<BranchingRule>> branching_rules,
+                    boost::optional<double> father_lb,
+                    int depth,
+                    bool try_elementary,
+                    double avg_time_spent_on_sp,
+                    double total_time_spent_on_sp,
+                    double total_time_spent_on_mp,
+                    double total_time_spent,
+                    double max_time_spent_by_exact_solver
+                ) :
+                   prob(prob),
+                   local_erased_edges(local_erased_edges),
+                   pool(pool),
+                   local_pool(local_pool),
+                   branching_rules(branching_rules),
+                   father_lb(father_lb),
+                   depth(depth),
+                   try_elementary(try_elementary),
+                   avg_time_spent_on_sp(avg_time_spent_on_sp),
+                   total_time_spent_on_sp(total_time_spent_on_sp),
+                   total_time_spent_on_mp(total_time_spent_on_mp),
+                   total_time_spent(total_time_spent),
+                   max_time_spent_by_exact_solver(max_time_spent_by_exact_solver)
     {
         sol_value = std::numeric_limits<double>::max();
         mip_sol_value = std::numeric_limits<double>::max();
         all_times_spent_on_sp = std::vector<double>(0);
         make_local_erased_edges();
         remove_incompatible_columns();
+        determine_equality_constraints();
     }
 
     void BBNode::make_local_erased_edges() {
-        for(const auto &vg : prob->graphs) {
-            local_erased_edges[vg.first] = vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first], unite_rules, separate_rules);
+        for(auto rule : branching_rules) {
+            for(const auto& vg : prob->graphs) {
+                rule->add_erased_edges(*(vg.second), local_erased_edges[vg.first]);
+            }
         }
+
+        // Old way:
+        // for(const auto &vg : prob->graphs) {
+        //     local_erased_edges[vg.first] = vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first], unite_rules, separate_rules);
+        // }
     }
 
     void BBNode::remove_incompatible_columns() {
         ColumnPool new_local_pool;
-
-        for(const auto &c : local_pool) {
-            if(std::any_of(unite_rules.begin(), unite_rules.end(),
-                           [&](const VisitRule &rule) { return !c.is_compatible_with_unite_rule(rule); }
-            )) { continue; }
-
-            if(std::any_of(separate_rules.begin(), separate_rules.end(),
-                           [&](const VisitRule &rule) { return !c.is_compatible_with_separate_rule(rule); }
-            )) { continue; }
-
+        for(const auto& c : local_pool) {
+            if(std::any_of(branching_rules.begin(), branching_rules.end(), [&] (auto rule) { return !rule->is_column_compatible(c); })) { continue; }
             new_local_pool.push_back(c);
         }
-
         local_pool = new_local_pool;
+
+        // Old way:
+        // ColumnPool new_local_pool;
+        //
+        // for(const auto &c : local_pool) {
+        //     if(std::any_of(unite_rules.begin(), unite_rules.end(),
+        //                    [&](const VisitRule &rule) { return !c.is_compatible_with_unite_rule(rule); }
+        //     )) { continue; }
+        //
+        //     if(std::any_of(separate_rules.begin(), separate_rules.end(),
+        //                    [&](const VisitRule &rule) { return !c.is_compatible_with_separate_rule(rule); }
+        //     )) { continue; }
+        //
+        //     new_local_pool.push_back(c);
+        // }
+        //
+        // local_pool = new_local_pool;
+    }
+
+    void BBNode::determine_equality_constraints() {
+        for(auto p : prob->data.ports) {
+            if(p->hub) { continue; }
+
+            for(auto pu : {PortType::PICKUP, PortType::DELIVERY}) {
+                if(std::any_of(branching_rules.begin(), branching_rules.end(), [&](auto rule){ return rule->should_row_be_equality(*p, pu); })) {
+                    ports_with_equality.push_back(std::make_pair(p.get(), pu));
+                }
+            }
+        }
     }
 
     std::vector<int> BBNode::column_coefficients(const Column &col) {
@@ -101,7 +146,7 @@ namespace mvrp {
 
         // We start by solving the LP relaxation of the Master Problem
         auto mp_start = high_resolution_clock::now();
-        auto sol = mp_solv.solve_lp(local_pool);
+        auto sol = mp_solv.solve_lp(local_pool, ports_with_equality);
         auto mp_end = high_resolution_clock::now();
 
         auto mp_time = duration_cast<duration<double>>(mp_end - mp_start).count();
@@ -153,7 +198,7 @@ namespace mvrp {
 
                 // Re-solve the LP
                 auto mp_start = high_resolution_clock::now();
-                sol = mp_solv.solve_lp(local_pool);
+                sol = mp_solv.solve_lp(local_pool, ports_with_equality);
                 auto mp_end = high_resolution_clock::now();
 
                 total_time_spent_on_mp += duration_cast<duration<double>>(mp_end - mp_start).count();
@@ -225,7 +270,7 @@ namespace mvrp {
 
         // Try to solve the integer problem with the columns we have at this node
         try {
-            auto sol = mp_solv.solve_mip(feasible_columns);
+            auto sol = mp_solv.solve_mip(feasible_columns, ports_with_equality);
 
             // Get the objective value of the MIP
             mip_sol_value = sol.obj_value;
@@ -254,5 +299,10 @@ namespace mvrp {
         // A MIP solution is feasible if the dummy column is not in the base columns
         return std::none_of(mip_base_columns.begin(), mip_base_columns.end(),
                             [](const auto &cc) { return cc.first.dummy; });
+    }
+
+    bool BBNode::has_fractional_solution() const {
+        return std::any_of(base_columns.begin(), base_columns.end(),
+                           [](const auto& cc) { return cc.second > cplex_epsilon && cc.second < 1.0 - cplex_epsilon; });
     }
 }

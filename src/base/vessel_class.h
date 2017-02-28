@@ -49,7 +49,12 @@ namespace mvrp {
 
         VesselClass(const std::string &name, int capacity, int num_vessels, double time_charter_cost_per_time_unit,
                     double hotel_cost_per_time_unit, const SpeedCostMap& bunker_cost_per_time_unit);
+
+        bool operator==(const VesselClass& other) const { return name == other.name; }
+        bool operator!=(const VesselClass& other) const { return !(*this == other); }
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const VesselClass& vc) { out << vc.name; return out; }
 }
 
 #endif

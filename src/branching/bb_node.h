@@ -12,10 +12,10 @@
 #include <boost/optional.hpp>
 
 #include "../base/problem.h"
-#include "cycle.h"
 #include "../column/column_pool.h"
 #include "../masterproblem/mp_solver.h"
 #include "../subproblem/sp_solver.h"
+#include "../branching/branching_rule.h"
 
 namespace mvrp {
     class BBNode {
@@ -24,12 +24,12 @@ namespace mvrp {
     public:
         std::shared_ptr<const Problem> prob;
         ErasedEdgesMap local_erased_edges;
+        std::vector<PortWithType> ports_with_equality;
 
         std::shared_ptr<ColumnPool> pool;
         ColumnPool local_pool;
 
-        VisitRuleList unite_rules;
-        VisitRuleList separate_rules;
+        std::vector<std::shared_ptr<BranchingRule>> branching_rules;
 
         /*  The optimal columns selected by the LP solver with the coefficient */
         std::vector<std::pair<Column, double>> base_columns;
@@ -66,9 +66,8 @@ namespace mvrp {
                const ErasedEdgesMap &local_erased_edges,
                std::shared_ptr<ColumnPool> pool,
                const ColumnPool &local_pool,
-               const VisitRuleList &unite_rules,
-               const VisitRuleList &separate_rules,
-               boost::optional<double> father_lb,
+               std::vector<std::shared_ptr<BranchingRule>> branching_rules = {},
+               boost::optional<double> father_lb = boost::none,
                int depth = 0,
                bool try_elementary = true,
                double avg_time_spent_on_sp = 0,
@@ -85,14 +84,18 @@ namespace mvrp {
 
         bool is_integer_feasible() const;
 
+        bool has_fractional_solution() const;
+
     private:
-        /*  Modifies the erased edges according to the rules
-            in unite_rules and separate_rules */
+        /*  Modifies the erased edges according to the branching rules */
         void make_local_erased_edges();
 
         /*  Removes from local_pool those columns that are not compatible
-            with unite_rules and separate_rules */
+            with the branching rules */
         void remove_incompatible_columns();
+
+        /* Determines which ports need an = constraint */
+        void determine_equality_constraints();
 
         /*  Test: I want to check if there are columns with the same
             constraint coefficients and possibly different objective

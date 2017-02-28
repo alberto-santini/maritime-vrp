@@ -131,6 +131,9 @@ namespace mvrp {
          * with the same UNLO code.
          */
         inline bool models_same_port_as(const Port &q) const { return q.name.substr(0, 5) == name.substr(0, 5); }
+
+        inline bool operator==(const Port& other) const { return name == other.name; }
+        inline bool operator!=(const Port& other) const { return !(*this == other); }
     };
 
     inline std::ostream& operator<<(std::ostream& out, const Port& port) { out << port.name; return out; }

@@ -48,7 +48,6 @@ set(SOURCE_FILES
   src/base/vessel_class.h
   src/branching/bb_node.h
   src/branching/bb_tree.h
-  src/branching/cycle.h
   src/column/column.h
   src/column/column_pool.h
   src/column/solution.h
@@ -68,7 +67,6 @@ set(SOURCE_FILES
   src/base/vessel_class.cpp
   src/branching/bb_node.cpp
   src/branching/bb_tree.cpp
-  src/branching/cycle.cpp
   src/column/column.cpp
   src/column/solution.cpp
   src/main.cpp
@@ -81,7 +79,9 @@ set(SOURCE_FILES
   src/subproblem/sp_solver.cpp
   src/subproblem/_labelling.h
   src/subproblem/_labelling.cpp
-  src/base/arc.cpp)
+  src/base/arc.cpp
+  src/branching/branching_rule.cpp
+  src/branching/branching_rule.h)
 
 add_executable(maritime_vrp ${SOURCE_FILES})
 target_link_libraries(maritime_vrp ${CPLEX_LIBRARIES})

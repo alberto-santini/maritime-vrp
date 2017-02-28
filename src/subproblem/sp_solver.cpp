@@ -66,7 +66,7 @@ namespace mvrp {
 
         if(valid_sols.size() > 0) {
             for(const auto &s : valid_sols) {
-                Column col(prob, s, "fast heuristic", ColumnOrigin::FAST_H);
+                Column col(prob, s, ColumnOrigin::FAST_H);
                 node_pool.push_back(col);
                 global_pool->push_back(col);
             }
@@ -142,7 +142,7 @@ namespace mvrp {
 
             if(valid_sols.size() > 0) {
                 for(const auto &s : valid_sols) {
-                    Column col(prob, s, "ESPPRC on the (C+P)-reduced graph", ColumnOrigin::ESPPRC);
+                    Column col(prob, s, ColumnOrigin::ESPPRC);
                     node_pool.push_back(col);
                     global_pool->push_back(col);
                 }
@@ -215,7 +215,7 @@ namespace mvrp {
 
             if(valid_sols.size() > 0) {
                 for(const auto &s : valid_sols) {
-                    Column col(prob, s, "ESPPRC on the P-reduced graph", ColumnOrigin::ESPPRC);
+                    Column col(prob, s, ColumnOrigin::ESPPRC);
                     node_pool.push_back(col);
                     global_pool->push_back(col);
                 }
@@ -287,7 +287,7 @@ namespace mvrp {
 
             if(valid_sols.size() > 0) {
                 for(const auto &s : valid_sols) {
-                    Column col(prob, s, "labelling on the P-reduced graph", ColumnOrigin::SPPRC_SMART);
+                    Column col(prob, s, ColumnOrigin::SPPRC_SMART);
                     node_pool.push_back(col);
                     global_pool->push_back(col);
                 }
@@ -355,7 +355,7 @@ namespace mvrp {
 
             if(valid_sols.size() > 0) {
                 for(const auto &s : valid_sols) {
-                    Column col(prob, s, "labelling on the (C+P)-reduced graph", ColumnOrigin::SPPRC_RED);
+                    Column col(prob, s, ColumnOrigin::SPPRC_RED);
                     node_pool.push_back(col);
                     global_pool->push_back(col);
                 }
@@ -427,7 +427,7 @@ namespace mvrp {
 
         if(valid_sols.size() > 0) {
             for(const auto &s : valid_sols) {
-                Column col(prob, s, "labelling on the complete graph", ColumnOrigin::SPPRC);
+                Column col(prob, s, ColumnOrigin::SPPRC);
                 node_pool.push_back(col);
                 global_pool->push_back(col);
             }

@@ -20,6 +20,8 @@ namespace mvrp {
         SOURCE_VERTEX, SINK_VERTEX, COMEBACK_HUB, REGULAR_PORT
     };
 
+    using PortWithType = std::pair<Port*, PortType>;
+
     struct Node {
         /**
          * Pointer to the associated port.

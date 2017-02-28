@@ -125,66 +125,66 @@ namespace mvrp {
         }
     }
 
-    ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules) const {
-        ErasedEdges erased = already_erased;
-
-        for(const auto &vr : unite_rules) {
-            std::shared_ptr<Node> n1, n2;
-            std::tie(n1, n2) = vr;
-
-            for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-                const Vertex &v1 = *vp.first;
-
-                if(graph[v1]->same_row_as(*n1)) {
-                    oeit ei, ei_end, ei_next;
-                    std::tie(ei, ei_end) = out_edges(v1, graph);
-                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                        ++ei_next;
-                        const Vertex &v2 = target(*ei, graph);
-                        if(!graph[v2]->same_row_as(*n2)) {
-                            if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
-                            erased[v1].insert(*ei);
-                        }
-                    }
-                } else if(graph[v1]->same_row_as(*n2)) {
-                    ieit ei, ei_end, ei_next;
-                    std::tie(ei, ei_end) = in_edges(v1, graph);
-                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                        ++ei_next;
-                        const Vertex &v2 = source(*ei, graph);
-                        if(!graph[v2]->same_row_as(*n1)) {
-                            if(erased.find(v2) == erased.end()) { erased[v2] = std::set<Edge>(); }
-                            erased[v2].insert(*ei);
-                        }
-                    }
-                }
-            }
-        }
-
-        for(const auto &vr : separate_rules) {
-            std::shared_ptr<Node> n1, n2;
-            std::tie(n1, n2) = vr;
-
-            for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
-                const Vertex &v1 = *vp.first;
-
-                if(graph[v1]->same_row_as(*n1)) {
-                    oeit ei, ei_end, ei_next;
-                    std::tie(ei, ei_end) = out_edges(v1, graph);
-                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
-                        ++ei_next;
-                        const Vertex &v2 = target(*ei, graph);
-                        if(graph[v2]->same_row_as(*n2)) {
-                            if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
-                            erased[v1].insert(*ei);
-                        }
-                    }
-                }
-            }
-        }
-
-        return erased;
-    }
+//    ErasedEdges Graph::get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules, const VisitRuleList& separate_rules) const {
+//        ErasedEdges erased = already_erased;
+//
+//        for(const auto &vr : unite_rules) {
+//            std::shared_ptr<Node> n1, n2;
+//            std::tie(n1, n2) = vr;
+//
+//            for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+//                const Vertex &v1 = *vp.first;
+//
+//                if(graph[v1]->same_row_as(*n1)) {
+//                    oeit ei, ei_end, ei_next;
+//                    std::tie(ei, ei_end) = out_edges(v1, graph);
+//                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                        ++ei_next;
+//                        const Vertex &v2 = target(*ei, graph);
+//                        if(!graph[v2]->same_row_as(*n2)) {
+//                            if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
+//                            erased[v1].insert(*ei);
+//                        }
+//                    }
+//                } else if(graph[v1]->same_row_as(*n2)) {
+//                    ieit ei, ei_end, ei_next;
+//                    std::tie(ei, ei_end) = in_edges(v1, graph);
+//                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                        ++ei_next;
+//                        const Vertex &v2 = source(*ei, graph);
+//                        if(!graph[v2]->same_row_as(*n1)) {
+//                            if(erased.find(v2) == erased.end()) { erased[v2] = std::set<Edge>(); }
+//                            erased[v2].insert(*ei);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        for(const auto &vr : separate_rules) {
+//            std::shared_ptr<Node> n1, n2;
+//            std::tie(n1, n2) = vr;
+//
+//            for(auto vp = vertices(graph); vp.first != vp.second; ++vp.first) {
+//                const Vertex &v1 = *vp.first;
+//
+//                if(graph[v1]->same_row_as(*n1)) {
+//                    oeit ei, ei_end, ei_next;
+//                    std::tie(ei, ei_end) = out_edges(v1, graph);
+//                    for(ei_next = ei; ei != ei_end; ei = ei_next) {
+//                        ++ei_next;
+//                        const Vertex &v2 = target(*ei, graph);
+//                        if(graph[v2]->same_row_as(*n2)) {
+//                            if(erased.find(v1) == erased.end()) { erased[v1] = std::set<Edge>(); }
+//                            erased[v1].insert(*ei);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return erased;
+//    }
 
     ErasedEdges Graph::reduce_graph(double ratio, ErasedEdges already_erased) const {
         ErasedEdges erased = already_erased;

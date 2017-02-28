@@ -14,10 +14,10 @@
 #include <ctime>
 
 #include "bb_tree.h"
+#include "branching_rule.h"
 
 namespace mvrp {
-    BBTree::BBTree(const std::string &program_params_file_name, const std::string &data_file_name) : instance_file_name{
-        data_file_name} {
+    BBTree::BBTree(const std::string &program_params_file_name, const std::string &data_file_name) : instance_file_name{data_file_name} {
         prob = std::make_shared<Problem>(program_params_file_name, data_file_name);
         ub = std::numeric_limits<double>::max();
         lb = std::numeric_limits<double>::max();
@@ -27,7 +27,10 @@ namespace mvrp {
         pool = std::make_shared<ColumnPool>();
         pool->push_back(dummy);
 
-        auto root_node = std::make_shared<BBNode>(prob, ErasedEdgesMap(), pool, *pool, VisitRuleList(), VisitRuleList(), boost::none);
+        ErasedEdgesMap erased_edges{};
+        for(auto vc : prob->data.vessel_classes) { erased_edges[vc] = ErasedEdges{}; }
+
+        auto root_node = std::make_shared<BBNode>(prob, erased_edges, pool, *pool);
 
         unexplored_nodes.push(root_node);
 
@@ -38,6 +41,560 @@ namespace mvrp {
         max_depth = 0;
         total_time_on_master = 0;
         total_time_on_pricing = 0;
+    }
+
+    void BBTree::update_lb(std::shared_ptr<BBNode> current_node, unsigned int node_number) {
+        // Root node. Global LB is node's LB.
+        if(node_number <= 1u) {
+            lb = current_node->sol_value;
+            return;
+        }
+
+        // Ran out of nodes => Tree explored completely => Solution found! => LB = UB
+        if(unexplored_nodes.empty()) {
+            lb = ub;
+            return;
+        }
+
+        lb = *unexplored_nodes.top()->father_lb;
+    }
+
+    void BBTree::explore_tree() {
+        using namespace std::chrono;
+
+        print_header();
+
+        auto node_number = 0u;
+        auto start_time = high_resolution_clock::now();
+
+        while(!unexplored_nodes.empty()) {
+            std::cerr << "Nodes in tree: " << unexplored_nodes.size() << std::endl;
+
+            auto current_node = unexplored_nodes.top();
+            unexplored_nodes.pop();
+
+            current_node->solve(node_number++);
+            std::cerr << "\tNode LB: " << std::setprecision(std::numeric_limits<double>::max_digits10)
+                      << current_node->sol_value << std::endl;
+
+            if(current_node->depth > max_depth) { max_depth = current_node->depth; }
+
+            if(!current_node->is_feasible()) {
+                std::cerr << "\t\tPruned by infeasibility (optimal LP solution contains dummy column)" << std::endl;
+
+                if(node_number == 1u) { std::cout << "Root node infeasible" << std::endl; }
+
+                update_lb(current_node, node_number);
+                gap = std::abs((ub - lb) / ub) * 100;
+
+                continue;
+            }
+
+            if(current_node->sol_value >= ub) {
+                std::cerr << "\t\tPruned by sub-optimality (UB = " << ub << ")" << std::endl;
+
+                update_lb(current_node, node_number);
+                gap = std::abs((ub - lb) / ub) * 100;
+
+                continue;
+            }
+
+            try_to_obtain_ub(current_node);
+
+            if(current_node->has_fractional_solution()) {
+                branch(current_node);
+            };
+
+            update_lb(current_node, node_number);
+
+            auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
+            gap = std::abs((ub - lb) / ub) * 100;
+
+            if(node_number == 1u) { gap_at_root = gap_node; }
+
+            total_time_on_master += current_node->total_time_spent_on_mp;
+            total_time_on_pricing += current_node->total_time_spent_on_sp;
+
+            print_row(*current_node, gap_node);
+
+            auto curr_time = high_resolution_clock::now();
+            auto el_time = duration_cast<duration<double>>(curr_time - start_time).count();
+
+            if(el_time > prob->params.time_limit_in_s) {
+                std::cerr << std::endl << "Over time limit! " << el_time << std::endl;
+                break;
+            }
+        }
+
+        auto end_time = high_resolution_clock::now();
+        elapsed_time = duration_cast<duration<double>>(end_time - start_time).count();
+
+        print_summary();
+        print_results();
+    }
+
+    void BBTree::branch(std::shared_ptr<BBNode> current_node) {
+        branch_on_port_selection(current_node) ||
+        branch_on_vessel_assignment(current_node) ||
+        branch_on_port_reached_from_two_ports(current_node) ||
+        branch_on_speed(current_node) ||
+        branch_on_arc(current_node);
+    }
+
+    bool BBTree::branch_on_port_selection(std::shared_ptr<BBNode> current_node) {
+        using PortFlowMap = std::map<PortWithType, float>;
+        PortFlowMap map;
+        auto eps = 0.00001f;
+
+        for(const auto& cc : current_node->base_columns) {
+            if(cc.first.dummy) { continue; }
+
+            const auto& column = cc.first;
+            const auto& coefficient = cc.second;
+            const auto& graph = column.sol.g;
+
+            for(const auto& edge : column.sol.path) {
+                const auto& v_orig = boost::source(edge, graph->graph);
+                const auto& n_orig = graph->graph[v_orig];
+
+                if(n_orig->n_type == NodeType::REGULAR_PORT) {
+                    auto key = std::make_pair(n_orig->port.get(), n_orig->pu_type);
+                    auto key_val_it = map.find(key);
+
+                    if(key_val_it == map.end()) { map[key] = 0.0f; }
+
+                    map[key] += coefficient;
+                }
+            }
+        }
+
+        Port* most_fractional_port = nullptr;
+        PortType most_fractional_pu = PortType::BOTH;
+        float most_fractional_val = .5f;
+
+        for(const auto& kv : map) {
+            const auto& key = kv.first;
+            const auto& val = kv.second;
+
+            if(val > eps && val < 1.0f - eps) {
+                if(std::fabs(val - .5f) < most_fractional_val - eps) {
+                    most_fractional_port = key.first;
+                    most_fractional_pu = key.second;
+                    most_fractional_val = std::fabs(val - .5f);
+                }
+            }
+        }
+
+        if(!most_fractional_port) { return false; }
+
+        assert(most_fractional_pu != PortType::BOTH);
+
+        std::shared_ptr<BranchingRule> include_port = std::make_shared<IncludePort>(most_fractional_port, most_fractional_pu);
+        std::shared_ptr<BranchingRule> exclude_port = std::make_shared<ExcludePort>(most_fractional_port, most_fractional_pu);
+
+        auto include_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        include_vec.push_back(include_port);
+        auto exclude_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        exclude_vec.push_back(exclude_port);
+
+        std::cerr << "Branch on port visit: " << *most_fractional_port << " " << most_fractional_pu << std::endl;
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                include_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                exclude_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        bb_nodes_generated += 2;
+
+        return true;
+    }
+
+    bool BBTree::branch_on_vessel_assignment(std::shared_ptr<BBNode> current_node) {
+        using PortVesselFlowMap = std::map<std::tuple<Port*, PortType, VesselClass*>, float>;
+        PortVesselFlowMap map;
+        auto eps = 0.00001f;
+
+        for(const auto& cc : current_node->base_columns) {
+            if(cc.first.dummy) { continue; }
+
+            const auto& column = cc.first;
+            const auto& coefficient = cc.second;
+            const auto& graph = column.sol.g;
+            const auto& vc = column.sol.vessel_class;
+
+            for(const auto& edge : column.sol.path) {
+                const auto& v_orig = boost::source(edge, graph->graph);
+                const auto& n_orig = graph->graph[v_orig];
+
+                if(n_orig->n_type == NodeType::REGULAR_PORT) {
+                    auto key = std::make_tuple(n_orig->port.get(), n_orig->pu_type, vc.get());
+                    auto key_val_it = map.find(key);
+
+                    if(key_val_it == map.end()) { map[key] = 0.0f; }
+
+                    map[key] += coefficient;
+                }
+            }
+        }
+
+        Port* most_fractional_port = nullptr;
+        PortType most_fractional_pu = PortType::BOTH;
+        VesselClass* most_fractional_vc = nullptr;
+        float most_fractional_val = .5f;
+
+        for(const auto& kv : map) {
+            const auto& key = kv.first;
+            const auto& val = kv.second;
+
+            if(val > eps && val < 1.0f - eps) {
+                if(std::fabs(val - .5f) < most_fractional_val - eps) {
+                    most_fractional_port = std::get<0>(key);
+                    most_fractional_pu = std::get<1>(key);
+                    most_fractional_vc = std::get<2>(key);
+                    most_fractional_val = std::fabs(val - .5f);
+                }
+            }
+        }
+
+        if(!most_fractional_port) {
+            assert(!most_fractional_vc);
+            return false;
+        }
+
+        assert(most_fractional_pu != PortType::BOTH);
+        assert(most_fractional_vc);
+
+        std::shared_ptr<BranchingRule> assign_port_v = std::make_shared<AssignToVessel>(most_fractional_port, most_fractional_pu, most_fractional_vc);
+        std::shared_ptr<BranchingRule> forbid_port_v = std::make_shared<ForbidToVessel>(most_fractional_port, most_fractional_pu, most_fractional_vc);
+
+        auto assign_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        assign_vec.push_back(assign_port_v);
+        auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        forbid_vec.push_back(forbid_port_v);
+
+        std::cerr << "Branch on port assignment to vessel: " << *most_fractional_port << " " << most_fractional_pu << " " << *most_fractional_vc << std::endl;
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                assign_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                forbid_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        bb_nodes_generated += 2;
+
+        return true;
+    }
+
+    bool BBTree::branch_on_port_reached_from_two_ports(std::shared_ptr<BBNode> current_node) {
+        float most_fractional_val = .5f;
+        VesselClass* most_fractional_vc = nullptr;
+        auto eps = 0.00001f;
+
+        boost::optional<std::pair<PortWithType, PortWithType>> most_fractional_port_succ = boost::none;
+
+        for(auto outer_it = current_node->base_columns.begin(); outer_it != current_node->base_columns.end(); ++outer_it) {
+            if(outer_it->first.dummy) { continue; }
+
+            const auto& outer_sol = outer_it->first.sol;
+            const auto& outer_coeff = outer_it->second;
+
+            if(std::fabs(outer_coeff - .5f) > most_fractional_val - eps) { continue; }
+
+            for(auto inner_it = outer_it + 1; inner_it < current_node->base_columns.end(); ++inner_it) {
+                const auto& inner_sol = inner_it->first.sol;
+
+                auto port_succ = outer_sol.common_port_visited_from_two_different_predecessors(inner_sol);
+
+                if(port_succ) {
+                    most_fractional_port_succ = port_succ;
+                    most_fractional_vc = outer_sol.vessel_class.get();
+                    most_fractional_val = outer_coeff;
+                    break;
+                }
+            }
+        }
+
+        if(most_fractional_port_succ) {
+            assert(most_fractional_vc);
+
+            std::shared_ptr<BranchingRule> force_visit = std::make_shared<ForceConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
+            std::shared_ptr<BranchingRule> forbid_visit = std::make_shared<ForbidConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
+
+            auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+            force_vec.push_back(force_visit);
+            auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+            forbid_vec.push_back(forbid_visit);
+
+            std::cerr << "Branch on consecutive visit: "
+                      << *(most_fractional_port_succ->first.first) << " "
+                      << most_fractional_port_succ->first.second << " -> "
+                      << *(most_fractional_port_succ->second.first) << " "
+                      << most_fractional_port_succ->second.second << std::endl;
+
+            unexplored_nodes.push(
+                std::make_shared<BBNode>(
+                    current_node->prob,
+                    current_node->local_erased_edges,
+                    current_node->pool,
+                    current_node->local_pool,
+                    force_vec,
+                    current_node->sol_value,
+                    current_node->depth + 1
+                )
+            );
+
+            unexplored_nodes.push(
+                std::make_shared<BBNode>(
+                    current_node->prob,
+                    current_node->local_erased_edges,
+                    current_node->pool,
+                    current_node->local_pool,
+                    forbid_vec,
+                    current_node->sol_value,
+                    current_node->depth + 1
+                )
+            );
+
+            bb_nodes_generated += 2;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool BBTree::branch_on_speed(std::shared_ptr<BBNode> current_node) {
+        float most_fractional_val = .5f;
+        VesselClass* most_fractional_vc = nullptr;
+        auto eps = 0.00001f;
+
+        boost::optional<std::tuple<PortWithType, PortWithType, double>> most_fractional_port_succ_speed = boost::none;
+
+        for(auto outer_it = current_node->base_columns.begin(); outer_it != current_node->base_columns.end(); ++outer_it) {
+            if(outer_it->first.dummy) { continue; }
+
+            const auto& outer_sol = outer_it->first.sol;
+            const auto& outer_coeff = outer_it->second;
+
+            if(std::fabs(outer_coeff - .5f) > most_fractional_val - eps) { continue; }
+
+            for(auto inner_it = outer_it + 1; inner_it < current_node->base_columns.end(); ++inner_it) {
+                const auto& inner_sol = inner_it->first.sol;
+
+                auto port_succ = outer_sol.common_port_succession_at_two_different_speeds(inner_sol);
+
+                if(port_succ) {
+                    most_fractional_port_succ_speed = port_succ;
+                    most_fractional_vc = outer_sol.vessel_class.get();
+                    most_fractional_val = outer_coeff;
+                    break;
+                }
+            }
+        }
+
+        if(most_fractional_port_succ_speed) {
+            assert(most_fractional_vc);
+
+            std::shared_ptr<BranchingRule> force_speed = std::make_shared<ForceSpeed>(*most_fractional_port_succ_speed, most_fractional_vc);
+            std::shared_ptr<BranchingRule> forbid_speed = std::make_shared<ForbidSpeed>(*most_fractional_port_succ_speed, most_fractional_vc);
+
+            auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+            force_vec.push_back(force_speed);
+            auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+            forbid_vec.push_back(forbid_speed);
+
+            std::cerr << "Branch on speed: "
+                      << *(std::get<0>(*most_fractional_port_succ_speed).first) << " "
+                      << std::get<0>(*most_fractional_port_succ_speed).second << " -> "
+                      << *(std::get<1>(*most_fractional_port_succ_speed).first) << " "
+                      << std::get<1>(*most_fractional_port_succ_speed).second << " at speed "
+                      << std::get<2>(*most_fractional_port_succ_speed) << std::endl;
+
+            unexplored_nodes.push(
+                std::make_shared<BBNode>(
+                    current_node->prob,
+                    current_node->local_erased_edges,
+                    current_node->pool,
+                    current_node->local_pool,
+                    force_vec,
+                    current_node->sol_value,
+                    current_node->depth + 1
+                )
+            );
+
+            unexplored_nodes.push(
+                std::make_shared<BBNode>(
+                    current_node->prob,
+                    current_node->local_erased_edges,
+                    current_node->pool,
+                    current_node->local_pool,
+                    forbid_vec,
+                    current_node->sol_value,
+                    current_node->depth + 1
+                )
+            );
+
+            bb_nodes_generated += 2;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    bool BBTree::branch_on_arc(std::shared_ptr<BBNode> current_node) {
+        float val = .5f;
+        Column const* col = nullptr;
+        auto eps = 0.00001f;
+
+        for(const auto& cc : current_node->base_columns) {
+            if(cc.first.dummy) { continue; }
+
+            if(std::fabs(cc.second - .5f) < val - eps) {
+                col = &cc.first;
+                val = cc.second;
+                break;
+            }
+        }
+
+        assert(col);
+
+        boost::optional<Edge> e = boost::none;
+
+        for(auto edge : col->sol.path) {
+            auto srcv = boost::source(edge, col->sol.g->graph);
+            auto trgv = boost::target(edge, col->sol.g->graph);
+            const auto& srcn = col->sol.g->graph[srcv];
+            const auto& trgn = col->sol.g->graph[trgv];
+
+            if(srcn->n_type == NodeType::REGULAR_PORT && trgn->n_type == NodeType::REGULAR_PORT) {
+                e = edge;
+                break;
+            }
+        }
+
+        assert(e);
+
+        std::shared_ptr<BranchingRule> force_arc = std::make_shared<ForceArc>(*e, col->sol.vessel_class.get());
+        std::shared_ptr<BranchingRule> forbid_arc = std::make_shared<ForbidArc>(*e, col->sol.vessel_class.get());
+
+        auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        force_vec.push_back(force_arc);
+        auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
+        forbid_vec.push_back(forbid_arc);
+
+        std::cerr << "Branch on arc for vessel " << *(col->sol.vessel_class) << std::endl;
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                force_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        unexplored_nodes.push(
+            std::make_shared<BBNode>(
+                current_node->prob,
+                current_node->local_erased_edges,
+                current_node->pool,
+                current_node->local_pool,
+                forbid_vec,
+                current_node->sol_value,
+                current_node->depth + 1
+            )
+        );
+
+        bb_nodes_generated += 2;
+
+        return true;
+    }
+
+    void BBTree::try_to_obtain_ub(std::shared_ptr<BBNode> current_node) {
+        ColumnPool feasible_columns;
+
+        for(const auto& c : current_node->local_pool) {
+            if(!c.dummy && !c.has_cycles()) {
+                feasible_columns.push_back(Column(c.prob, c.sol, ColumnOrigin::MIP));
+            }
+        }
+
+        if(current_node->has_fractional_solution()) {
+            if(feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp) {
+                if(current_node->solve_integer(feasible_columns)) {
+                    std::cerr << "\tNode UB: " << std::setprecision(std::numeric_limits<double>::max_digits10)
+                              << current_node->mip_sol_value << std::endl;
+                    if(ub - current_node->mip_sol_value > BBNode::cplex_epsilon) {
+                        std::cerr << "\t\tImproving the UB" << std::endl;
+                        ub = current_node->mip_sol_value;
+                        node_attaining_ub = current_node;
+                        node_bound_type = BoundType::FROM_MIP;
+                        for(const auto& cc : node_attaining_ub->mip_base_columns) {
+                            std::cerr << "\t\t\t " << cc.first << " with coeff " << cc.second << std::endl;
+                        }
+                    }
+                } else {
+                    std::cerr << "\tMIP infeasible" << std::endl;
+                }
+            } else {
+                std::cerr << "\tToo many columns to solve MIP" << std::endl;
+            }
+        } else {
+            if(std::all_of(current_node->base_columns.begin(), current_node->base_columns.end(),
+                [&] (const auto& cc) -> bool { return !cc.first.dummy && !cc.first.has_cycles(); }
+            )) {
+                if(ub - current_node->sol_value > BBNode::cplex_epsilon) {
+                    std::cerr << "\t\tImproving the UB" << std::endl;
+                    ub = current_node->sol_value;
+                    node_attaining_ub = current_node;
+                    node_bound_type = BoundType::FROM_LP;
+                    for(const auto& cc : node_attaining_ub->base_columns) {
+                        std::cerr << "\t\t\t " << cc.first << " with coeff " << cc.second << std::endl;
+                    }
+                }
+            }
+        }
     }
 
     void BBTree::print_header() const {
@@ -83,145 +640,7 @@ namespace mvrp {
                   "-------*" << std::endl;
     }
 
-    void BBTree::update_lb(std::shared_ptr<BBNode> current_node, unsigned int node_number) {
-        // Root node. Global LB is node's LB.
-        if(node_number <= 1u) {
-            lb = current_node->sol_value;
-            return;
-        }
-
-        // Ran out of nodes => Tree explored completely => Solution found! => LB = UB
-        if(unexplored_nodes.empty()) {
-            lb = ub;
-            return;
-        }
-
-        lb = *unexplored_nodes.top()->father_lb;
-    }
-
-    void BBTree::explore_tree() {
-        using namespace std::chrono;
-
-        print_header();
-
-        auto node_number = 0u;
-        auto start_time = high_resolution_clock::now();
-
-        while(!unexplored_nodes.empty()) {
-            std::cerr << "Nodes in tree: " << unexplored_nodes.size() << std::endl;
-
-            auto current_node = unexplored_nodes.top();
-            unexplored_nodes.pop();
-
-            // Solve the master problem to obtain a lower bound
-            current_node->solve(node_number++);
-            std::cerr << "\tNode LB: " << std::setprecision(std::numeric_limits<double>::max_digits10)
-                      << current_node->sol_value << std::endl;
-
-            if(current_node->depth > max_depth) {
-                max_depth = current_node->depth;
-            }
-
-            if(!current_node->is_feasible()) {
-                // Prune by infeasibility
-                std::cerr << "\t\tPruned by infeasibility (optimal LP solution contains dummy column)" << std::endl;
-
-                if(node_number == 1u) {
-                    // Infeasible at root node!
-                    std::cout << "Root node infeasible" << std::endl;
-                }
-
-                update_lb(current_node, node_number);
-                gap = std::abs((ub - lb) / ub) * 100;
-
-                continue;
-            }
-
-            if(current_node->sol_value >= ub) {
-                // Prune by sub-optimality
-                std::cerr << "\t\tPruned by sub-optimality (UB = " << ub << ")" << std::endl;
-
-                update_lb(current_node, node_number);
-                gap = std::abs((ub - lb) / ub) * 100;
-
-                continue;
-            }
-
-            // Detect eventual cycles
-            Cycles cycles;
-            for(const auto &cc : current_node->base_columns) {
-                if(!cc.first.dummy) {
-                    auto g = cc.first.sol.g;
-                    auto cycle = Cycle::shortest_cycle(cc.first.sol.path, g);
-                    if(!cycle.empty()) {
-                        cycles.push_back(make_pair(cycle, g));
-                    }
-                }
-            }
-
-            if(cycles.size() > 0) {
-                // Solution contains cycles
-                try_to_obtain_ub(current_node);
-                std::cerr << "\tBranching on cycles" << std::endl;
-                branch_on_cycles(cycles, current_node);
-            } else {
-                // Check if the solution is feasible (i.e. integer vs fractional)
-                bool fractional = false;
-                for(const auto &cc : current_node->base_columns) {
-                    if(fabs(cc.second - 0) > BBNode::cplex_epsilon && fabs(cc.second - 1) > BBNode::cplex_epsilon) {
-                        fractional = true;
-                        break;
-                    }
-                }
-
-                if(fractional) {
-                    // Solution is fractional
-                    try_to_obtain_ub(current_node);
-                    std::cerr << "\tBranching on fractional" << std::endl;
-                    branch_on_fractional(current_node);
-                } else {
-                    // Solution integer
-                    std::cerr << "\tSolution actually integer" << std::endl;
-                    if(ub - current_node->sol_value > BBNode::cplex_epsilon) {
-                        std::cerr << "\t\tAnd improving the UB" << std::endl;
-                        ub = current_node->sol_value;
-                        node_attaining_ub = current_node;
-                        node_bound_type = BoundType::FROM_LP;
-                    }
-                }
-            }
-
-            update_lb(current_node, node_number);
-
-            auto gap_node = std::abs((ub - current_node->sol_value) / ub) * 100;
-            gap = std::abs((ub - lb) / ub) * 100;
-
-            if(node_number == 1u) {
-                gap_at_root = gap_node;
-            }
-
-            total_time_on_master += current_node->total_time_spent_on_mp;
-            total_time_on_pricing += current_node->total_time_spent_on_sp;
-
-            print_row(*current_node, gap_node);
-
-            auto curr_time = high_resolution_clock::now();
-            auto el_time = duration_cast<duration<double>>(curr_time - start_time).count();
-
-            if(el_time > prob->params.time_limit_in_s) {
-                std::cerr << std::endl << "Over time limit! " << el_time << std::endl;
-                break;
-            }
-        }
-
-        auto end_time = high_resolution_clock::now();
-        elapsed_time = duration_cast<duration<double>>(end_time - start_time).count();
-
-        print_summary();
-        print_results();
-    }
-
-// LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
+    // LIBSTD of GCC DOES NOT IMPLEMENT STD::DEFAULTFLOAT !!
     inline std::ostream &defaultfloat(std::ostream &os) {
         os.unsetf(std::ios_base::floatfield);
         return os;
@@ -397,8 +816,8 @@ namespace mvrp {
             for(auto i = 0u; i < d.size(); i++) {
                 // Exclude delivery-to-pickup arcs
                 if(d[i] > 0.0001) {
-                  weighted_speed += d[i] * s[i];
-                  total_distance += d[i];
+                    weighted_speed += d[i] * s[i];
+                    total_distance += d[i];
                 }
             }
         }
@@ -474,156 +893,6 @@ namespace mvrp {
                 std::cout << cc.first << " selected with coefficient " << cc.second << std::endl;
                 cc.first.sol.g->print_path(cc.first.sol.path, std::cout);
             }
-        }
-    }
-
-    void BBTree::branch_on_cycles(const Cycles &cycles, std::shared_ptr<BBNode> current_node) {
-        auto shortest = std::min_element(cycles.begin(), cycles.end(),
-                                         [](const auto &c1, const auto &c2) {
-                                             return (c1.first.size() < c2.first.size());
-                                         });
-
-        const auto g = shortest->second;
-
-        std::cerr << "\t\tShortest cycle of length " << shortest->first.size() << " on graph for vc "
-                  << g->vessel_class->name << ": ";
-        Cycle::print_cycle(shortest->first, g, std::cerr);
-
-        for(auto fix_forb = shortest->first.begin(); fix_forb != shortest->first.end(); ++fix_forb) {
-            std::cerr << "\t\t\tCreating child node:" << std::endl;
-
-            VisitRuleList unite_rules, separate_rules;
-
-            for(auto fix_impo = shortest->first.begin(); fix_impo != fix_forb; ++fix_impo) {
-                auto n_source_impo = g->graph[source(*fix_impo, g->graph)];
-                auto n_target_impo = g->graph[target(*fix_impo, g->graph)];
-                std::cerr << "\t\t\t\tForcing the traversal of " << n_source_impo->port->name << " -> "
-                          << n_target_impo->port->name << std::endl;
-                unite_rules.push_back(std::make_pair(n_source_impo, n_target_impo));
-            }
-
-            auto n_source_forb = g->graph[source(*fix_forb, g->graph)];
-            auto n_target_forb = g->graph[target(*fix_forb, g->graph)];
-            std::cerr << "\t\t\t\tForbidding the traversal of " << n_source_forb->port->name << " -> "
-                      << n_target_forb->port->name << std::endl;
-            separate_rules.push_back(std::make_pair(n_source_forb, n_target_forb));
-
-            unexplored_nodes.push(
-                std::make_shared<BBNode>(
-                    current_node->prob,
-                    current_node->local_erased_edges,
-                    current_node->pool,
-                    current_node->local_pool,
-                    unite_rules,
-                    separate_rules,
-                    current_node->sol_value,
-                    current_node->depth + 1
-                )
-            );
-            bb_nodes_generated++;
-        }
-    }
-
-    void BBTree::branch_on_fractional(std::shared_ptr<BBNode> current_node) {
-        // Detect the most fractional column
-        auto cc_it = std::max_element(current_node->base_columns.begin(), current_node->base_columns.end(),
-                                      [](const auto &cc1, const auto &cc2) {
-                                          return (fabs(cc1.second - 0.5) > fabs(cc2.second - 0.5));
-                                      });
-
-        for(const auto &e : cc_it->first.sol.path) {
-            const Graph &g = *cc_it->first.sol.g;
-            auto n = g.graph[target(e, g.graph)];
-            if(n->n_type != NodeType::REGULAR_PORT) {
-                continue;
-            }
-            for(const auto &cc : current_node->base_columns) {
-                for(const auto &e_inner : cc.first.sol.path) {
-                    const Graph &g_inner = *cc.first.sol.g;
-                    const Node &n_inner = *g_inner.graph[target(e_inner, g_inner.graph)];
-                    if(n_inner.same_row_as(*n)) {
-                        auto n_src = g.graph[source(e, g.graph)];
-                        const Node &n_inner_src = *g_inner.graph[source(e_inner, g_inner.graph)];
-                        if(!n_inner_src.same_row_as(*n_src)) {
-                            std::cerr << "\t\tPort " << n->port->name << " visited by 2 routes from 2 different ports";
-                            std::cerr << " - acting on graph for vc " << g.vessel_class->name << ":" << std::endl;
-
-                            VisitRuleList unite_rules, separate_rules;
-                            unite_rules.push_back(make_pair(n_src, n));
-                            separate_rules.push_back(make_pair(n_src, n));
-
-                            std::cerr << "\t\t\tCreating child node 1:" << std::endl;
-                            std::cerr << "\t\t\t\tForcing the traversal of " << n_src->port->name << " -> ";
-                            std::cerr << n->port->name << std::endl;
-                            unexplored_nodes.push(
-                                std::make_shared<BBNode>(
-                                    current_node->prob,
-                                    current_node->local_erased_edges,
-                                    current_node->pool,
-                                    current_node->local_pool,
-                                    unite_rules,
-                                    VisitRuleList(),
-                                    current_node->sol_value,
-                                    current_node->depth + 1
-                                )
-                            );
-
-                            std::cerr << "\t\t\tCreating child node 2:" << std::endl;
-                            std::cerr << "\t\t\t\tForbidding the traversal of " << n_src->port->name << " -> ";
-                            std::cerr << n->port->name << std::endl;
-                            unexplored_nodes.push(
-                                std::make_shared<BBNode>(
-                                    current_node->prob,
-                                    current_node->local_erased_edges,
-                                    current_node->pool,
-                                    current_node->local_pool,
-                                    VisitRuleList(),
-                                    separate_rules,
-                                    current_node->sol_value,
-                                    current_node->depth + 1
-                                )
-                            );
-
-                            bb_nodes_generated += 2;
-
-                            goto exit_nested_loops;
-                        }
-                    }
-                }
-            }
-        }
-
-        exit_nested_loops:
-        {}
-    }
-
-    void BBTree::try_to_obtain_ub(std::shared_ptr<BBNode> current_node) {
-        ColumnPool feasible_columns;
-
-        for(const auto &c : current_node->local_pool) {
-            if(!c.dummy && !c.has_cycles()) {
-                feasible_columns.push_back(Column(c.prob, c.sol, "MIP elimination", ColumnOrigin::MIP));
-            }
-        }
-
-        if(feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp) {
-            if(current_node->solve_integer(feasible_columns)) {
-                std::cerr << "\tNode UB: " << std::setprecision(std::numeric_limits<double>::max_digits10)
-                          << current_node->mip_sol_value << std::endl;
-                if(ub - current_node->mip_sol_value > BBNode::cplex_epsilon) {
-                    std::cerr << "\t\tImproving the UB" << std::endl;
-                    ub = current_node->mip_sol_value;
-                    node_attaining_ub = current_node;
-                    node_bound_type = BoundType::FROM_MIP;
-                    for(const auto &cc : node_attaining_ub->mip_base_columns) {
-                        std::cerr << "\t\t\t " << cc.first << " with coeff " << cc.second << std::endl;
-                    }
-                }
-            } else {
-                std::cerr << "\tMIP infeasible" << std::endl;
-            }
-        } else {
-            std::cerr << "\tToo many columns to solve MIP" << std::endl;
         }
     }
 }

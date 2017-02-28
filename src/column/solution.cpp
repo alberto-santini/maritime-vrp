@@ -180,4 +180,118 @@ namespace mvrp {
 
         return s;
     }
+
+    bool Solution::uses_arc(Edge e) const {
+        return std::find(path.begin(), path.end(), e) != path.end();
+    }
+
+    bool Solution::visits_port(const Port& port, const PortType& pu_type) const {
+        for(const auto& edge : path) {
+            auto v = boost::source(edge, g->graph);
+            const auto& n = g->graph[v];
+
+            if(*(n->port) == port && n->pu_type == pu_type) { return true; }
+        }
+        return false;
+    }
+
+    bool Solution::visits_consecutive_ports(const PortWithType& pred, const PortWithType& succ) const {
+        for(const auto& edge : path) {
+            auto srcv = boost::source(edge, g->graph);
+            auto trgv = boost::target(edge, g->graph);
+            const auto& srcn = g->graph[srcv];
+            const auto& trgn = g->graph[trgv];
+
+            if(*(srcn->port) == *(pred.first) && *(trgn->port) == *(succ.first) && srcn->pu_type == pred.second && trgn->pu_type == succ.second) { return true; }
+        }
+        return false;
+    }
+
+    bool Solution::visits_consecutive_ports_at_speed(const PortWithType& pred, const PortWithType& succ, double speed) const {
+        for(const auto& edge : path) {
+            auto srcv = boost::source(edge, g->graph);
+            auto trgv = boost::target(edge, g->graph);
+            const auto& srcn = g->graph[srcv];
+            const auto& trgn = g->graph[trgv];
+
+            if( *(srcn->port) == *(pred.first) &&
+                *(trgn->port) == *(succ.first) &&
+                srcn->pu_type == pred.second &&
+                trgn->pu_type == succ.second &&
+                std::abs(g->graph[edge]->speed - speed) < 1e-6
+            ) { return true; }
+        }
+        return false;
+    }
+
+    Solution::PortsWithPredecessors Solution::visited_ports_with_predecessors() const {
+        PortsWithPredecessors visited;
+
+        for(const auto& edge : path) {
+            auto srcv = boost::source(edge, g->graph);
+            auto trgv = boost::target(edge, g->graph);
+            const auto& srcn = g->graph[srcv];
+            const auto& trgn = g->graph[trgv];
+
+            if(trgn->n_type == NodeType::REGULAR_PORT) {
+                auto key = std::make_pair(trgn->port.get(), trgn->pu_type);
+                auto val = std::make_pair(srcn->port.get(), srcn->pu_type);
+
+                if(visited.find(key) == visited.end()) {
+                    visited[key] = std::vector<PortWithType>{};
+                }
+
+                visited[key].push_back(val);
+            }
+        }
+
+        return visited;
+    };
+
+    boost::optional<std::pair<PortWithType, PortWithType>> Solution::common_port_visited_from_two_different_predecessors(const Solution& other) const {
+        auto this_ports = visited_ports_with_predecessors();
+        auto other_ports = other.visited_ports_with_predecessors();
+
+        for(const auto& kv : this_ports) {
+            if(other_ports.find(kv.first) == other_ports.end()) { continue; }
+            const auto& successor = kv.first;
+            const auto& this_predecessors = kv.second;
+            const auto& other_predecessors = other_ports[successor];
+
+            for(const auto& p : this_predecessors) {
+                if(std::find(other_predecessors.begin(), other_predecessors.end(), p) == other_predecessors.end()) {
+                    return std::make_pair(p, successor);
+                }
+            }
+        }
+
+        return boost::none;
+    };
+
+    boost::optional<std::tuple<PortWithType, PortWithType, double>> Solution::common_port_succession_at_two_different_speeds(const Solution& other) const {
+        for(const auto& edge : path) {
+            auto srcv = boost::source(edge, g->graph);
+            auto trgv = boost::target(edge, g->graph);
+            auto speed = g->graph[edge]->speed;
+            const auto& srcn = g->graph[srcv];
+            const auto& trgn = g->graph[trgv];
+
+            auto src = std::make_pair(srcn->port.get(), srcn->pu_type);
+            auto trg = std::make_pair(trgn->port.get(), trgn->pu_type);
+
+            if(
+                std::any_of(
+                    other.vessel_class->bunker_cost_per_time_unit.begin(),
+                    other.vessel_class->bunker_cost_per_time_unit.end(),
+                    [&] (const auto& speed_cost) -> bool {
+                        return other.visits_consecutive_ports_at_speed(src, trg, speed_cost.first);
+                    }
+                )
+            ) {
+                return std::make_tuple(src, trg, speed);
+            }
+        }
+
+        return boost::none;
+    };
 }

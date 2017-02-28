@@ -36,8 +36,11 @@ namespace mvrp {
         }
     };
 
-    class Solution {
-    public:
+    struct Solution {
+        // Key => Port
+        // Value => List of ports visited immediately before <Key> in the current route (more than one in case of cycles)
+        using PortsWithPredecessors = std::map<PortWithType, std::vector<PortWithType>>;
+
         Path path;
         double cost;
         double reduced_cost;
@@ -52,7 +55,24 @@ namespace mvrp {
         Solution(Path path, double cost, double reduced_cost, std::shared_ptr<VesselClass> vessel_class, std::shared_ptr<const Graph> g) :
             path{path}, cost{cost}, reduced_cost{reduced_cost}, vessel_class{vessel_class}, g{g} {}
 
+        bool uses_arc(Edge e) const;
+        bool visits_port(const Port& port, const PortType& pu_type) const;
+        bool visits_port(const PortWithType& pt) const { return visits_port(*pt.first, pt.second); }
+        bool visits_consecutive_ports(const PortWithType& pred, const PortWithType& succ) const;
+        bool visits_consecutive_ports_at_speed(const PortWithType& pred, const PortWithType& succ, double speed) const;
+
         bool satisfies_capacity_constraints() const;
+
+        PortsWithPredecessors visited_ports_with_predecessors() const;
+
+        // If this route (r) and another route (s) have one port (i) in common and they visit i coming
+        // from two different preceding ports (j,k) then returns the pair <j,i>.
+        boost::optional<std::pair<PortWithType, PortWithType>> common_port_visited_from_two_different_predecessors(const Solution& other) const;
+
+        // If this route (r) and another route (s) visited two ports (i,j) in succession
+        // but have tdone so at different speeds (x,y) then returns the tuple <i,j,x>.
+        boost::optional<std::tuple<PortWithType, PortWithType, double>> common_port_succession_at_two_different_speeds(const Solution& other) const;
+
         bool operator==(const Solution &other) const;
         double length() const;
         double highest_load_efficiency() const;

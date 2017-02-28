@@ -49,6 +49,11 @@ namespace mvrp {
         double length;
 
         /**
+         * Vessel speed along the arc.
+         */
+        double speed;
+
+        /**
          * Unique progressive id used by boost algorithms.
          */
         int boost_edge_id;
@@ -61,10 +66,10 @@ namespace mvrp {
         Arc() {}
 
         Arc(double bunker_costs, double tc_costs, double movement_costs, double port_costs, double revenue,
-            double length, ArcType type) :
+            double length, double speed, ArcType type) :
             cost(bunker_costs + tc_costs + movement_costs + port_costs - revenue), bunker_costs(bunker_costs),
             tc_costs(tc_costs), movement_costs(movement_costs), port_costs(port_costs), revenue(revenue),
-            length(length), type(type) {
+            length(length), speed(speed), type(type) {
             boost_edge_id = 0;
         }
     };

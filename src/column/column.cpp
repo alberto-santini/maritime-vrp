@@ -9,9 +9,7 @@
 #include "column.h"
 
 namespace mvrp {
-    Column::Column(std::shared_ptr<const Problem> prob, const Solution &sol, const std::string &created_by, ColumnOrigin origin) :
-        prob(prob), sol(sol), created_by(created_by), origin(origin)
-    {
+    Column::Column(std::shared_ptr<const Problem> prob, const Solution &sol, ColumnOrigin origin) : prob(prob), sol(sol), origin(origin) {
         auto g = prob->graphs.at(sol.vessel_class);
 
         auto np = prob->data.num_ports;
@@ -56,52 +54,51 @@ namespace mvrp {
         port_coeff = std::vector<double>(2 * (prob->data.num_ports - 1), 1);
         vc_coeff = std::vector<double>(prob->data.num_vessel_classes, 0);
         dummy = true;
-        created_by = "dummy";
         origin = ColumnOrigin::NONE;
     }
 
-    bool Column::is_compatible_with_unite_rule(const VisitRule &vr) const {
-        if(dummy) {
-            return true;
-        }
-
-        auto g = sol.g;
-
-        for(const auto &e : sol.path) {
-            const Node &orig = *g->graph[source(e, g->graph)];
-            const Node &dest = *g->graph[target(e, g->graph)];
-
-            /*  If orig~vr.first and !dest~vr.second OR
-                   !orig~vr.first and dest~vr.second
-                then the path is not compatible! */
-            if(orig.same_row_as(*vr.first) != dest.same_row_as(*vr.second)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    bool Column::is_compatible_with_separate_rule(const VisitRule &vr) const {
-        if(dummy) {
-            return true;
-        }
-
-        auto g = sol.g;
-
-        for(const auto &e : sol.path) {
-            const Node &orig = *g->graph[source(e, g->graph)];
-            const Node &dest = *g->graph[target(e, g->graph)];
-
-            /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
-            if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
+//    bool Column::is_compatible_with_unite_rule(const VisitRule &vr) const {
+//        if(dummy) {
+//            return true;
+//        }
+//
+//        auto g = sol.g;
+//
+//        for(const auto &e : sol.path) {
+//            const Node &orig = *g->graph[source(e, g->graph)];
+//            const Node &dest = *g->graph[target(e, g->graph)];
+//
+//            /*  If orig~vr.first and !dest~vr.second OR
+//                   !orig~vr.first and dest~vr.second
+//                then the path is not compatible! */
+//            if(orig.same_row_as(*vr.first) != dest.same_row_as(*vr.second)) {
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
+//
+//    bool Column::is_compatible_with_separate_rule(const VisitRule &vr) const {
+//        if(dummy) {
+//            return true;
+//        }
+//
+//        auto g = sol.g;
+//
+//        for(const auto &e : sol.path) {
+//            const Node &orig = *g->graph[source(e, g->graph)];
+//            const Node &dest = *g->graph[target(e, g->graph)];
+//
+//            /*  If orig~vr.first and dest~vr.second then the path is not compatible! */
+//            if(orig.same_row_as(*vr.first) && dest.same_row_as(*vr.second)) {
+//                return false;
+//            }
+//        }
+//
+//        return true;
+//    }
+//
     bool Column::has_cycles() const {
         for(auto coeff : port_coeff) {
             if(coeff > 1 + 0.000001) {
@@ -125,8 +122,6 @@ namespace mvrp {
         for(auto i = 0u; i < c.vc_coeff.size(); i++) {
             out << c.vc_coeff[i] << " ";
         }
-
-        out << "by " << c.created_by << " ";
 
         return out;
     }

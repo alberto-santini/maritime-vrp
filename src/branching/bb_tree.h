@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "../base/problem.h"
-#include "cycle.h"
 #include "bb_node.h"
 #include "../column/column_pool.h"
 
@@ -45,8 +44,13 @@ namespace mvrp {
         void explore_tree();
 
     private:
-        void branch_on_cycles(const Cycles &cycles, std::shared_ptr<BBNode> current_node);
-        void branch_on_fractional(std::shared_ptr<BBNode> current_node);
+        void branch(std::shared_ptr<BBNode> current_node);
+        bool branch_on_port_selection(std::shared_ptr<BBNode> current_node);
+        bool branch_on_vessel_assignment(std::shared_ptr<BBNode> current_node);
+        bool branch_on_port_reached_from_two_ports(std::shared_ptr<BBNode> current_node);
+        bool branch_on_speed(std::shared_ptr<BBNode> current_node);
+        bool branch_on_arc(std::shared_ptr<BBNode> current_node);
+
         void try_to_obtain_ub(std::shared_ptr<BBNode> current_node);
         void print_header() const;
         void print_row(const BBNode &current_node, double gap_node) const;

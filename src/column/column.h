@@ -24,23 +24,18 @@ namespace mvrp {
         std::vector<double> port_coeff;
         std::vector<double> vc_coeff;
         bool dummy;
-        std::string created_by;
         ColumnOrigin origin;
 
         Column() : origin(ColumnOrigin::NONE) {}
 
         Column(std::shared_ptr<const Problem> prob) : prob(prob) {}
 
-        Column(std::shared_ptr<const Problem> prob, const Solution &sol, const std::string &created_by, ColumnOrigin origin = ColumnOrigin::NONE);
+        Column(std::shared_ptr<const Problem> prob, const Solution &sol, ColumnOrigin origin = ColumnOrigin::NONE);
 
-        Column(std::shared_ptr<const Problem> prob, const Solution &sol, double obj_coeff, const std::vector<double> &port_coeff,
-               const std::vector<double> &vc_coeff, bool dummy, const std::string &created_by, ColumnOrigin origin) :
-               prob(prob), sol(sol), obj_coeff(obj_coeff), port_coeff(port_coeff), vc_coeff(vc_coeff), dummy(dummy),
-               created_by(created_by), origin(origin) {}
+        Column(std::shared_ptr<const Problem> prob, const Solution &sol, double obj_coeff, const std::vector<double> &port_coeff, const std::vector<double> &vc_coeff, bool dummy, ColumnOrigin origin) :
+               prob(prob), sol(sol), obj_coeff(obj_coeff), port_coeff(port_coeff), vc_coeff(vc_coeff), dummy(dummy), origin(origin) {}
 
         void make_dummy(double huge_cost);
-        bool is_compatible_with_unite_rule(const VisitRule &vr) const;
-        bool is_compatible_with_separate_rule(const VisitRule &vr) const;
         bool has_cycles() const;
     };
 

@@ -32,12 +32,6 @@ namespace mvrp {
     using Edge = boost::graph_traits<BGraph>::edge_descriptor;
 
     using Path = std::vector<Edge>;
-
-    // TODO: sholud these be moved?
-    using VisitRule = std::pair<std::shared_ptr<Node>, std::shared_ptr<Node>>;
-    using VisitRuleList = std::vector<VisitRule>;
-
-    // TODO: should this be moved?
     using ErasedEdges = std::map<Vertex, std::set<Edge>>;
 
     struct Graph {
@@ -53,7 +47,6 @@ namespace mvrp {
 
         /**
          * Vector used to keep an ordering of the arcs, e.g. by their cost.
-         * TODO: should these be simple pointers?
          */
         std::vector<std::shared_ptr<Arc>> ordered_arcs;
 
@@ -62,7 +55,6 @@ namespace mvrp {
         Graph(const BGraph& graph, std::shared_ptr<VesselClass> vessel_class) :
             graph(graph), vessel_class(vessel_class) {}
 
-        // TODO: is this constructor really needed?!
         Graph(BGraph&& graph, std::shared_ptr<VesselClass> vessel_class) :
             graph(graph), vessel_class(vessel_class) {}
 
@@ -119,16 +111,16 @@ namespace mvrp {
         /*  Used in branching when we want to enforce that n2->port is [not] visited just
             after n1->port */
 
-        /**
-         * Gives a list of edges that need to be removed, in order for the subproblem to be
-         * compliant with new branching rules.
-         * @param already_erased    A list of edges already removed.
-         * @param unite_rules       A "unite" branching rule.
-         * @param separate_rules    A "separate" branching rule.
-         * @return                  A list of edges to remove (including those given in input).
-         */
-        ErasedEdges get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules,
-                                                const VisitRuleList& separate_rules) const;
+//        /**
+//         * Gives a list of edges that need to be removed, in order for the subproblem to be
+//         * compliant with new branching rules.
+//         * @param already_erased    A list of edges already removed.
+//         * @param unite_rules       A "unite" branching rule.
+//         * @param separate_rules    A "separate" branching rule.
+//         * @return                  A list of edges to remove (including those given in input).
+//         */
+//        ErasedEdges get_erased_edges_from_rules(ErasedEdges already_erased, const VisitRuleList& unite_rules,
+//                                                const VisitRuleList& separate_rules) const;
 
         /**
          * Gives a list of edges that need to be removed in order to reduce the graph. In particular,
