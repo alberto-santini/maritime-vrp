@@ -1,7 +1,7 @@
 {
   "greedy_max_outarcs":                 10,
   "greedy_reruns":                      100,
-  "max_cols_to_solve_mp":               100000,
+  "max_cols_to_solve_mp":               2500,
   "dummy_column_price":                 1000000000000000,
   "enable_cost_prize_acceleration":     true,
   "enable_prize_acceleration":          true,
