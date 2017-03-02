@@ -29,7 +29,7 @@ namespace mvrp {
         std::shared_ptr<ColumnPool> pool;
         ColumnPool local_pool;
 
-        std::vector<std::shared_ptr<BranchingRule>> branching_rules;
+        std::shared_ptr<BranchingRule> branching_rule;
 
         /*  The optimal columns selected by the LP solver with the coefficient */
         std::vector<std::pair<Column, double>> base_columns;
@@ -45,6 +45,9 @@ namespace mvrp {
 
         /* Depth in the BB tree */
         int depth;
+
+        /* Node name */
+        std::string name;
 
         /*  Used to determine if a solution is integral, or with cost < 0 */
         static constexpr double cplex_epsilon = 0.000001;
@@ -66,9 +69,10 @@ namespace mvrp {
                const ErasedEdgesMap &local_erased_edges,
                std::shared_ptr<ColumnPool> pool,
                const ColumnPool &local_pool,
-               std::vector<std::shared_ptr<BranchingRule>> branching_rules = {},
+               std::shared_ptr<BranchingRule> branching_rule = nullptr,
                boost::optional<double> father_lb = boost::none,
                int depth = 0,
+               std::string name = "root",
                bool try_elementary = true,
                double avg_time_spent_on_sp = 0,
                double total_time_spent_on_sp = 0,

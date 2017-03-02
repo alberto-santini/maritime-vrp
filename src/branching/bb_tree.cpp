@@ -192,12 +192,11 @@ namespace mvrp {
         std::shared_ptr<BranchingRule> include_port = std::make_shared<IncludePort>(most_fractional_port, most_fractional_pu);
         std::shared_ptr<BranchingRule> exclude_port = std::make_shared<ExcludePort>(most_fractional_port, most_fractional_pu);
 
-        auto include_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        include_vec.push_back(include_port);
-        auto exclude_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        exclude_vec.push_back(exclude_port);
+        std::stringstream portname;
+        portname << *most_fractional_port << " " << most_fractional_pu;
 
-        std::cerr << "Branch on port visit: " << *most_fractional_port << " " << most_fractional_pu << std::endl;
+        std::cerr << "Branch on port visit: " << portname.str() << std::endl;
+        std::cerr << "Branching from node: " << current_node->name << std::endl;
 
         unexplored_nodes.push(
             std::make_shared<BBNode>(
@@ -205,9 +204,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                include_vec,
+                include_port,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " (PV " + portname.str() + ")"
             )
         );
 
@@ -217,9 +217,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                exclude_vec,
+                exclude_port,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " (!PV " + portname.str() + ")"
             )
         );
 
@@ -286,12 +287,11 @@ namespace mvrp {
         std::shared_ptr<BranchingRule> assign_port_v = std::make_shared<AssignToVessel>(most_fractional_port, most_fractional_pu, most_fractional_vc);
         std::shared_ptr<BranchingRule> forbid_port_v = std::make_shared<ForbidToVessel>(most_fractional_port, most_fractional_pu, most_fractional_vc);
 
-        auto assign_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        assign_vec.push_back(assign_port_v);
-        auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        forbid_vec.push_back(forbid_port_v);
+        std::stringstream name;
+        name << *most_fractional_port << " " << most_fractional_pu << "[" << *most_fractional_vc << "]";
 
-        std::cerr << "Branch on port assignment to vessel: " << *most_fractional_port << " " << most_fractional_pu << " " << *most_fractional_vc << std::endl;
+        std::cerr << "Branch on port assignment to vessel: " << name.str() << std::endl;
+        std::cerr << "Branching from node: " << current_node->name << std::endl;
 
         unexplored_nodes.push(
             std::make_shared<BBNode>(
@@ -299,9 +299,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                assign_vec,
+                assign_port_v,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " (PA " + name.str() + ")"
             )
         );
 
@@ -311,9 +312,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                forbid_vec,
+                forbid_port_v,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " (!PA " + name.str() + ")"
             )
         );
 
@@ -357,16 +359,12 @@ namespace mvrp {
             std::shared_ptr<BranchingRule> force_visit = std::make_shared<ForceConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
             std::shared_ptr<BranchingRule> forbid_visit = std::make_shared<ForbidConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
 
-            auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-            force_vec.push_back(force_visit);
-            auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-            forbid_vec.push_back(forbid_visit);
-
             std::cerr << "Branch on consecutive visit: "
                       << *(most_fractional_port_succ->first.first) << " "
                       << most_fractional_port_succ->first.second << " -> "
                       << *(most_fractional_port_succ->second.first) << " "
                       << most_fractional_port_succ->second.second << std::endl;
+            std::cerr << "Branching from node: " << current_node->name << std::endl;
 
             unexplored_nodes.push(
                 std::make_shared<BBNode>(
@@ -374,9 +372,10 @@ namespace mvrp {
                     current_node->local_erased_edges,
                     current_node->pool,
                     current_node->local_pool,
-                    force_vec,
+                    force_visit,
                     current_node->sol_value,
-                    current_node->depth + 1
+                    current_node->depth + 1,
+                    current_node->name + " PS"
                 )
             );
 
@@ -386,9 +385,10 @@ namespace mvrp {
                     current_node->local_erased_edges,
                     current_node->pool,
                     current_node->local_pool,
-                    forbid_vec,
+                    forbid_visit,
                     current_node->sol_value,
-                    current_node->depth + 1
+                    current_node->depth + 1,
+                    current_node->name + " !PS"
                 )
             );
 
@@ -435,17 +435,13 @@ namespace mvrp {
             std::shared_ptr<BranchingRule> force_speed = std::make_shared<ForceSpeed>(*most_fractional_port_succ_speed, most_fractional_vc);
             std::shared_ptr<BranchingRule> forbid_speed = std::make_shared<ForbidSpeed>(*most_fractional_port_succ_speed, most_fractional_vc);
 
-            auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-            force_vec.push_back(force_speed);
-            auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-            forbid_vec.push_back(forbid_speed);
-
             std::cerr << "Branch on speed: "
                       << *(std::get<0>(*most_fractional_port_succ_speed).first) << " "
                       << std::get<0>(*most_fractional_port_succ_speed).second << " -> "
                       << *(std::get<1>(*most_fractional_port_succ_speed).first) << " "
                       << std::get<1>(*most_fractional_port_succ_speed).second << " at speed "
                       << std::get<2>(*most_fractional_port_succ_speed) << std::endl;
+            std::cerr << "Branching from node: " << current_node->name << std::endl;
 
             unexplored_nodes.push(
                 std::make_shared<BBNode>(
@@ -453,9 +449,10 @@ namespace mvrp {
                     current_node->local_erased_edges,
                     current_node->pool,
                     current_node->local_pool,
-                    force_vec,
+                    force_speed,
                     current_node->sol_value,
-                    current_node->depth + 1
+                    current_node->depth + 1,
+                    current_node->name + " S"
                 )
             );
 
@@ -465,9 +462,10 @@ namespace mvrp {
                     current_node->local_erased_edges,
                     current_node->pool,
                     current_node->local_pool,
-                    forbid_vec,
+                    forbid_speed,
                     current_node->sol_value,
-                    current_node->depth + 1
+                    current_node->depth + 1,
+                    current_node->name + " !S"
                 )
             );
 
@@ -515,12 +513,8 @@ namespace mvrp {
         std::shared_ptr<BranchingRule> force_arc = std::make_shared<ForceArc>(*e, col->sol.vessel_class.get());
         std::shared_ptr<BranchingRule> forbid_arc = std::make_shared<ForbidArc>(*e, col->sol.vessel_class.get());
 
-        auto force_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        force_vec.push_back(force_arc);
-        auto forbid_vec = std::vector<std::shared_ptr<BranchingRule>>{};
-        forbid_vec.push_back(forbid_arc);
-
         std::cerr << "Branch on arc for vessel " << *(col->sol.vessel_class) << std::endl;
+        std::cerr << "Branching from node: " << current_node->name << std::endl;
 
         unexplored_nodes.push(
             std::make_shared<BBNode>(
@@ -528,9 +522,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                force_vec,
+                force_arc,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " A"
             )
         );
 
@@ -540,9 +535,10 @@ namespace mvrp {
                 current_node->local_erased_edges,
                 current_node->pool,
                 current_node->local_pool,
-                forbid_vec,
+                forbid_arc,
                 current_node->sol_value,
-                current_node->depth + 1
+                current_node->depth + 1,
+                current_node->name + " !A"
             )
         );
 

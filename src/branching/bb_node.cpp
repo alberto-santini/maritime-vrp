@@ -15,9 +15,10 @@ namespace mvrp {
                     const ErasedEdgesMap& local_erased_edges,
                     std::shared_ptr<ColumnPool> pool,
                     const ColumnPool &local_pool,
-                    std::vector<std::shared_ptr<BranchingRule>> branching_rules,
+                    std::shared_ptr<BranchingRule> branching_rule,
                     boost::optional<double> father_lb,
                     int depth,
+                    std::string name,
                     bool try_elementary,
                     double avg_time_spent_on_sp,
                     double total_time_spent_on_sp,
@@ -29,9 +30,10 @@ namespace mvrp {
                    local_erased_edges(local_erased_edges),
                    pool(pool),
                    local_pool(local_pool),
-                   branching_rules(branching_rules),
+                   branching_rule(branching_rule),
                    father_lb(father_lb),
                    depth(depth),
+                   name(name),
                    try_elementary(try_elementary),
                    avg_time_spent_on_sp(avg_time_spent_on_sp),
                    total_time_spent_on_sp(total_time_spent_on_sp),
@@ -48,50 +50,33 @@ namespace mvrp {
     }
 
     void BBNode::make_local_erased_edges() {
-        for(auto rule : branching_rules) {
-            for(const auto& vg : prob->graphs) {
-                rule->add_erased_edges(*(vg.second), local_erased_edges[vg.first]);
-            }
-        }
+        if(!branching_rule) { return; }
 
-        // Old way:
-        // for(const auto &vg : prob->graphs) {
-        //     local_erased_edges[vg.first] = vg.second->get_erased_edges_from_rules(local_erased_edges[vg.first], unite_rules, separate_rules);
-        // }
+        for(const auto& vg : prob->graphs) {
+                branching_rule->add_erased_edges(*(vg.second), local_erased_edges[vg.first]);
+        }
     }
 
     void BBNode::remove_incompatible_columns() {
+        if(!branching_rule) { return; }
+
         ColumnPool new_local_pool;
         for(const auto& c : local_pool) {
-            if(std::any_of(branching_rules.begin(), branching_rules.end(), [&] (auto rule) { return !rule->is_column_compatible(c); })) { continue; }
-            new_local_pool.push_back(c);
+            if(branching_rule->is_column_compatible(c)) {
+                new_local_pool.push_back(c);
+            }
         }
         local_pool = new_local_pool;
-
-        // Old way:
-        // ColumnPool new_local_pool;
-        //
-        // for(const auto &c : local_pool) {
-        //     if(std::any_of(unite_rules.begin(), unite_rules.end(),
-        //                    [&](const VisitRule &rule) { return !c.is_compatible_with_unite_rule(rule); }
-        //     )) { continue; }
-        //
-        //     if(std::any_of(separate_rules.begin(), separate_rules.end(),
-        //                    [&](const VisitRule &rule) { return !c.is_compatible_with_separate_rule(rule); }
-        //     )) { continue; }
-        //
-        //     new_local_pool.push_back(c);
-        // }
-        //
-        // local_pool = new_local_pool;
     }
 
     void BBNode::determine_equality_constraints() {
+        if(!branching_rule) { return; }
+
         for(auto p : prob->data.ports) {
             if(p->hub) { continue; }
 
             for(auto pu : {PortType::PICKUP, PortType::DELIVERY}) {
-                if(std::any_of(branching_rules.begin(), branching_rules.end(), [&](auto rule){ return rule->should_row_be_equality(*p, pu); })) {
+                if(branching_rule->should_row_be_equality(*p, pu)) {
                     ports_with_equality.push_back(std::make_pair(p.get(), pu));
                 }
             }
