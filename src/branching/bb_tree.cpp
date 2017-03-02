@@ -561,7 +561,10 @@ namespace mvrp {
         }
 
         if(current_node->has_fractional_solution()) {
-            if(feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp) {
+            if(
+                current_node->depth == 0 ||
+                feasible_columns.size() <= (unsigned int) prob->params.max_cols_to_solve_mp
+            ) {
                 if(current_node->solve_integer(feasible_columns)) {
                     std::cerr << "\tNode UB: " << std::setprecision(std::numeric_limits<double>::max_digits10)
                               << current_node->mip_sol_value << std::endl;
