@@ -22,14 +22,12 @@ namespace mvrp {
 
         MPSolver(std::shared_ptr<const Problem> prob) : prob(prob) {}
 
-        MPLinearSolution solve_lp(const ColumnPool &pool, const std::vector<PortWithType>& ports_with_equality) const;
+        MPLinearSolution solve_lp(const ColumnPool &pool, const std::vector<PortWithType>& ports_with_equality, boost::optional<std::string> model_dump = boost::none) const;
         MPIntegerSolution solve_mip(const ColumnPool &pool, const std::vector<PortWithType>& ports_with_equality) const;
 
     private:
         using IloData = std::tuple<IloEnv, IloNumVarArray, IloRangeArray, IloRangeArray, IloCplex>;
-        IloData solve(const ColumnPool &pool, const std::vector<PortWithType>& ports_with_equality, bool linear) const;
-
-        bool should_row_have_equality(int row, const std::vector<PortWithType>& ports_with_equality) const;
+        IloData solve(const ColumnPool &pool, const std::vector<PortWithType>& ports_with_equality, bool linear, boost::optional<std::string> model_dump = boost::none) const;
     };
 }
 

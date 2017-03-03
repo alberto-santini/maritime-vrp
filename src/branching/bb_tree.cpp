@@ -30,7 +30,9 @@ namespace mvrp {
         ErasedEdgesMap erased_edges{};
         for(auto vc : prob->data.vessel_classes) { erased_edges[vc] = ErasedEdges{}; }
 
-        auto root_node = std::make_shared<BBNode>(prob, erased_edges, pool, *pool);
+        std::vector<PortWithType> ports_with_equality{};
+
+        auto root_node = std::make_shared<BBNode>(prob, erased_edges, ports_with_equality, pool, *pool);
 
         unexplored_nodes.push(root_node);
 
@@ -196,33 +198,21 @@ namespace mvrp {
         portname << *most_fractional_port << " " << most_fractional_pu;
 
         std::cerr << "Branch on port visit: " << portname.str() << std::endl;
+
+        if(PEDANTIC) {
+            std::cerr << "The port has total in-flow of: " << most_fractional_val << std::endl;
+            std::cerr << "Columns visiting the port:" << std::endl;
+            for(const auto& cc : current_node->base_columns) {
+                if(cc.first.sol.visits_port(*most_fractional_port, most_fractional_pu)) {
+                    std::cerr << "\t" << cc.first << "\t(" << cc.second << ")" << std::endl;
+                }
+            }
+        }
+
         std::cerr << "Branching from node: " << current_node->name << std::endl;
 
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                include_port,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " (PV " + portname.str() + ")"
-            )
-        );
-
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                exclude_port,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " (!PV " + portname.str() + ")"
-            )
-        );
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, include_port, current_node->name + " (PV " + portname.str() + ")"));
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, exclude_port, current_node->name + " (!PV " + portname.str() + ")"));
 
         bb_nodes_generated += 2;
 
@@ -293,31 +283,8 @@ namespace mvrp {
         std::cerr << "Branch on port assignment to vessel: " << name.str() << std::endl;
         std::cerr << "Branching from node: " << current_node->name << std::endl;
 
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                assign_port_v,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " (PA " + name.str() + ")"
-            )
-        );
-
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                forbid_port_v,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " (!PA " + name.str() + ")"
-            )
-        );
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, assign_port_v, current_node->name + " (PA " + name.str() + ")"));
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, forbid_port_v, current_node->name + " (!PA " + name.str() + ")"));
 
         bb_nodes_generated += 2;
 
@@ -359,38 +326,17 @@ namespace mvrp {
             std::shared_ptr<BranchingRule> force_visit = std::make_shared<ForceConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
             std::shared_ptr<BranchingRule> forbid_visit = std::make_shared<ForbidConsecutiveVisit>(*most_fractional_port_succ, most_fractional_vc);
 
-            std::cerr << "Branch on consecutive visit: "
-                      << *(most_fractional_port_succ->first.first) << " "
-                      << most_fractional_port_succ->first.second << " -> "
-                      << *(most_fractional_port_succ->second.first) << " "
-                      << most_fractional_port_succ->second.second << std::endl;
+            std::stringstream name;
+            name << *(most_fractional_port_succ->first.first) << " "
+                 << most_fractional_port_succ->first.second << " - "
+                 << *(most_fractional_port_succ->second.first) << " "
+                 << most_fractional_port_succ->second.second;
+
+            std::cerr << "Branch on consecutive visit: " << name.str() << std::endl;
             std::cerr << "Branching from node: " << current_node->name << std::endl;
 
-            unexplored_nodes.push(
-                std::make_shared<BBNode>(
-                    current_node->prob,
-                    current_node->local_erased_edges,
-                    current_node->pool,
-                    current_node->local_pool,
-                    force_visit,
-                    current_node->sol_value,
-                    current_node->depth + 1,
-                    current_node->name + " PS"
-                )
-            );
-
-            unexplored_nodes.push(
-                std::make_shared<BBNode>(
-                    current_node->prob,
-                    current_node->local_erased_edges,
-                    current_node->pool,
-                    current_node->local_pool,
-                    forbid_visit,
-                    current_node->sol_value,
-                    current_node->depth + 1,
-                    current_node->name + " !PS"
-                )
-            );
+            unexplored_nodes.push(std::make_shared<BBNode>(*current_node, force_visit, current_node->name + " (PS " + name.str() + ")"));
+            unexplored_nodes.push(std::make_shared<BBNode>(*current_node, forbid_visit, current_node->name + " (!PS " + name.str() + ")"));
 
             bb_nodes_generated += 2;
 
@@ -443,31 +389,8 @@ namespace mvrp {
                       << std::get<2>(*most_fractional_port_succ_speed) << std::endl;
             std::cerr << "Branching from node: " << current_node->name << std::endl;
 
-            unexplored_nodes.push(
-                std::make_shared<BBNode>(
-                    current_node->prob,
-                    current_node->local_erased_edges,
-                    current_node->pool,
-                    current_node->local_pool,
-                    force_speed,
-                    current_node->sol_value,
-                    current_node->depth + 1,
-                    current_node->name + " S"
-                )
-            );
-
-            unexplored_nodes.push(
-                std::make_shared<BBNode>(
-                    current_node->prob,
-                    current_node->local_erased_edges,
-                    current_node->pool,
-                    current_node->local_pool,
-                    forbid_speed,
-                    current_node->sol_value,
-                    current_node->depth + 1,
-                    current_node->name + " !S"
-                )
-            );
+            unexplored_nodes.push(std::make_shared<BBNode>(*current_node, force_speed, current_node->name + " S"));
+            unexplored_nodes.push(std::make_shared<BBNode>(*current_node, forbid_speed, current_node->name + " !S"));
 
             bb_nodes_generated += 2;
 
@@ -516,31 +439,8 @@ namespace mvrp {
         std::cerr << "Branch on arc for vessel " << *(col->sol.vessel_class) << std::endl;
         std::cerr << "Branching from node: " << current_node->name << std::endl;
 
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                force_arc,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " A"
-            )
-        );
-
-        unexplored_nodes.push(
-            std::make_shared<BBNode>(
-                current_node->prob,
-                current_node->local_erased_edges,
-                current_node->pool,
-                current_node->local_pool,
-                forbid_arc,
-                current_node->sol_value,
-                current_node->depth + 1,
-                current_node->name + " !A"
-            )
-        );
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, force_arc, current_node->name + " A"));
+        unexplored_nodes.push(std::make_shared<BBNode>(*current_node, forbid_arc, current_node->name + " !A"));
 
         bb_nodes_generated += 2;
 

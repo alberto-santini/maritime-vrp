@@ -13,6 +13,7 @@
 namespace mvrp {
     BBNode::BBNode( std::shared_ptr<const Problem> prob,
                     const ErasedEdgesMap& local_erased_edges,
+                    std::vector<PortWithType> ports_with_equality,
                     std::shared_ptr<ColumnPool> pool,
                     const ColumnPool &local_pool,
                     std::shared_ptr<BranchingRule> branching_rule,
@@ -28,6 +29,7 @@ namespace mvrp {
                 ) :
                    prob(prob),
                    local_erased_edges(local_erased_edges),
+                   ports_with_equality(ports_with_equality),
                    pool(pool),
                    local_pool(local_pool),
                    branching_rule(branching_rule),
@@ -49,11 +51,30 @@ namespace mvrp {
         determine_equality_constraints();
     }
 
+    BBNode::BBNode(const BBNode& father, std::shared_ptr<BranchingRule> branching_rule, std::string name) :
+        prob{father.prob},
+        local_erased_edges{father.local_erased_edges},
+        ports_with_equality{father.ports_with_equality},
+        pool{father.pool},
+        local_pool{father.local_pool},
+        branching_rule{branching_rule},
+        father_lb{father.sol_value},
+        depth{father.depth + 1},
+        name{name}
+    {
+        sol_value = std::numeric_limits<double>::max();
+        mip_sol_value = std::numeric_limits<double>::max();
+        all_times_spent_on_sp = std::vector<double>(0);
+        make_local_erased_edges();
+        remove_incompatible_columns();
+        determine_equality_constraints();
+    }
+
     void BBNode::make_local_erased_edges() {
         if(!branching_rule) { return; }
 
         for(const auto& vg : prob->graphs) {
-                branching_rule->add_erased_edges(*(vg.second), local_erased_edges[vg.first]);
+            branching_rule->add_erased_edges(*(vg.second), local_erased_edges[vg.first]);
         }
     }
 
@@ -77,7 +98,9 @@ namespace mvrp {
 
             for(auto pu : {PortType::PICKUP, PortType::DELIVERY}) {
                 if(branching_rule->should_row_be_equality(*p, pu)) {
-                    ports_with_equality.push_back(std::make_pair(p.get(), pu));
+                    auto port = std::make_pair(p.get(), pu);
+                    assert(std::find(ports_with_equality.begin(), ports_with_equality.end(), port) == ports_with_equality.end());
+                    ports_with_equality.push_back(port);
                 }
             }
         }
@@ -161,8 +184,7 @@ namespace mvrp {
 
             // Solve the pricing subproblem
             auto sp_start = high_resolution_clock::now();
-            std::tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary,
-                                                        max_time_spent_by_exact_solver);
+            std::tie(sp_found_columns, orig) = sp_solv.solve(local_pool, pool, try_elementary, max_time_spent_by_exact_solver);
             auto sp_end = high_resolution_clock::now();
 
             auto sp_time = duration_cast<duration<double>>(sp_end - sp_start).count();
@@ -178,8 +200,7 @@ namespace mvrp {
                 //      at last iteration we tried elementary labelling AND
                 //      it didn't produce any result
                 // Then: stop trying elementary labelling
-                if(try_elementary && (orig != ColumnOrigin::FAST_H) &&
-                   (orig != ColumnOrigin::ESPPRC)) { try_elementary = false; }
+                if(try_elementary && (orig != ColumnOrigin::FAST_H) && (orig != ColumnOrigin::ESPPRC)) { try_elementary = false; }
 
                 // Re-solve the LP
                 auto mp_start = high_resolution_clock::now();

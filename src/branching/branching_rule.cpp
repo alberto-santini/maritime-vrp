@@ -8,7 +8,9 @@ namespace mvrp {
     /* --- Include Port --- */
     void IncludePort::add_erased_edges(const Graph& graph, ErasedEdges& erased) const {}
     bool IncludePort::is_column_compatible(const Column& column) const { return true; }
-    bool IncludePort::should_row_be_equality(const Port& port, const PortType& pu_type) const { return port == *(this->port) && pu_type == this->pu_type; }
+    bool IncludePort::should_row_be_equality(const Port& port, const PortType& pu_type) const {
+        return port == *(this->port) && pu_type == this->pu_type;
+    }
 
     /* --- Exclude Port --- */
     void ExcludePort::add_erased_edges(const Graph& graph, ErasedEdges& erased) const {

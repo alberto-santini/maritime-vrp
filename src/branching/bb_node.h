@@ -67,6 +67,7 @@ namespace mvrp {
 
         BBNode(std::shared_ptr<const Problem> prob,
                const ErasedEdgesMap &local_erased_edges,
+               std::vector<PortWithType> ports_with_equality,
                std::shared_ptr<ColumnPool> pool,
                const ColumnPool &local_pool,
                std::shared_ptr<BranchingRule> branching_rule = nullptr,
@@ -79,6 +80,8 @@ namespace mvrp {
                double total_time_spent_on_mp = 0,
                double total_time_spent = 0,
                double max_time_spent_by_exact_solver = 0);
+
+        BBNode(const BBNode& father, std::shared_ptr<BranchingRule> branching_rule, std::string name);
 
         void solve(unsigned int node_number);
 
