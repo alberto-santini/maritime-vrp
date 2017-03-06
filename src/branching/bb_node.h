@@ -93,6 +93,8 @@ namespace mvrp {
 
         bool has_fractional_solution() const;
 
+        bool has_solution_with_cycles() const;
+
     private:
         /*  Modifies the erased edges according to the branching rules */
         void make_local_erased_edges();
