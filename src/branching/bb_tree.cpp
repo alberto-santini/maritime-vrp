@@ -296,7 +296,10 @@ namespace mvrp {
         VesselClass* most_fractional_vc = nullptr;
         auto eps = 0.00001f;
 
-        boost::optional<std::pair<PortWithType, PortWithType>> most_fractional_port_succ = boost::none;
+        // Using make_optional because of a GCC -Wmaybe-uninitialized false positive:
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47679
+        boost::optional<std::pair<PortWithType, PortWithType>> most_fractional_port_succ = 
+            boost::make_optional(false, std::pair<PortWithType, PortWithType>{});
 
         for(auto outer_it = current_node->base_columns.begin(); outer_it != current_node->base_columns.end(); ++outer_it) {
             if(outer_it->first.dummy) { continue; }
@@ -351,7 +354,10 @@ namespace mvrp {
         VesselClass* most_fractional_vc = nullptr;
         auto eps = 0.00001f;
 
-        boost::optional<std::tuple<PortWithType, PortWithType, double>> most_fractional_port_succ_speed = boost::none;
+        // Using make_optional because of a GCC -Wmaybe-uninitialized false positive:
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47679
+        boost::optional<std::tuple<PortWithType, PortWithType, double>> most_fractional_port_succ_speed =
+            boost::make_optional(false, std::tuple<PortWithType, PortWithType, double>{});
 
         for(auto outer_it = current_node->base_columns.begin(); outer_it != current_node->base_columns.end(); ++outer_it) {
             if(outer_it->first.dummy) { continue; }
@@ -417,7 +423,9 @@ namespace mvrp {
 
         assert(col);
 
-        boost::optional<Edge> e = boost::none;
+        // Using make_optional because of a GCC -Wmaybe-uninitialized false positive:
+        // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=47679
+        boost::optional<Edge> e = boost::make_optional(false, Edge{});
 
         for(auto edge : col->sol.path) {
             auto srcv = boost::source(edge, col->sol.g->graph);
