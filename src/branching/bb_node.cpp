@@ -311,4 +311,9 @@ namespace mvrp {
         return std::any_of(base_columns.begin(), base_columns.end(),
                            [](const auto& cc) { return cc.second > cplex_epsilon && cc.second < 1.0 - cplex_epsilon; });
     }
+
+    bool BBNode::has_solution_with_cycles() const {
+        return std::any_of(base_columns.begin(), base_columns.end(),
+                           [](const auto& cc) { return cc.first.has_cycles(); });
+    }
 }

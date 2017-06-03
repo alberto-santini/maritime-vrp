@@ -103,7 +103,7 @@ namespace mvrp {
 
             try_to_obtain_ub(current_node);
 
-            if(current_node->has_fractional_solution()) {
+            if(current_node->has_fractional_solution() || current_node->has_solution_with_cycles()) {
                 branch(current_node);
             };
 
@@ -309,16 +309,32 @@ namespace mvrp {
 
             if(std::fabs(outer_coeff - .5f) > most_fractional_val - eps) { continue; }
 
-            for(auto inner_it = outer_it + 1; inner_it < current_node->base_columns.end(); ++inner_it) {
-                const auto& inner_sol = inner_it->first.sol;
-
-                auto port_succ = outer_sol.common_port_visited_from_two_different_predecessors(inner_sol);
-
-                if(port_succ) {
-                    most_fractional_port_succ = port_succ;
+            // Check for a cycle in this column
+            auto with_cycle = false;
+            auto visited = outer_sol.visited_ports_with_predecessors();
+            for(const auto& port_pred : visited) {
+                if(port_pred.second.size() > 0) {
+                    most_fractional_port_succ = std::make_pair(port_pred.second.back(), port_pred.first);
                     most_fractional_vc = outer_sol.vessel_class.get();
                     most_fractional_val = outer_coeff;
+                    with_cycle = true;
                     break;
+                }
+            }
+
+            if(!with_cycle) {
+                // Check for another column which visit a port covered by this column, with a different predecessor
+                for(auto inner_it = outer_it + 1; inner_it < current_node->base_columns.end(); ++inner_it) {
+                    const auto& inner_sol = inner_it->first.sol;
+
+                    auto port_succ = outer_sol.common_port_visited_from_two_different_predecessors(inner_sol);
+
+                    if(port_succ) {
+                        most_fractional_port_succ = port_succ;
+                        most_fractional_vc = outer_sol.vessel_class.get();
+                        most_fractional_val = outer_coeff;
+                        break;
+                    }
                 }
             }
         }
